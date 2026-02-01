@@ -39,3 +39,7 @@
 
 - Conventional commits: feat:, fix:, refactor:, docs:, chore:
 - Keep commits atomic and focused
+
+## Current Task
+
+If working on a task, check `~/.claude/logs/current-task.md` for context.

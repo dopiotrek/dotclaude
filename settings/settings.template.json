@@ -118,6 +118,17 @@
   },
   "model": "opus",
   "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/session-context-loader.py"
+          }
+        ]
+      }
+    ],
     "PermissionRequest": [
       {
         "matcher": "",
