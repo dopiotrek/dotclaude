@@ -1,4 +1,8 @@
 {
+  "fileSuggestion": {
+    "type": "command",
+    "command": "$HOME/.claude/scripts/file-suggest.sh"
+  },
   "permissions": {
     "allow": [
       "Read(//$HOME/**)",
