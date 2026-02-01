@@ -1,0 +1,336 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//$HOME/**)",
+      "Edit(//$HOME/**)",
+      "Write(//$HOME/.claude/**)",
+      "WebSearch",
+      "WebFetch(domain:vite.dev)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:svelte.dev)",
+      "WebFetch(domain:kit.svelte.dev)",
+      "WebFetch(domain:tailwindcss.com)",
+      "WebFetch(domain:drizzle.team)",
+      "WebFetch(domain:supabase.com)",
+      "mcp__svelte__get-documentation",
+      "mcp__svelte-llm__list_sections",
+      "mcp__svelte-llm__get_documentation",
+      "mcp__ide__getDiagnostics",
+      "mcp__gemini-cli__ask-gemini",
+      "mcp__supabase__get_advisors",
+      "mcp__supabase__execute_sql",
+      "mcp__supabase__get_logs",
+      "mcp__supabase__list_projects",
+      "mcp__vercel__search_vercel_documentation",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_type",
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_take_screenshot",
+      "Skill(frontend-design)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(tree:*)",
+      "Bash(wc:*)",
+      "Bash(cat:*)",
+      "Bash(echo:*)",
+      "Bash(grep:*)",
+      "Bash(shasum:*)",
+      "Bash(printenv:*)",
+      "Bash(curl:*)",
+      "Bash(node:*)",
+      "Bash(python3:*)",
+      "Bash(timeout:*)",
+      "Bash(wait)",
+      "Bash(mkdir:*)",
+      "Bash(chmod:*)",
+      "Bash(tee:*)",
+      "Bash(xargs:*)",
+      "Bash(pnpm dev:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm check:*)",
+      "Bash(pnpm check:light:*)",
+      "Bash(pnpm tsc:*)",
+      "Bash(pnpm svelte-check:*)",
+      "Bash(pnpm vitest run:*)",
+      "Bash(pnpm test:e2e:*)",
+      "Bash(pnpm test:integration:*)",
+      "Bash(pnpm db:generate:*)",
+      "Bash(pnpm db:migrate:*)",
+      "Bash(pnpm db:studio:*)",
+      "Bash(pnpm tsx:*)",
+      "Bash(pnpm exec:*)",
+      "Bash(pnpm --filter:*)",
+      "Bash(pnpm update:*)",
+      "Bash(pnpm remove:*)",
+      "Bash(vitest run:*)",
+      "Bash(pnpm view:*)",
+      "Bash(NODE_OPTIONS=:*)",
+      "Bash(git add:*)",
+      "Bash(git checkout:*)",
+      "Bash(git mv:*)",
+      "Bash(git -C:*)",
+      "Bash(git push:*)",
+      "Bash(docker exec:*)",
+      "Bash(psql:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm rebuild:*)",
+      "Bash(fnm:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git commit:*)",
+      "Bash(git branch:*)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)",
+      "Bash(gh:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+      "Write(./.env)",
+      "Write(./.env.*)",
+      "Write(./secrets/**)"
+    ],
+    "ask": [
+      "Bash(rm:*)",
+      "Bash(rm -rf:*)",
+      "Bash(mv:*)",
+      "Bash(cp:*)",
+      "Bash(kill:*)",
+      "Bash(pkill:*)",
+      "Bash(git reset:*)",
+      "Bash(git rebase:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(DROP:*)",
+      "Bash(DELETE FROM:*)",
+      "Bash(TRUNCATE:*)"
+    ],
+    "defaultMode": "default"
+  },
+  "model": "opus",
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/permission-auto-approve.py"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "terminal-notifier -title '🤖 Claude' -message 'Awaiting your input' -sound Ping"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/stop-verification.py"
+          },
+          {
+            "type": "command",
+            "command": "terminal-notifier -title \"🤖 Claude\" -subtitle \"Task Done\" -message \"Completed work in $(basename \"$PWD\")\" -sound Glass -timeout 10"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/command-logger.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/bash-command-validator.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/command-logger.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/no-secrets.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/drizzle-migration-guard.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/import-path-validator.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/sveltekit-route-validator.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/supabase-rls-reminder.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/command-logger.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/no-secrets.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/drizzle-migration-guard.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/import-path-validator.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/sveltekit-route-validator.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/supabase-rls-reminder.py"
+          }
+        ]
+      },
+      {
+        "matcher": "MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/command-logger.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/no-secrets.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/drizzle-migration-guard.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/import-path-validator.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/sveltekit-route-validator.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/supabase-rls-reminder.py"
+          }
+        ]
+      },
+      {
+        "matcher": "WebSearch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/web-search-enhancer.py"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/auto-format.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/dependency-audit.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/sveltekit-perf-guard.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/auto-format.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/dependency-audit.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/sveltekit-perf-guard.py"
+          }
+        ]
+      },
+      {
+        "matcher": "MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/auto-format.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/dependency-audit.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/sveltekit-perf-guard.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/sveltekit-perf-guard.py"
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "feature-dev@claude-code-plugins": true,
+    "compounding-engineering@every-marketplace": true,
+    "code-review@claude-code-plugins": true,
+    "security-guidance@claude-code-plugins": true,
+    "backend-development@claude-code-workflows": true,
+    "code-simplifier@claude-plugins-official": true
+  }
+}

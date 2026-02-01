@@ -1,0 +1,37 @@
+# Never commit these (contain secrets or personal data)
+.credentials.json
+*.log
+history.jsonl
+
+# Local directories
+debug/
+projects/
+file-history/
+telemetry/
+statsig/
+cache/
+logs/
+
+# Local overrides (user-specific)
+settings.local.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+
+# Node (if any scripts use it)
+node_modules/
