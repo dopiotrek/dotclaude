@@ -3,6 +3,8 @@ name: clone
 description: Clone the current conversation so the user can branch off and try a different approach.
 ---
 
+# Conversation Clone Skill
+
 Clone the current conversation so the user can branch off and try a different approach.
 
 Steps:

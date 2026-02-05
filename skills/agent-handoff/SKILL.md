@@ -3,6 +3,8 @@ name: handoff
 description: Write or update a handoff document so the next agent with fresh context can continue this work.
 ---
 
+# Agent Handoff Skill
+
 Write or update a handoff document so the next agent with fresh context can continue this work.
 
 Steps:
