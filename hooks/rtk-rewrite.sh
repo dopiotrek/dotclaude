@@ -17,6 +17,14 @@ if [ -z "$CMD" ]; then
   exit 0
 fi
 
+# Strip leading "cd ... && " prefix that Claude Code often prepends
+CD_PREFIX=""
+CD_REGEX='^(cd[[:space:]]+[^&]*&&[[:space:]]+)'
+if [[ "$CMD" =~ $CD_REGEX ]]; then
+  CD_PREFIX="${BASH_REMATCH[1]}"
+  CMD="${CMD:${#CD_PREFIX}}"
+fi
+
 # Extract the first meaningful command (before pipes, &&, etc.)
 # We only rewrite if the FIRST command in a chain matches.
 FIRST_CMD="$CMD"
@@ -134,6 +142,11 @@ elif echo "$FIRST_CMD" | grep -qE '^go\s+vet(\s|$)'; then
   REWRITTEN=$(echo "$CMD" | sed 's/^go vet/rtk go vet/')
 elif echo "$FIRST_CMD" | grep -qE '^golangci-lint(\s|$)'; then
   REWRITTEN=$(echo "$CMD" | sed 's/^golangci-lint/rtk golangci-lint/')
+fi
+
+# Prepend cd prefix if it was stripped
+if [ -n "$CD_PREFIX" ] && [ -n "$REWRITTEN" ]; then
+  REWRITTEN="${CD_PREFIX}${REWRITTEN}"
 fi
 
 # If no rewrite needed, approve as-is

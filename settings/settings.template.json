@@ -175,20 +175,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/rtk-rewrite.sh"
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
             "command": "python3 $HOME/.claude/hooks/command-logger.py"
           },
           {
             "type": "command",
             "command": "python3 $HOME/.claude/hooks/bash-command-validator.py"
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/rtk-rewrite.sh"
           }
         ]
       },
