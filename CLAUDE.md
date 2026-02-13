@@ -43,3 +43,5 @@
 ## Current Task
 
 If working on a task, check `.claude/current-task.md` in the project root for context.
+
+@RTK.md

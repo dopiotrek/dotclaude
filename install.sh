@@ -136,6 +136,13 @@ else
     ln -s "$SCRIPT_DIR/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
     print_success "CLAUDE.md → $SCRIPT_DIR/CLAUDE.md"
 
+    # RTK.md (if present)
+    if [ -f "$SCRIPT_DIR/RTK.md" ]; then
+        rm -f "$CLAUDE_DIR/RTK.md"
+        ln -s "$SCRIPT_DIR/RTK.md" "$CLAUDE_DIR/RTK.md"
+        print_success "RTK.md    → $SCRIPT_DIR/RTK.md"
+    fi
+
     # Hooks directory
     rm -rf "$CLAUDE_DIR/hooks"
     ln -s "$SCRIPT_DIR/hooks" "$CLAUDE_DIR/hooks"
@@ -185,9 +192,9 @@ echo -e "${GREEN}═════════════════════
 echo ""
 echo "Installed components:"
 echo "  • CLAUDE.md    - Global preferences and instructions"
-echo "  • 13 hooks     - Automated guardrails and enhancements"
-echo "  • 9 agents     - Specialized task handlers"
-echo "  • 4 skills     - Reusable skill definitions"
+echo "  • "$(ls -1 $SCRIPT_DIR/hooks | wc -l)" hooks     - Automated guardrails and enhancements"
+echo "  • "$(ls -1 $SCRIPT_DIR/agents | wc -l)" agents     - Specialized task handlers"
+echo "  • "$(ls -1 $SCRIPT_DIR/skills | wc -l)" skills     - Reusable skill definitions"
 echo "  • settings.json - Permissions and hook configuration"
 echo ""
 
