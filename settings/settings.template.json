@@ -154,6 +154,17 @@
         ]
       }
     ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/lessons-loader.py"
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "matcher": "*",
@@ -161,6 +172,10 @@
           {
             "type": "command",
             "command": "python3 $HOME/.claude/hooks/stop-verification.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/lessons-writer.py"
           },
           {
             "type": "command",
