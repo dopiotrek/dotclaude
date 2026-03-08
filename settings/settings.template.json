@@ -1,7 +1,7 @@
 {
   "statusLine": {
     "type": "command",
-    "command": "$HOME/.claude/scripts/statusline.sh"
+    "command": "bash $HOME/.claude/scripts/statusline.sh"
   },
   "fileSuggestion": {
     "type": "command",
