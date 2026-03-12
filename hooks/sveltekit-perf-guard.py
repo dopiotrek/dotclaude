@@ -18,9 +18,6 @@ CHUNK_BUDGET_KB = 100   # Individual chunk budget in KB
 FILE_SIZE_WARN_KB = 100 # Warn if single source file exceeds this
 MAX_IMPORTS_WARN = 15   # Warn if file has more than this many imports
 
-LOG_DIR = Path(__file__).parent.parent / "logs"
-LOG_FILE = LOG_DIR / "sveltekit-perf.log"
-
 # Patterns that may affect bundle size negatively
 PERF_ANTIPATTERNS = [
     (r"import\s+\*\s+as\s+\w+\s+from", "Wildcard import detected - use named imports for better tree-shaking"),
@@ -37,10 +34,8 @@ SVELTE_PATTERNS = [
 
 
 def log(message: str) -> None:
-    """Log to both stdout and file."""
+    """Log to stdout for context injection."""
     print(message)
-    with open(LOG_FILE, "a") as f:
-        f.write(message + "\n")
 
 
 def get_dir_size(path: Path) -> int:

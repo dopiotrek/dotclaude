@@ -1,0 +1,17 @@
+{
+  "$schema": "./features.schema.json",
+  "lastUpdated": "2026-03-12",
+  "features": [
+    {
+      "id": "example-feature",
+      "name": "Example Feature",
+      "status": "planned",
+      "category": "core",
+      "route": "/example",
+      "description": "Replace this with your first real feature entry",
+      "plannedAt": "2026-03-12",
+      "dependencies": [],
+      "notes": "Delete this entry and add real features as you build them"
+    }
+  ]
+}

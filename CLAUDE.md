@@ -40,28 +40,11 @@
 - Conventional commits: feat:, fix:, refactor:, docs:, chore:
 - Keep commits atomic and focused
 
-## Build Log
+## Systems
 
-Before finishing any non-trivial task (not typos, not quick questions), append an entry to `.claude/logs/build-log.md`. This is used for content creation — blog posts, social media, changelogs.
-
-Format each entry like this:
-
-```
-## YYYY-MM-DD | Category: Short title
-
-**What:** One sentence — what was built/fixed/changed.
-**Why:** The problem or motivation. What was broken, missing, or needed.
-**How:** The approach taken, key decisions, tradeoffs considered.
-**Outcome:** What's different now. Concrete result.
-**Takeaway:** One reusable insight — the kind of thing worth sharing in a post.
-```
-
-Categories: Feature, Fix, Refactor, Infrastructure, Performance, DX, Design.
-Keep entries concise (5-8 lines max). Write for an audience of devs building SaaS with AI tools.
-Skip entries for trivial changes (renaming, comment updates, formatting).
-
-## Current Task
-
-If working on a task, check `.claude/current-task.md` in the project root for context.
+@.claude/concept.md
+@.claude/rules/task-system.md
+@.claude/rules/ship-log.md
+@.claude/rules/features-registry.md
 
 @RTK.md

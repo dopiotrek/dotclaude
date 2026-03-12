@@ -8,10 +8,6 @@ import json
 import re
 import sys
 from datetime import datetime
-from pathlib import Path
-
-LOG_DIR = Path(__file__).parent.parent / "logs"
-LOG_FILE = LOG_DIR / "web-search.log"
 
 # Words that indicate the query already has temporal context
 TEMPORAL_KEYWORDS = [
@@ -28,14 +24,6 @@ TECH_KEYWORDS = [
     'install', 'configuration', 'release', 'version',
     'framework', 'library', 'package', 'npm', 'pip',
 ]
-
-
-def log(message: str) -> None:
-    """Log to file."""
-    LOG_DIR.mkdir(parents=True, exist_ok=True)
-    with open(LOG_FILE, "a") as f:
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        f.write(f"[{timestamp}] {message}\n")
 
 
 def has_year(query: str) -> bool:
@@ -82,7 +70,6 @@ def main():
 
     if should_add_year:
         modified_query = f"{query} {current_year}"
-        log(f"Enhanced: '{query}' → '{modified_query}'")
 
         # Output modified query for Claude Code to use
         output = {
@@ -94,8 +81,6 @@ def main():
             }
         }
         print(json.dumps(output))
-    else:
-        log(f"Unchanged: '{query}'")
 
     sys.exit(0)
 

@@ -131,7 +131,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $HOME/.claude/hooks/session-context-loader.py"
+            "command": "python3 $HOME/.claude/hooks/task-restore.py"
           }
         ]
       }
@@ -179,7 +179,7 @@
           },
           {
             "type": "command",
-            "command": "python3 $HOME/.claude/hooks/lessons-writer.py"
+            "command": "python3 $HOME/.claude/hooks/ship-log-writer.py"
           },
           {
             "type": "command",
@@ -203,10 +203,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $HOME/.claude/hooks/command-logger.py"
-          },
-          {
-            "type": "command",
             "command": "python3 $HOME/.claude/hooks/no-secrets.py"
           },
           {
@@ -219,7 +215,7 @@
           },
           {
             "type": "command",
-            "command": "python3 $HOME/.claude/hooks/sveltekit-route-validator.py"
+            "command": "python3 $HOME/.claude/hooks/sveltekit-  alidator.py"
           },
           {
             "type": "command",
@@ -230,10 +226,6 @@
       {
         "matcher": "Edit",
         "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/command-logger.py"
-          },
           {
             "type": "command",
             "command": "python3 $HOME/.claude/hooks/no-secrets.py"
@@ -259,10 +251,6 @@
       {
         "matcher": "MultiEdit",
         "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/command-logger.py"
-          },
           {
             "type": "command",
             "command": "python3 $HOME/.claude/hooks/no-secrets.py"
@@ -352,15 +340,29 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $HOME/.claude/hooks/command-logger.py"
-          },
-          {
-            "type": "command",
             "command": "python3 $HOME/.claude/hooks/bash-command-validator.py"
           },
           {
             "type": "command",
             "command": "python3 $HOME/.claude/hooks/sveltekit-perf-guard.py"
+          }
+        ]
+      },
+      {
+        "matcher": "precompact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/task-snapshot.py"
+          }
+        ]
+      },
+      {
+        "matcher": "postcompact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/task-restore.py"
           }
         ]
       }

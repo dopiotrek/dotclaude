@@ -15,9 +15,6 @@ import re
 import sys
 from pathlib import Path
 
-LOG_DIR = Path(__file__).parent.parent / "logs"
-LOG_FILE = LOG_DIR / "route-validator.log"
-
 # Valid SvelteKit route file names
 VALID_ROUTE_FILES = {
     '+page.svelte',
@@ -104,15 +101,6 @@ CONTENT_PATTERNS = [
         '🚨 Database import in +page.svelte. Use +page.server.ts for DB queries'
     ),
 ]
-
-
-def log(message: str) -> None:
-    """Log to file."""
-    LOG_DIR.mkdir(parents=True, exist_ok=True)
-    from datetime import datetime
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    with open(LOG_FILE, "a") as f:
-        f.write(f"[{timestamp}] {message}\n")
 
 
 def is_route_file(file_path: str) -> bool:
@@ -240,14 +228,6 @@ def main():
     # Analyze the route
     result = analyze_route(file_path, content)
 
-    # Log analysis
-    if result['is_route']:
-        log(f"Analyzing route: {Path(file_path).name}")
-        for item in result['warnings']:
-            log(f"  {item}")
-        for item in result['errors']:
-            log(f"  {item}")
-
     # Block if there are errors
     if result['errors']:
         output = []
@@ -288,7 +268,6 @@ def main():
         output.append("")
 
         print("\n".join(output), file=sys.stderr)
-        log("Warnings issued but allowing operation")
 
     sys.exit(0)
 

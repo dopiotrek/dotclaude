@@ -44,15 +44,9 @@ DEPENDENCY_FILES = {
 }
 
 
-LOG_DIR = Path(__file__).parent.parent / "logs"
-LOG_FILE = LOG_DIR / "dependency-audit.log"
-
-
 def log(message: str) -> None:
-    """Log to both stdout and file."""
+    """Log to stdout for context injection."""
     print(message)
-    with open(LOG_FILE, "a") as f:
-        f.write(message + "\n")
 
 
 def run_audit(file_path: str) -> None:

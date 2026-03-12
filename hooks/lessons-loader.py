@@ -2,10 +2,13 @@
 """
 UserPromptSubmit hook that injects relevant lessons into Claude's context.
 
-Reads .claude/lessons.md, matches lesson tags against keywords in the
-user's prompt, and outputs the top matches to stdout. Claude sees these
-before processing the message — fresh context every time, immune to
-context window eviction.
+Reads .claude/logs/ship-log.md, finds 💡 Lesson entries, matches their tags
+against keywords in the user's prompt, and outputs the top matches to stdout.
+
+Claude sees these before processing the message — fresh context every time,
+immune to context window eviction.
+
+Also supports legacy .claude/lessons.md for backward compatibility.
 
 Keeps output compact: max 5 lessons, truncated to avoid bloating tokens.
 """
@@ -18,7 +21,6 @@ from pathlib import Path
 
 
 def find_project_root() -> Path | None:
-    """Find the project root using git or fallback to cwd."""
     try:
         result = subprocess.run(
             ["git", "rev-parse", "--show-toplevel"],
@@ -31,12 +33,49 @@ def find_project_root() -> Path | None:
     return Path.cwd()
 
 
-def parse_lessons(content: str) -> list[dict]:
-    """Parse lessons.md into structured entries."""
+def parse_ship_log_lessons(content: str) -> list[dict]:
+    """Parse 💡 lesson entries from ship-log.md."""
     lessons: list[dict] = []
     entries = re.split(r'\n## ', content)
 
-    for entry in entries[1:]:  # skip the file header
+    for entry in entries[1:]:
+        lines = entry.strip().split("\n")
+        if not lines:
+            continue
+
+        header = lines[0]
+
+        # Only parse 💡 Lesson entries
+        if "💡" not in header:
+            continue
+
+        # Extract tags from **Tags:** line
+        tags: list[str] = []
+        body_lines: list[str] = []
+        for line in lines[1:]:
+            if line.startswith("**Tags:**"):
+                tag_str = line.replace("**Tags:**", "").strip()
+                tags = [t.strip().lower() for t in tag_str.split(",")]
+            elif line.strip() != "---":
+                body_lines.append(line)
+
+        body = "\n".join(body_lines).strip()
+
+        # Skip lessons with unfilled rules
+        if "TODO - fill in" in body:
+            continue
+
+        lessons.append({"header": header.strip(), "tags": tags, "body": body})
+
+    return lessons
+
+
+def parse_legacy_lessons(content: str) -> list[dict]:
+    """Parse lessons from old-format lessons.md for backward compatibility."""
+    lessons: list[dict] = []
+    entries = re.split(r'\n## ', content)
+
+    for entry in entries[1:]:
         lines = entry.strip().split("\n")
         if not lines:
             continue
@@ -46,7 +85,6 @@ def parse_lessons(content: str) -> list[dict]:
         tags = [t.strip().lower() for t in parts[1].split(",")] if len(parts) > 1 else []
         body = "\n".join(lines[1:]).strip()
 
-        # Skip lessons with unfilled rules (they're noise until reviewed)
         if "TODO - fill in" in body:
             continue
 
@@ -64,13 +102,10 @@ def match_lessons(prompt: str, lessons: list[dict], max_results: int = 5) -> lis
     for lesson in lessons:
         score = 0.0
         for tag in lesson["tags"]:
-            # Exact tag match in prompt
             if tag in prompt_lower:
                 score += 2.0
-            # Tag appears as a word boundary match
             elif tag in prompt_words:
                 score += 1.5
-            # Stem match (first 4+ chars) — catches migrate/migration, etc.
             elif len(tag) > 3:
                 stem = tag[:4]
                 if any(w.startswith(stem) for w in prompt_words):
@@ -97,24 +132,32 @@ def main():
     if not project_root:
         sys.exit(0)
 
-    lessons_file = project_root / ".claude" / "lessons.md"
-    if not lessons_file.exists():
+    # Collect lessons from both sources
+    all_lessons: list[dict] = []
+
+    # Primary: ship-log.md
+    ship_log = project_root / ".claude" / "logs" / "ship-log.md"
+    if ship_log.exists():
+        try:
+            all_lessons.extend(parse_ship_log_lessons(ship_log.read_text()))
+        except (IOError, OSError):
+            pass
+
+    # Legacy fallback: lessons.md
+    legacy_file = project_root / ".claude" / "lessons.md"
+    if legacy_file.exists():
+        try:
+            all_lessons.extend(parse_legacy_lessons(legacy_file.read_text()))
+        except (IOError, OSError):
+            pass
+
+    if not all_lessons:
         sys.exit(0)
 
-    try:
-        content = lessons_file.read_text()
-    except (IOError, OSError):
-        sys.exit(0)
-
-    lessons = parse_lessons(content)
-    if not lessons:
-        sys.exit(0)
-
-    matched = match_lessons(prompt, lessons)
+    matched = match_lessons(prompt, all_lessons)
     if not matched:
         sys.exit(0)
 
-    # Output to stdout — Claude sees this as pre-prompt context
     lines: list[str] = [
         "<past-lessons>",
         f"Relevant lessons from past sessions ({len(matched)} matched):",
@@ -122,7 +165,6 @@ def main():
     ]
     for lesson in matched:
         lines.append(f"## {lesson['header']}")
-        # Truncate body to keep token usage reasonable
         body = lesson["body"]
         if len(body) > 300:
             body = body[:300] + "..."

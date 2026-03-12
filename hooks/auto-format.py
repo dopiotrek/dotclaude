@@ -10,9 +10,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-LOG_DIR = Path(__file__).parent.parent / "logs"
-LOG_FILE = LOG_DIR / "auto-format.log"
-
 # Map file extensions to formatters
 # Each entry: extension -> (formatter_cmd, check_cmd, description)
 FORMATTERS = {
@@ -59,12 +56,6 @@ SKIP_PATTERNS = [
 ]
 
 
-def log(message: str) -> None:
-    """Log to file only (keep stdout clean for hooks)."""
-    with open(LOG_FILE, "a") as f:
-        f.write(message + "\n")
-
-
 def should_skip(file_path: str) -> bool:
     """Check if file should be skipped."""
     for pattern in SKIP_PATTERNS:
@@ -81,7 +72,6 @@ def format_file(file_path: str) -> None:
         return
 
     if should_skip(file_path):
-        log(f"⏭️  Skipped (excluded path): {path.name}")
         return
 
     suffix = path.suffix.lower()
@@ -92,7 +82,6 @@ def format_file(file_path: str) -> None:
 
     # Check if formatter is available
     if not shutil.which(check_cmd) and check_cmd != "prettier":
-        log(f"⚠️  {formatter_name} not installed, skipping format for {path.name}")
         return
 
     # Build full command
@@ -107,19 +96,10 @@ def format_file(file_path: str) -> None:
             cwd=path.parent
         )
 
-        if result.returncode == 0:
-            log(f"✨ Formatted with {formatter_name}: {path.name}")
-        else:
-            # Don't log errors for minor issues, just skip silently
-            if result.stderr and "error" in result.stderr.lower():
-                log(f"⚠️  {formatter_name} warning for {path.name}: {result.stderr[:100]}")
+        pass  # Silent success/failure
 
-    except subprocess.TimeoutExpired:
-        log(f"⚠️  {formatter_name} timeout for {path.name}")
-    except FileNotFoundError:
-        log(f"⚠️  {formatter_name} not found")
-    except Exception as e:
-        log(f"⚠️  Error formatting {path.name}: {e}")
+    except (subprocess.TimeoutExpired, FileNotFoundError, Exception):
+        pass
 
 
 def main():

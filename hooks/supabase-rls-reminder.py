@@ -36,9 +36,6 @@ def styled(text: str, *styles: str) -> str:
     """Apply ANSI styles to text."""
     return ''.join(styles) + text + Colors.RESET
 
-LOG_DIR = Path(__file__).parent.parent / "logs"
-LOG_FILE = LOG_DIR / "rls-reminder.log"
-
 # Tables that typically need RLS for multi-tenant isolation
 MULTI_TENANT_INDICATORS = [
     'organizationId',
@@ -71,15 +68,6 @@ PUBLIC_TABLES = [
 # Schema file patterns
 SCHEMA_PATHS = ['schema/', 'packages/db/schema/']
 MIGRATION_PATHS = ['migrations/', 'packages/db/migrations/']
-
-
-def log(message: str) -> None:
-    """Log to file."""
-    LOG_DIR.mkdir(parents=True, exist_ok=True)
-    from datetime import datetime
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    with open(LOG_FILE, "a") as f:
-        f.write(f"[{timestamp}] {message}\n")
 
 
 def is_schema_file(file_path: str) -> bool:
@@ -232,19 +220,10 @@ def main():
 
     if is_schema_file(file_path):
         result = analyze_schema_file(content, file_path)
-        log(f"Analyzing schema: {Path(file_path).name}")
     elif is_migration_file(file_path):
         result = analyze_migration_file(content, file_path)
-        log(f"Analyzing migration: {Path(file_path).name}")
     else:
         sys.exit(0)
-
-    # Log findings
-    if result:
-        for item in result['info']:
-            log(f"  {item}")
-        for item in result['warnings']:
-            log(f"  {item}")
 
     # Only warn, never block (RLS is a reminder, not enforcement)
     if result and (result['warnings'] or result['info']):
@@ -301,7 +280,6 @@ def main():
 
         # Output JSON response
         print(json.dumps(response))
-        log("RLS reminder issued (JSON response)")
 
     sys.exit(0)  # Always allow - this is just a reminder
 

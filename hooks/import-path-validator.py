@@ -15,9 +15,6 @@ import re
 import sys
 from pathlib import Path
 
-LOG_DIR = Path(__file__).parent.parent / "logs"
-LOG_FILE = LOG_DIR / "import-validator.log"
-
 # Patterns to check
 IMPORT_PATTERNS = [
     # Cross-package relative imports (bad)
@@ -90,15 +87,6 @@ RELEVANT_EXTENSIONS = {'.ts', '.js', '.svelte', '.tsx', '.jsx'}
 
 # Paths that indicate SvelteKit app context
 SVELTEKIT_PATHS = ['apps/web/', 'apps/marketing/']
-
-
-def log(message: str) -> None:
-    """Log to file."""
-    LOG_DIR.mkdir(parents=True, exist_ok=True)
-    from datetime import datetime
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    with open(LOG_FILE, "a") as f:
-        f.write(f"[{timestamp}] {message}\n")
 
 
 def is_relevant_file(file_path: str) -> bool:
@@ -201,17 +189,6 @@ def main():
     # Analyze the content
     result = analyze_file(file_path, content)
 
-    # Log analysis
-    if result['file_type']:
-        log(f"Analyzing imports: {Path(file_path).name}")
-
-        for item in result['info']:
-            log(f"  {item}")
-        for item in result['warnings']:
-            log(f"  {item}")
-        for item in result['errors']:
-            log(f"  {item}")
-
     # Block if there are errors
     if result['errors']:
         output = []
@@ -252,7 +229,6 @@ def main():
 
         # Print to stderr but don't block
         print("\n".join(output), file=sys.stderr)
-        log("Warnings issued but allowing operation")
 
     sys.exit(0)
 
