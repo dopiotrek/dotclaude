@@ -3,8 +3,8 @@
 PostToolUse hook (matcher: postcompact) — restores task context after compaction.
 
 After Claude's context is compressed, most project-specific context is lost.
-This hook reads the active task file (which was just updated by task-snapshot.py
-during precompact) and injects it into Claude's context as a system message.
+This hook reads .claude/current-task.md (which was just updated by
+task-snapshot.py during precompact) and injects it into Claude's context.
 
 This is the READ side of the compaction bridge.
 The WRITE side is task-snapshot.py (precompact).
@@ -29,16 +29,6 @@ def find_project_root() -> Path | None:
     except (subprocess.TimeoutExpired, FileNotFoundError):
         pass
     return Path.cwd()
-
-
-def get_active_task(tasks_dir: Path) -> Path | None:
-    """Find the most recently modified active task file."""
-    active_dir = tasks_dir / "active"
-    if not active_dir.exists():
-        return None
-
-    task_files = sorted(active_dir.glob("*.md"), key=lambda f: f.stat().st_mtime, reverse=True)
-    return task_files[0] if task_files else None
 
 
 def get_features_summary(project_root: Path) -> str:
@@ -71,10 +61,9 @@ def main():
     if not project_root:
         sys.exit(0)
 
-    tasks_dir = project_root / ".claude" / "tasks"
-    task_file = get_active_task(tasks_dir)
+    task_file = project_root / ".claude" / "current-task.md"
 
-    if not task_file:
+    if not task_file.exists():
         sys.exit(0)
 
     try:
@@ -99,26 +88,11 @@ def main():
     if features:
         lines.extend(["", features])
 
-    # Inject concept summary if available
-    concept_file = project_root / ".claude" / "concept.md"
-    if concept_file.exists():
-        try:
-            concept = concept_file.read_text().strip()
-            # Only inject if it's been filled in (not just template comments)
-            if concept and not all(line.startswith("<!--") or line.startswith("#") or not line.strip()
-                                   for line in concept.split("\n")):
-                lines.extend([
-                    "",
-                    "Product context: see .claude/concept.md",
-                ])
-        except Exception:
-            pass
-
     lines.extend([
         "",
         "=" * 60,
         "Resume work on this task. Check the Plan section for next steps.",
-        "Update the task file as you make progress.",
+        "Update .claude/current-task.md as you make progress.",
         "=" * 60,
     ])
 

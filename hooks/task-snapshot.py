@@ -3,11 +3,8 @@
 PostToolUse hook (matcher: precompact) — saves task state before context compaction.
 
 When Claude's context window is about to be compressed, this hook captures
-the current state of the active task so nothing is lost. It writes a
-"Context Snapshot" section to the active task file with:
-- Recent git changes
-- Current task status
-- Timestamp
+the current git state and appends it to .claude/current-task.md so nothing
+is lost across the compaction boundary.
 
 This is the WRITE side of the compaction bridge.
 The READ side is task-restore.py (postcompact).
@@ -32,16 +29,6 @@ def find_project_root() -> Path | None:
     except (subprocess.TimeoutExpired, FileNotFoundError):
         pass
     return Path.cwd()
-
-
-def get_active_task(tasks_dir: Path) -> Path | None:
-    """Find the most recently modified active task file."""
-    active_dir = tasks_dir / "active"
-    if not active_dir.exists():
-        return None
-
-    task_files = sorted(active_dir.glob("*.md"), key=lambda f: f.stat().st_mtime, reverse=True)
-    return task_files[0] if task_files else None
 
 
 def get_recent_changes(project_root: Path) -> str:
@@ -143,10 +130,9 @@ def main():
     if not project_root:
         sys.exit(0)
 
-    tasks_dir = project_root / ".claude" / "tasks"
-    task_file = get_active_task(tasks_dir)
+    task_file = project_root / ".claude" / "current-task.md"
 
-    if not task_file:
+    if not task_file.exists():
         sys.exit(0)
 
     try:

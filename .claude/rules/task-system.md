@@ -1,18 +1,19 @@
 # Task System
 
-Tasks live in `.claude/tasks/` with subdirectories: `active/`, `completed/`, `backlog/`.
+Active work is tracked in `.claude/current-task.md` — a single file, always the current thing.
 
-**When starting non-trivial work:**
-1. Create a task file: `.claude/tasks/active/YYYY-MM-DD-task-name.md`
-2. Use this format:
+**When to write it:**
+- When exiting plan mode (write the full plan)
+- When starting non-trivial work
+- When switching to a different task
+
+**Format:**
 
 ```
 # Task: Short descriptive title
-Status: in-progress
-Created: YYYY-MM-DD
+Status: in-progress | blocked | done
+Branch: feature-branch-name
 Updated: YYYY-MM-DD HH:MM
-Priority: high | medium | low
-Feature: feature-id (from features.json, if applicable)
 
 ## Goal
 One sentence — what "done" looks like.
@@ -26,10 +27,12 @@ One sentence — what "done" looks like.
 Key decisions, context, blockers. Free-form.
 ```
 
-3. **Update the Plan section** as you complete steps (check boxes, add new ones)
-4. **Update Notes** with key decisions and context — especially things that would be lost during compaction
-5. When done, move the file to `completed/`
+**Keep it current:**
+- Check off steps as you complete them
+- Add new steps if scope changes
+- Update Notes with key decisions — especially things that would be lost during compaction
+- Set Status to `done` when finished
 
-**Critical:** The precompact hook automatically snapshots git state into the task file. The postcompact hook restores it. Keep the task file accurate — it's your lifeline across compaction boundaries.
+**Critical:** The precompact hook snapshots git state into this file. The postcompact hook restores it. Keep it accurate — it's your lifeline across compaction boundaries.
 
-**After compaction:** If you notice context was just compressed, immediately read the active task file to restore your working state.
+**After compaction:** If you notice context was just compressed, immediately read `.claude/current-task.md` to restore your working state.

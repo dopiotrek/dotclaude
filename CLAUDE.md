@@ -43,9 +43,4 @@
 ## Systems
 
 @.claude/concept.md
-@.claude/rules/task-system.md
-@.claude/rules/ship-log.md
-@.claude/rules/features-registry.md
-@.claude/rules/tmux-tasks.md
-
 @RTK.md

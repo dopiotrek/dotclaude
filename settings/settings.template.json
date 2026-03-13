@@ -215,7 +215,7 @@
           },
           {
             "type": "command",
-            "command": "python3 $HOME/.claude/hooks/sveltekit-  alidator.py"
+            "command": "python3 $HOME/.claude/hooks/sveltekit-route-validator.py"
           },
           {
             "type": "command",

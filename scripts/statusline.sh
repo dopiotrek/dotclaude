@@ -20,6 +20,8 @@ reset='\033[0m'
 
 # ===== Extract data from JSON =====
 model_name=$(echo "$input" | jq -r '.model.display_name // "Claude"')
+dir=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // ""')
+dir_name="${dir##*/}"
 
 # Context window
 size=$(echo "$input" | jq -r '.context_window.context_window_size // 200000')
@@ -49,38 +51,79 @@ format_tokens() {
     fi
 }
 
-used_tokens=$(format_tokens $current)
-total_tokens=$(format_tokens $size)
+used_str=$(format_tokens $current)
+total_str=$(format_tokens $size)
 
-# Context color
-ctx_color="$green"
-[ "$pct_used" -ge 50 ] 2>/dev/null && ctx_color="$orange"
-[ "$pct_used" -ge 70 ] 2>/dev/null && ctx_color="$yellow"
-[ "$pct_used" -ge 90 ] 2>/dev/null && ctx_color="$red"
+# Context color based on usage
+if [ "$pct_used" -ge 90 ]; then
+    ctx_color="$red"
+elif [ "$pct_used" -ge 70 ]; then
+    ctx_color="$yellow"
+elif [ "$pct_used" -ge 50 ]; then
+    ctx_color="$orange"
+else
+    ctx_color="$green"
+fi
 
-# Git branch from cwd
-dir=$(echo "$input" | jq -r '.cwd // ""')
+# # Progress bar (uncomment to enable)
+# BAR_WIDTH=20
+# FILLED=$((pct_used * BAR_WIDTH / 100))
+# [ "$FILLED" -gt "$BAR_WIDTH" ] && FILLED=$BAR_WIDTH
+# EMPTY=$((BAR_WIDTH - FILLED))
+# BAR=""
+# [ "$FILLED" -gt 0 ] && BAR=$(printf "%${FILLED}s" | tr ' ' '█')
+# [ "$EMPTY" -gt 0 ] && BAR="${BAR}$(printf "%${EMPTY}s" | tr ' ' '░')"
+
+# # Cost & duration (uncomment to enable for API usage)
+# cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
+# cost_fmt=$(printf '$%.2f' "$cost")
+# duration_ms=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
+# mins=$((duration_ms / 60000))
+# secs=$(( (duration_ms % 60000) / 1000 ))
+
+# Git branch (cached for performance)
+CACHE_FILE="/tmp/statusline-git-cache-$$"
 branch=""
-if [ -n "$dir" ] && [ -d "${dir}/.git" ]; then
-    branch=$(git -C "$dir" symbolic-ref --short HEAD 2>/dev/null || git -C "$dir" rev-parse --short HEAD 2>/dev/null)
+if [ -n "$dir" ]; then
+    # Use a stable cache key based on directory
+    CACHE_FILE="/tmp/statusline-git-cache"
+    CACHE_MAX_AGE=5
+    cache_stale=true
+    if [ -f "$CACHE_FILE" ]; then
+        # Portable age check: create a reference file N seconds old, compare
+        ref_file="/tmp/statusline-ref-$$"
+        touch -d "$(date -d "${CACHE_MAX_AGE} seconds ago" 2>/dev/null || date -v-${CACHE_MAX_AGE}S 2>/dev/null)" "$ref_file" 2>/dev/null
+        if [ -f "$ref_file" ] && [ "$CACHE_FILE" -nt "$ref_file" ]; then
+            cache_stale=false
+        fi
+        rm -f "$ref_file"
+    fi
+    if $cache_stale; then
+        if [ -d "${dir}/.git" ] || git -C "$dir" rev-parse --git-dir >/dev/null 2>&1; then
+            branch=$(git -C "$dir" symbolic-ref --short HEAD 2>/dev/null || git -C "$dir" rev-parse --short HEAD 2>/dev/null)
+        fi
+        echo "$branch" > "$CACHE_FILE"
+    else
+        branch=$(cat "$CACHE_FILE")
+    fi
 fi
 
 # Thinking status
-thinking_on=false
+thinking=""
 settings_path="$HOME/.claude/settings.json"
 if [ -f "$settings_path" ]; then
     thinking_val=$(jq -r '.alwaysThinkingEnabled // false' "$settings_path" 2>/dev/null)
-    [ "$thinking_val" = "true" ] && thinking_on=true
+    [ "$thinking_val" = "true" ] && thinking=" ${dim}|${reset} ${orange}think${reset}"
 fi
 
-# ===== Build line =====
-# Model | branch | ctx used/total (%) | thinking
+# ===== Output: Model | Branch | Context (%) | Thinking =====
 line="${blue}${model_name}${reset}"
+# [ -n "$dir_name" ] && line+=" ${dim}|${reset} 📁 ${dim}${dir_name}${reset}"  # uncomment to show repo name
 [ -n "$branch" ] && line+=" ${dim}|${reset} ${cyan}${branch}${reset}"
-line+=" ${dim}|${reset} ${ctx_color}${used_tokens} / ${total_tokens}${reset} ${dim}(${pct_used}%)${reset}"
-if $thinking_on; then
-    line+=" ${dim}|${reset} ${orange}think${reset}"
-fi
+line+=" ${dim}|${reset} ${ctx_color}${used_str}/${total_str} ${dim}(${pct_used}%)${reset}"
+# line+=" ${dim}|${reset} ${yellow}${cost_fmt}${reset}"  # uncomment for cost
+# line+=" ${dim}|${reset} ⏱ ${dim}${mins}m ${secs}s${reset}"  # uncomment for duration
+line+="${thinking}"
 
 printf "%b" "$line"
 exit 0
