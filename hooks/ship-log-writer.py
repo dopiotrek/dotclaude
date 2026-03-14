@@ -21,6 +21,17 @@ from datetime import datetime
 from pathlib import Path
 
 
+def _trim_output(text: str, max_chars: int = 2000) -> str:
+    """Take the tail of output but align to a line boundary so we don't slice mid-message."""
+    if len(text) <= max_chars:
+        return text
+    trimmed = text[-max_chars:]
+    nl = trimmed.find("\n")
+    if nl >= 0:
+        trimmed = trimmed[nl + 1:]
+    return trimmed
+
+
 def find_project_root() -> Path | None:
     try:
         result = subprocess.run(
@@ -74,26 +85,37 @@ def infer_tags(files: list[str], error_output: str) -> list[str]:
     return sorted(tags)
 
 
-def extract_meaningful_error(raw_output: str) -> str | None:
-    """Extract a meaningful error message, skipping noise."""
+def extract_meaningful_errors(raw_output: str, max_errors: int = 3) -> list[str]:
+    """Extract meaningful error messages, skipping noise. Returns up to max_errors."""
     lines = [l.strip() for l in raw_output.split("\n") if l.strip()]
 
-    # Skip lines that are just file paths or counts
     noise_patterns = [
         r"^\d+ error",
         r"^Found \d+",
         r"^\s*$",
         r"^ELIFECYCLE",
         r"^ERR!",
+        r"^npm ",
+        r"^pnpm ",
     ]
 
+    # Match actual TS/Svelte error lines: file(line,col): error TSXXXX: message
+    error_pattern = re.compile(r".+\(\d+,\d+\):\s*error\s+TS\d+:.+")
+
+    errors: list[str] = []
     for line in lines:
         if any(re.match(p, line) for p in noise_patterns):
             continue
-        if len(line) > 20:  # Skip very short lines
-            return line[:150]
+        # Prefer actual error lines
+        if error_pattern.match(line):
+            errors.append(line[:200])
+            if len(errors) >= max_errors:
+                break
+        elif not errors and len(line) > 20:
+            # Fallback: first non-noise line if no TS errors found yet
+            errors.append(line[:200])
 
-    return lines[0][:150] if lines else None
+    return errors if errors else ([lines[0][:200]] if lines else [])
 
 
 def is_duplicate(ship_log: Path, error_key: str) -> bool:
@@ -108,19 +130,42 @@ def is_duplicate(ship_log: Path, error_key: str) -> bool:
     return today in content and error_key[:50] in content
 
 
+def infer_rule(check_name: str, errors: list[str], tags: list[str]) -> str:
+    """Auto-generate a useful rule from the error pattern."""
+    combined = " ".join(errors).lower()
+
+    if "ts1005" in combined:
+        return "Check for syntax errors (missing semicolons, commas, brackets) before committing."
+    if "ts2322" in combined or "ts2345" in combined:
+        return "Verify type assignments match expected types — don't use `as` to silence, fix the source."
+    if "ts2304" in combined or "ts2552" in combined:
+        return "Check that all referenced names are imported and spelled correctly."
+    if "ts2339" in combined:
+        return "Verify the property exists on the type — check the type definition, not just the runtime shape."
+    if "ts18" in combined:
+        return "Check for top-level await, missing async, or module resolution issues."
+    if "ts2307" in combined:
+        return "Fix import paths — check for typos, missing extensions, or incorrect aliases."
+    if "svelte" in check_name.lower():
+        return f"Run svelte-check before committing changes to {', '.join(tags[:3])} files."
+
+    return f"Run `pnpm {check_name.lower()}` check before committing to catch these errors early."
+
+
 def append_lesson(project_root: Path, tags: list[str], check_name: str,
-                  error_preview: str, changed_files: list[str]):
+                  errors: list[str], changed_files: list[str]):
     """Append a 💡 lesson entry to the ship-log."""
     ship_log = project_root / ".claude" / "logs" / "ship-log.md"
 
     if not ship_log.exists():
         ship_log.parent.mkdir(parents=True, exist_ok=True)
         ship_log.write_text(
-            "# Ship Log — dronelist.io\n\n"
+            "# Ship Log\n\n"
             "<!-- 🚀 = shipped. 💡 = learned. Auto-maintained by hooks + CLAUDE.md. -->\n\n"
         )
 
-    if is_duplicate(ship_log, error_preview):
+    # Deduplicate against first error
+    if is_duplicate(ship_log, errors[0]):
         return
 
     date = datetime.now().strftime("%Y-%m-%d")
@@ -129,10 +174,18 @@ def append_lesson(project_root: Path, tags: list[str], check_name: str,
     if len(changed_files) > 3:
         files_str += f" (+{len(changed_files) - 3} more)"
 
+    # Format errors as a list if multiple
+    if len(errors) == 1:
+        errors_str = errors[0]
+    else:
+        errors_str = "\n".join(f"  - `{e}`" for e in errors)
+
+    rule = infer_rule(check_name, errors, tags)
+
     entry = (
         f"## {date} | 💡 Lesson: {check_name} failure in {files_str}\n\n"
-        f"**What broke:** {error_preview}\n\n"
-        f"**Rule:** TODO - fill in after reviewing the root cause\n\n"
+        f"**What broke:** {errors_str}\n\n"
+        f"**Rule:** {rule}\n\n"
         f"**Tags:** {tag_str}\n\n"
         f"---\n\n"
     )
@@ -176,8 +229,8 @@ def main():
             if result.returncode != 0:
                 checks_failed.append({
                     "name": name,
-                    "stderr": result.stderr[-500:] if result.stderr else "",
-                    "stdout": result.stdout[-500:] if result.stdout else "",
+                    "stderr": _trim_output(result.stderr or ""),
+                    "stdout": _trim_output(result.stdout or ""),
                 })
         except subprocess.TimeoutExpired:
             pass
@@ -191,12 +244,12 @@ def main():
 
     for check in checks_failed:
         raw_output = (check["stderr"] or check["stdout"]).strip()
-        error_preview = extract_meaningful_error(raw_output)
-        if not error_preview:
+        errors = extract_meaningful_errors(raw_output)
+        if not errors:
             continue
 
         tags = infer_tags(changed_files, raw_output)
-        append_lesson(project_root, tags, check["name"], error_preview, changed_files)
+        append_lesson(project_root, tags, check["name"], errors, changed_files)
 
     sys.exit(0)
 

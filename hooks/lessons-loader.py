@@ -61,8 +61,8 @@ def parse_ship_log_lessons(content: str) -> list[dict]:
 
         body = "\n".join(body_lines).strip()
 
-        # Skip lessons with unfilled rules
-        if "TODO - fill in" in body:
+        # Skip lessons with unfilled rules (legacy entries only)
+        if body.strip() == "**Rule:** TODO - fill in after reviewing the root cause":
             continue
 
         lessons.append({"header": header.strip(), "tags": tags, "body": body})
