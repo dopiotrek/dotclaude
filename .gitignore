@@ -35,3 +35,10 @@ __pycache__/
 
 # Node (if any scripts use it)
 node_modules/
+
+# gstack build artifacts (rebuild locally with ./skills/gstack/setup)
+skills/gstack/browse/dist/
+skills/gstack/design/dist/
+skills/gstack/bin/gstack-global-discover
+skills/gstack/.agents/
+skills/gstack/bun.lock

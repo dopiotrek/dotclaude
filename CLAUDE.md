@@ -47,7 +47,5 @@
 
 ## Workflow
 
-@workflow/task-system.md
 @workflow/ship-log.md
-@workflow/features-registry.md
 @workflow/tmux-tasks.md
