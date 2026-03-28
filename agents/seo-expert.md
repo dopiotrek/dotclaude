@@ -65,7 +65,7 @@ When analyzing content, systematically evaluate:
 
 ## Output Format
 
-Provide comprehensive structural blueprints in `_docs/analysis/` with a descriptive name (e.g., `_docs/analysis/seo-feature-name-analysis.md`):
+Save analysis to `_docs/reviews/` with a descriptive name (e.g., `_docs/reviews/seo-homepage-audit.md`):
 
 **Structure Visualization:**
 
