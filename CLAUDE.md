@@ -18,6 +18,8 @@
 - Preserve existing code style in files being edited
 - Use existing patterns from the codebase, don't invent new ones
 - Consider mobile-first for any UI work
+- After reading a file, reference it from context. Only re-read if the file was modified since last read.
+- Use Glob instead of find/ls commands. Use Grep instead of grep/rg. Use Read instead of cat.
 
 ## Things to Never Do
 

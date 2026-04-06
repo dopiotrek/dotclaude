@@ -100,7 +100,7 @@ gstack/
 │   ├── src/         # CLI + commands (generate, variants, compare, serve, etc.)
 │   ├── test/        # Integration tests
 │   └── dist/        # Compiled binary
-├── extension/       # Chrome extension (side panel + activity feed)
+├── extension/       # Chrome extension (side panel + activity feed + CSS inspector)
 ├── lib/             # Shared libraries (worktree.ts)
 ├── docs/designs/    # Design documents
 ├── setup-deploy/    # /setup-deploy skill (one-time deploy config)
@@ -221,6 +221,24 @@ Examples of good bisection:
 When the user says "bisect commit" or "bisect and push," split staged/unstaged
 changes into logical commits and push.
 
+## Community PR guardrails
+
+When reviewing or merging community PRs, **always AskUserQuestion** before accepting
+any commit that:
+
+1. **Touches ETHOS.md** — this file is Garry's personal builder philosophy. No edits
+   from external contributors or AI agents, period.
+2. **Removes or softens promotional material** — YC references, founder perspective,
+   and product voice are intentional. PRs that frame these as "unnecessary" or
+   "too promotional" must be rejected.
+3. **Changes Garry's voice** — the tone, humor, directness, and perspective in skill
+   templates, CHANGELOG, and docs are not generic. PRs that rewrite voice to be
+   more "neutral" or "professional" must be rejected.
+
+Even if the agent strongly believes a change improves the project, these three
+categories require explicit user approval via AskUserQuestion. No exceptions.
+No auto-merging. No "I'll just clean this up."
+
 ## CHANGELOG + VERSION style
 
 **VERSION and CHANGELOG are branch-scoped.** Every feature branch that ships gets its
@@ -239,6 +257,23 @@ not what was already on main.
 2. Is the base branch version already released? (If yes, bump and create new entry.)
 3. Does an existing entry on this branch already cover earlier work? (If yes, replace
    it with one unified entry for the final version.)
+
+**Merging main does NOT mean adopting main's version.** When you merge origin/main into
+a feature branch, main may bring new CHANGELOG entries and a higher VERSION. Your branch
+still needs its OWN version bump on top. If main is at v0.13.8.0 and your branch adds
+features, bump to v0.13.9.0 with a new entry. Never jam your changes into an entry that
+already landed on main. Your entry goes on top because your branch lands next.
+
+**After merging main, always check:**
+- Does CHANGELOG have your branch's own entry separate from main's entries?
+- Is VERSION higher than main's VERSION?
+- Is your entry the topmost entry in CHANGELOG (above main's latest)?
+If any answer is no, fix it before continuing.
+
+**After any CHANGELOG edit that moves, adds, or removes entries,** immediately run
+`grep "^## \[" CHANGELOG.md` and verify the full version sequence is contiguous
+with no gaps or duplicates before committing. If a version is missing, the edit
+broke something. Fix it before moving on.
 
 CHANGELOG.md is **for users**, not contributors. Write it like product release notes:
 
