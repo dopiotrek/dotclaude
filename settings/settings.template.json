@@ -177,11 +177,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $HOME/.claude/hooks/stop-verification.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/ship-log-writer.py"
+            "command": "python3 $HOME/.claude/hooks/stop-verify-and-log.py"
           },
           {
             "type": "command",
