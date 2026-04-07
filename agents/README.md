@@ -78,7 +78,7 @@ Form handling specialist with sveltekit-superforms and Zod:
 
 #### `code-reviewer.md`
 
-**Model:** opus | **Color:** purple
+**Model:** sonnet | **Color:** purple
 
 Elite code review expert with 2025 methodologies:
 

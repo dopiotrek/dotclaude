@@ -106,7 +106,13 @@
       "Read(./secrets/**)",
       "Write(./.env)",
       "Write(./.env.*)",
-      "Write(./secrets/**)"
+      "Write(./secrets/**)",
+      "Read(**/node_modules/**)",
+      "Read(**/.svelte-kit/**)",
+      "Read(**/dist/**)",
+      "Read(**/build/**)",
+      "Read(**/__pycache__/**)",
+      "Read(**/*.lock)"
     ],
     "ask": [
       "Bash(rm:*)",
