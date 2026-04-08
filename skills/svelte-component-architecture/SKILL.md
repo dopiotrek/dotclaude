@@ -1,6 +1,7 @@
 ---
 name: svelte-architect
 description: Component decomposition and architecture guidelines for SvelteKit/Svelte 5 apps. Use when creating new components, deciding how to split code, reviewing component structure, refactoring nested components, or when unsure whether to extract a component. Triggers on phrases like "where should this go", "too many components", "too nested", "extract component", "component structure", "file organization", "props drilling", "refactor components", "review architecture", or questions about component boundaries.
+paths: "src/**/*.svelte, src/lib/components/**"
 ---
 
 # Svelte Component Architecture

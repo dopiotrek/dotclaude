@@ -7,6 +7,7 @@
     "type": "command",
     "command": "$HOME/.claude/scripts/file-suggest.sh"
   },
+  "autoMemoryDirectory": ".claude/memory",
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-6[1m]",
@@ -42,63 +43,63 @@
       "mcp__playwright__browser_console_messages",
       "mcp__playwright__browser_take_screenshot",
       "Skill(frontend-design)",
-      "Bash(ls:*)",
-      "Bash(find:*)",
-      "Bash(tree:*)",
-      "Bash(wc:*)",
-      "Bash(cat:*)",
-      "Bash(echo:*)",
-      "Bash(grep:*)",
-      "Bash(shasum:*)",
-      "Bash(printenv:*)",
-      "Bash(curl:*)",
-      "Bash(node:*)",
-      "Bash(python3:*)",
-      "Bash(timeout:*)",
+      "Bash(ls *)",
+      "Bash(find *)",
+      "Bash(tree *)",
+      "Bash(wc *)",
+      "Bash(cat *)",
+      "Bash(echo *)",
+      "Bash(grep *)",
+      "Bash(shasum *)",
+      "Bash(printenv *)",
+      "Bash(curl *)",
+      "Bash(node *)",
+      "Bash(python3 *)",
+      "Bash(timeout *)",
       "Bash(wait)",
-      "Bash(mkdir:*)",
-      "Bash(chmod:*)",
-      "Bash(tee:*)",
-      "Bash(xargs:*)",
-      "Bash(pnpm dev:*)",
-      "Bash(pnpm build:*)",
-      "Bash(pnpm check:*)",
-      "Bash(pnpm check:light:*)",
-      "Bash(pnpm tsc:*)",
-      "Bash(pnpm svelte-check:*)",
-      "Bash(pnpm vitest run:*)",
-      "Bash(pnpm test:e2e:*)",
-      "Bash(pnpm test:integration:*)",
-      "Bash(pnpm db:generate:*)",
-      "Bash(pnpm db:migrate:*)",
-      "Bash(pnpm db:studio:*)",
-      "Bash(pnpm tsx:*)",
-      "Bash(pnpm exec:*)",
-      "Bash(pnpm --filter:*)",
-      "Bash(pnpm update:*)",
-      "Bash(pnpm remove:*)",
-      "Bash(vitest run:*)",
-      "Bash(pnpm view:*)",
-      "Bash(NODE_OPTIONS=:*)",
-      "Bash(git add:*)",
-      "Bash(git checkout:*)",
-      "Bash(git mv:*)",
-      "Bash(git -C:*)",
-      "Bash(git push:*)",
-      "Bash(docker exec:*)",
-      "Bash(psql:*)",
-      "Bash(pnpm install:*)",
-      "Bash(pnpm add:*)",
-      "Bash(pnpm rebuild:*)",
-      "Bash(fnm:*)",
-      "Bash(git status:*)",
-      "Bash(git diff:*)",
-      "Bash(git log:*)",
-      "Bash(git commit:*)",
-      "Bash(git branch:*)",
-      "Bash(git pull:*)",
-      "Bash(git stash:*)",
-      "Bash(gh:*)"
+      "Bash(mkdir *)",
+      "Bash(chmod *)",
+      "Bash(tee *)",
+      "Bash(xargs *)",
+      "Bash(pnpm dev *)",
+      "Bash(pnpm build *)",
+      "Bash(pnpm check *)",
+      "Bash(pnpm check:light *)",
+      "Bash(pnpm tsc *)",
+      "Bash(pnpm svelte-check *)",
+      "Bash(pnpm vitest run *)",
+      "Bash(pnpm test:e2e *)",
+      "Bash(pnpm test:integration *)",
+      "Bash(pnpm db:generate *)",
+      "Bash(pnpm db:migrate *)",
+      "Bash(pnpm db:studio *)",
+      "Bash(pnpm tsx *)",
+      "Bash(pnpm exec *)",
+      "Bash(pnpm --filter *)",
+      "Bash(pnpm update *)",
+      "Bash(pnpm remove *)",
+      "Bash(vitest run *)",
+      "Bash(pnpm view *)",
+      "Bash(NODE_OPTIONS= *)",
+      "Bash(git add *)",
+      "Bash(git checkout *)",
+      "Bash(git mv *)",
+      "Bash(git -C *)",
+      "Bash(git push *)",
+      "Bash(docker exec *)",
+      "Bash(psql *)",
+      "Bash(pnpm install *)",
+      "Bash(pnpm add *)",
+      "Bash(pnpm rebuild *)",
+      "Bash(fnm *)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git commit *)",
+      "Bash(git branch *)",
+      "Bash(git pull *)",
+      "Bash(git stash *)",
+      "Bash(gh *)"
     ],
     "deny": [
       "Read(./.env)",
@@ -112,22 +113,31 @@
       "Read(**/dist/**)",
       "Read(**/build/**)",
       "Read(**/__pycache__/**)",
-      "Read(**/*.lock)"
+      "Read(**/*.lock)",
+      "Bash(rm -rf /)",
+      "Bash(rm -rf ~*)",
+      "Bash(sudo rm *)",
+      "Bash(sudo chmod *)",
+      "Bash(chmod 777 *)",
+      "Bash(curl * | sh)",
+      "Bash(curl * | bash)",
+      "Bash(wget * | sh)",
+      "Bash(wget * | bash)"
     ],
     "ask": [
-      "Bash(rm:*)",
-      "Bash(rm -rf:*)",
-      "Bash(mv:*)",
-      "Bash(cp:*)",
-      "Bash(kill:*)",
-      "Bash(pkill:*)",
-      "Bash(git reset:*)",
-      "Bash(git rebase:*)",
-      "Bash(git push --force:*)",
-      "Bash(git push -f:*)",
-      "Bash(DROP:*)",
-      "Bash(DELETE FROM:*)",
-      "Bash(TRUNCATE:*)"
+      "Bash(rm *)",
+      "Bash(rm -rf *)",
+      "Bash(mv *)",
+      "Bash(cp *)",
+      "Bash(kill *)",
+      "Bash(pkill *)",
+      "Bash(git reset *)",
+      "Bash(git rebase *)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(DROP *)",
+      "Bash(DELETE FROM *)",
+      "Bash(TRUNCATE *)"
     ],
     "defaultMode": "default"
   },
@@ -140,17 +150,6 @@
           {
             "type": "command",
             "command": "python3 $HOME/.claude/hooks/task-restore.py"
-          }
-        ]
-      }
-    ],
-    "PermissionRequest": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/permission-auto-approve.py"
           }
         ]
       }
@@ -203,23 +202,21 @@
         ]
       },
       {
-        "matcher": "Write",
+        "matcher": "Write|Edit|MultiEdit",
         "hooks": [
           {
             "type": "command",
             "command": "python3 $HOME/.claude/hooks/no-secrets.py"
-          },
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "if": "Write(*.sql)|Edit(*.sql)|MultiEdit(*.sql)|Write(**/migrations/**)|Edit(**/migrations/**)|MultiEdit(**/migrations/**)|Write(**/schema*)|Edit(**/schema*)|MultiEdit(**/schema*)",
+        "hooks": [
           {
             "type": "command",
             "command": "python3 $HOME/.claude/hooks/drizzle-migration-guard.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/import-path-validator.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/sveltekit-route-validator.py"
           },
           {
             "type": "command",
@@ -228,124 +225,50 @@
         ]
       },
       {
-        "matcher": "Edit",
+        "matcher": "Write|Edit|MultiEdit",
+        "if": "Write(*.ts)|Write(*.svelte)|Write(*.js)|Edit(*.ts)|Edit(*.svelte)|Edit(*.js)|MultiEdit(*.ts)|MultiEdit(*.svelte)|MultiEdit(*.js)",
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $HOME/.claude/hooks/no-secrets.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/drizzle-migration-guard.py"
-          },
-          {
-            "type": "command",
             "command": "python3 $HOME/.claude/hooks/import-path-validator.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/sveltekit-route-validator.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/supabase-rls-reminder.py"
           }
         ]
       },
       {
-        "matcher": "MultiEdit",
+        "matcher": "Write|Edit|MultiEdit",
+        "if": "Write(**/routes/**)|Edit(**/routes/**)|MultiEdit(**/routes/**)",
         "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/no-secrets.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/drizzle-migration-guard.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/import-path-validator.py"
-          },
           {
             "type": "command",
             "command": "python3 $HOME/.claude/hooks/sveltekit-route-validator.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/supabase-rls-reminder.py"
-          }
-        ]
-      },
-      {
-        "matcher": "WebSearch",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/web-search-enhancer.py"
           }
         ]
       }
     ],
     "PostToolUse": [
       {
-        "matcher": "Edit",
+        "matcher": "Write|Edit|MultiEdit",
         "hooks": [
           {
             "type": "command",
             "command": "python3 $HOME/.claude/hooks/auto-format.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/dependency-audit.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/sveltekit-perf-guard.py"
           }
         ]
       },
       {
-        "matcher": "Write",
+        "matcher": "Write|Edit|MultiEdit",
+        "if": "Write(**/package.json)|Edit(**/package.json)|Write(**/requirements.txt)|Edit(**/requirements.txt)|Write(**/Cargo.toml)|Edit(**/Cargo.toml)|Write(**/Gemfile)|Edit(**/Gemfile)",
         "hooks": [
           {
             "type": "command",
-            "command": "python3 $HOME/.claude/hooks/auto-format.py"
-          },
-          {
-            "type": "command",
             "command": "python3 $HOME/.claude/hooks/dependency-audit.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/sveltekit-perf-guard.py"
-          }
-        ]
-      },
-      {
-        "matcher": "MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/auto-format.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/dependency-audit.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/sveltekit-perf-guard.py"
           }
         ]
       },
       {
         "matcher": "Bash",
+        "if": "Bash(pnpm build *)|Bash(pnpm check *)|Bash(vite build *)",
         "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/bash-command-validator.py"
-          },
           {
             "type": "command",
             "command": "python3 $HOME/.claude/hooks/sveltekit-perf-guard.py"

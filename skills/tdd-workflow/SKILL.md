@@ -1,6 +1,7 @@
 ---
 name: tdd-workflow
 description: Use this skill when writing new features, fixing bugs, or refactoring code. Enforces test-driven development with 80%+ coverage including unit, integration, and E2E tests.
+paths: "src/**/*.test.ts, src/**/*.spec.ts, tests/**, e2e/**"
 ---
 
 # Test-Driven Development Workflow

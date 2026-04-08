@@ -4,6 +4,7 @@ description: >
   Use PROACTIVELY this agent for mobile UI design tasks in Svelte 5 applications with TailwindCSS. Specializes in creating visually appealing, touch-friendly interfaces, responsive layouts, mobile navigation patterns, and user experience optimization for mobile devices.
 model: sonnet
 color: purple
+allowed-tools: ["Read", "Glob", "Grep", "Edit", "Write", "Bash"]
 ---
 
 # Mobile UI Designer Agent

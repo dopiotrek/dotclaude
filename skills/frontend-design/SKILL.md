@@ -1,6 +1,7 @@
 ---
 name: ui-skills
 description: Opinionated constraints for building better interfaces with agents.
+paths: "src/**/*.svelte, src/lib/components/**, src/routes/**/+page.svelte"
 ---
 
 # UI Skills

@@ -5,9 +5,9 @@ Merged Stop hook: verification checks + ship-log lesson writing.
 Replaces the old stop-verification.py and ship-log-writer.py which redundantly
 ran the same expensive checks (tsc, svelte-check) independently.
 
-This hook forks to background so the Stop event returns in <50ms.
-Results are written to /tmp/claude-verify-<pid>.txt and lessons are
-appended to .claude/logs/ship-log.md on failure.
+Launches background subprocess (cross-platform, no os.fork) so the Stop event
+returns quickly. Results are written to .claude/logs/last-verify.txt for
+the lessons-loader to pick up, and lessons are appended to ship-log.md on failure.
 """
 
 import json
@@ -260,7 +260,7 @@ def append_lesson(project_root: Path, tags: list[str], check_name: str,
         f.write(entry)
 
 
-# ── Main ─────────────────────────────────────────────────────────────
+# ── Background worker ───────────────────────────────────────────────
 
 
 def do_work():
@@ -276,11 +276,12 @@ def do_work():
     # Run all checks (once, shared results)
     results = [run_check(name, cmd, project_root, timeout) for name, cmd, timeout in checks]
 
-    # Write verification results to temp file
+    # Write verification results to project-local file (readable next session)
     output = format_results(results)
     if output:
-        results_file = Path(f"/tmp/claude-verify-{os.getpid()}.txt")
-        results_file.write_text(output)
+        verify_file = project_root / ".claude" / "logs" / "last-verify.txt"
+        verify_file.parent.mkdir(parents=True, exist_ok=True)
+        verify_file.write_text(output)
 
     # Write lessons for any failures
     failed = [r for r in results if not r["success"] and r.get("error") != "Command not found"]
@@ -295,6 +296,9 @@ def do_work():
             append_lesson(project_root, tags, check["name"], errors, changed_files)
 
 
+# ── Main ─────────────────────────────────────────────────────────────
+
+
 def main():
     # Consume stdin (required by hook protocol)
     try:
@@ -302,19 +306,24 @@ def main():
     except (json.JSONDecodeError, EOFError):
         pass
 
-    # Fork to background — parent exits immediately, child does the work
-    pid = os.fork()
-    if pid > 0:
-        # Parent: exit immediately so Stop event is not blocked
-        sys.exit(0)
-
-    # Child: detach and do the work
-    os.setsid()
-    try:
-        do_work()
-    except Exception:
-        pass  # Background — don't crash noisily
+    # Launch background subprocess (cross-platform, replaces os.fork)
+    # The child runs this same script with --background flag
+    subprocess.Popen(
+        [sys.executable, __file__, "--background"],
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        start_new_session=True,
+    )
+    # Parent exits immediately so Stop event is not blocked
+    sys.exit(0)
 
 
 if __name__ == "__main__":
-    main()
+    if "--background" in sys.argv:
+        try:
+            do_work()
+        except Exception:
+            pass  # Background — don't crash noisily
+    else:
+        main()

@@ -1,16 +1,17 @@
 # Hooks
 
-Hooks are Python scripts that run before/after Claude Code tool invocations. They provide automated guardrails for security, code quality, and developer experience.
+Hooks are scripts that run before/after Claude Code tool invocations. They provide automated guardrails for security, code quality, and developer experience.
 
 ## Hook Types
 
-| Event               | When it Runs                     | Can Block?   | Use Case                    |
-| ------------------- | -------------------------------- | ------------ | --------------------------- |
-| `PreToolUse`        | Before tool execution            | Yes (exit 2) | Validation, transformation  |
-| `PostToolUse`       | After successful tool execution  | No           | Formatting, auditing        |
-| `PermissionRequest` | When permission is requested     | Yes          | Auto-approve/deny           |
-| `Stop`              | When Claude completes work       | No           | Verification, notifications |
-| `Notification`      | When Claude needs user attention | No           | Desktop notifications       |
+| Event              | When it Runs                     | Can Block?   | Use Case                    |
+| ------------------ | -------------------------------- | ------------ | --------------------------- |
+| `PreToolUse`       | Before tool execution            | Yes (exit 2) | Validation, transformation  |
+| `PostToolUse`      | After successful tool execution  | No           | Formatting, auditing        |
+| `UserPromptSubmit` | Before Claude processes a prompt | No           | Context injection           |
+| `Stop`             | When Claude completes work       | No           | Verification, notifications |
+| `Notification`     | When Claude needs user attention | No           | Desktop notifications       |
+| `SessionStart`     | On startup or resume             | No           | State restoration           |
 
 ## Exit Codes
 
@@ -18,13 +19,21 @@ Hooks are Python scripts that run before/after Claude Code tool invocations. The
 - `1` - Warning, show stderr to user (doesn't block)
 - `2` - Block the operation, show stderr to Claude
 
+## Performance Notes
+
+Hooks spawn a process on every matching event. To minimize overhead:
+
+- **Use `if` conditionals** in settings to skip hooks when the file path doesn't match (e.g., only run drizzle-migration-guard on `.sql` files)
+- **Use pipe matchers** like `Write|Edit|MultiEdit` instead of duplicating hooks per tool
+- **Dangerous pattern blocking** is handled by `permissions.deny` in settings (native, zero overhead) — don't duplicate it in hooks
+
 ## Included Hooks
 
-### Security & Safety
+### Security
 
 #### `no-secrets.py`
 
-**Event:** PreToolUse (Write, Edit)
+**Event:** PreToolUse (Write|Edit|MultiEdit)
 
 Blocks hardcoded secrets from being written to files:
 
@@ -34,44 +43,11 @@ Blocks hardcoded secrets from being written to files:
 - JWT tokens
 - Hardcoded passwords
 
-```python
-# Patterns detected:
-"sk_live_xxxx"           # Stripe
-"sk-xxxxxxxxxxxxxxxx"    # OpenAI
-"password = 'secret'"    # Hardcoded password
-```
-
-#### `permission-auto-approve.py`
-
-**Event:** PermissionRequest
-
-Auto-approves safe, read-only operations to reduce permission prompts:
-
-- Read, Glob, Grep, LS tools
-- Safe git commands (status, diff, log)
-- Package info commands (pnpm list, npm view)
-
-Also blocks dangerous patterns like:
-
-- `rm -rf /` or `rm -rf ~`
-- `sudo rm`, `sudo chmod`
-- `curl | sh` (piped execution)
-- SQL injection patterns
-
-#### `bash-command-validator.py`
-
-**Event:** PreToolUse (Bash)
-
-Enforces use of modern, faster CLI tools:
-
-- Suggests `rg` (ripgrep) instead of `grep`
-- Suggests `rg --files` instead of `find -name`
-
 ### Code Quality
 
 #### `auto-format.py`
 
-**Event:** PostToolUse (Write, Edit, MultiEdit)
+**Event:** PostToolUse (Write|Edit|MultiEdit)
 
 Auto-formats code after edits using appropriate formatters:
 
@@ -85,124 +61,114 @@ Skips: node_modules, .svelte-kit, build, dist, lock files
 
 #### `import-path-validator.py`
 
-**Event:** PreToolUse (Write, Edit, MultiEdit)
+**Event:** PreToolUse (Write|Edit|MultiEdit)
+**Conditional:** Only runs on `.ts`, `.js`, `.svelte` files
 
 Enforces import conventions for monorepo projects:
 
 - Blocks cross-package relative imports (use `@package/*` instead)
 - Warns about deep relative imports (use `$lib/` in SvelteKit)
-- Blocks imports from node_modules via relative path
 - Warns about wildcard imports (tree-shaking issues)
 - Warns about deprecated `$app/stores` (use `$app/state` in Svelte 5)
 
 #### `sveltekit-route-validator.py`
 
-**Event:** PreToolUse (Write, Edit, MultiEdit)
+**Event:** PreToolUse (Write|Edit|MultiEdit)
+**Conditional:** Only runs on files in `routes/` directories
 
 Validates SvelteKit routing conventions:
 
 - Ensures `+` prefix on route files (+page.svelte, +server.ts)
 - Detects Svelte 3 syntax (\_\_layout.svelte, index.svelte)
 - Catches common typos (+pages.svelte, +layouts.svelte)
-- Warns about load functions in wrong files
-- Blocks server-only imports in client files
 
 #### `sveltekit-perf-guard.py`
 
-**Event:** PostToolUse (Write, Edit, MultiEdit, Bash)
+**Event:** PostToolUse (Bash)
+**Conditional:** Only runs on build commands (pnpm build, vite build)
 
 Monitors bundle size and performance:
 
 - Checks total JS bundle size against budget (default 1000KB)
 - Warns about individual chunks exceeding 100KB
-- Detects anti-patterns:
-  - Wildcard imports (`import * as`)
-  - Full lodash import (use lodash-es)
-  - moment.js (use date-fns)
-  - Barrel imports from @tabler/icons-svelte
+- Detects anti-patterns: wildcard imports, full lodash, moment.js
 
 ### Database & Migrations
 
 #### `drizzle-migration-guard.py`
 
-**Event:** PreToolUse (Write, Edit, MultiEdit)
+**Event:** PreToolUse (Write|Edit|MultiEdit)
+**Conditional:** Only runs on `.sql` files, `migrations/`, and `schema*` files
 
-Prevents dangerous schema changes in Drizzle migrations:
+Prevents dangerous schema changes:
 
-**Blocks (exit 2):**
-
-- DROP TABLE, DROP SCHEMA
-- TRUNCATE
-- DELETE without WHERE
-
-**Warns (exit 0):**
-
-- DROP COLUMN
-- ALTER COLUMN TYPE
-- SET NOT NULL without DEFAULT
-
-Also validates migration file naming (NNNN_name.sql format).
+- **Blocks:** DROP TABLE, DROP SCHEMA, TRUNCATE, DELETE without WHERE
+- **Warns:** DROP COLUMN, ALTER COLUMN TYPE, SET NOT NULL without DEFAULT
 
 #### `supabase-rls-reminder.py`
 
-**Event:** PreToolUse (Write, Edit, MultiEdit)
+**Event:** PreToolUse (Write|Edit|MultiEdit)
+**Conditional:** Only runs on `.sql` files, `migrations/`, and `schema*` files
 
 Reminds to add Row Level Security when creating tables:
 
 - Detects new table definitions in Drizzle schema files
 - Checks for tables with tenant columns (organizationId, userId)
 - Suggests RLS policy patterns
-- Provides documentation links
 
-### Utilities
+### Token Optimization
 
-#### `command-logger.py`
+#### `rtk-rewrite.sh`
 
-**Event:** PreToolUse (Bash, Write, Edit)
+**Event:** PreToolUse (Bash)
 
-Logs all Claude Code operations for audit:
+Transparently rewrites CLI commands to RTK equivalents for 60-90% token savings:
 
-- Timestamp
-- Tool name
-- File path (for file operations)
-- Command (for Bash, truncated to 80 chars)
-- Pattern (for Grep/Glob)
+- git, gh, cargo, pnpm, vitest, tsc, eslint, prettier, docker, kubectl, curl, pytest, ruff
 
-Logs to `~/.claude/logs/command-log.txt`
+Skips silently if `rtk` or `jq` are not installed.
 
-#### `dependency-audit.py`
+### Context & Learning
 
-**Event:** PostToolUse (Write, Edit)
+#### `lessons-loader.py`
 
-Runs security audits when dependency files are modified:
+**Event:** UserPromptSubmit
 
-- `package.json` / `pnpm-lock.yaml` → `pnpm audit`
-- `requirements.txt` → `safety check`
-- `Cargo.toml` → `cargo audit`
-- `Gemfile` → `bundle audit`
+Injects relevant past lessons into every prompt:
 
-#### `stop-verification.py`
+- Reads `.claude/logs/ship-log.md` for lesson entries
+- Matches tags against current prompt keywords
+- Returns top 5 relevant lessons (max 300 chars each)
+
+#### `stop-verify-and-log.py`
 
 **Event:** Stop
 
-Runs verification checks when Claude completes work:
+Runs verification checks in background when Claude completes work:
 
 - TypeScript: `pnpm tsc --noEmit`
 - Svelte: `pnpm svelte-check --threshold error`
 - Python: `mypy .`
 - Rust: `cargo check`
 
-Reports pass/fail status with helpful output.
+Results saved to `.claude/logs/last-verify.txt`. Failures auto-append lessons to `.claude/logs/ship-log.md`.
 
-#### `web-search-enhancer.py`
+### Dependencies
 
-**Event:** PreToolUse (WebSearch)
+#### `dependency-audit.py`
 
-Enhances web searches for documentation:
+**Event:** PostToolUse (Write|Edit|MultiEdit)
+**Conditional:** Only runs when package.json, requirements.txt, Cargo.toml, or Gemfile are modified
 
-- Adds current year to tech documentation queries
-- Only modifies queries about docs, tutorials, APIs
-- Skips queries that already have temporal context
+Runs security audits on dependency file changes.
+
+## Removed Hooks (April 2026 cleanup)
+
+The following hooks were removed as they're now handled by native Claude Code features:
+
+- **`permission-auto-approve.py`** — Replaced by `permissions.allow` and `permissions.deny` rules in settings.json (native, zero overhead)
+- **`bash-command-validator.py`** — Triple coverage with CLAUDE.md instructions + RTK rewrite hook
+- **`web-search-enhancer.py`** — Low value, search engines already bias toward recent results
 
 ## Creating Your Own Hooks
 
@@ -210,10 +176,6 @@ Enhances web searches for documentation:
 
 ```python
 #!/usr/bin/env python3
-"""
-Description of what this hook does.
-"""
-
 import json
 import sys
 
@@ -226,84 +188,23 @@ def main():
     tool_name = input_data.get("tool_name", "")
     tool_input = input_data.get("tool_input", {})
 
-    # PreToolUse: Check input before execution
-    # PostToolUse: Also has tool_response
-
     # Your logic here...
 
-    # Exit codes:
-    # 0 = allow/success
-    # 1 = warning (show stderr to user)
-    # 2 = block (show stderr to Claude)
+    # Exit codes: 0 = allow, 1 = warn user, 2 = block + tell Claude
     sys.exit(0)
 
 if __name__ == "__main__":
     main()
 ```
 
-### Input Data Structure
+### Using `if` Conditionals (v2.1.85+)
 
-```python
-{
-    "tool_name": "Write",  # or Edit, Bash, etc.
-    "tool_input": {
-        "file_path": "/path/to/file",
-        "content": "file content",
-        # ... tool-specific fields
-    },
-    # PostToolUse only:
-    "tool_response": {
-        "success": True,
-        # ... response data
-    }
-}
-```
-
-### Modifying Tool Input (PreToolUse)
-
-```python
-# Return modified input via stdout
-output = {
-    "hookSpecificOutput": {
-        "hookEventName": "PreToolUse",
-        "modifiedToolInput": {
-            "query": "modified query"
-        }
-    }
-}
-print(json.dumps(output))
-```
-
-### Adding to Settings
-
-After creating a hook, add it to `settings/settings.template.json`:
+In settings.json, use `if` to skip hooks when irrelevant:
 
 ```json
 {
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/my-hook.py"
-          }
-        ]
-      }
-    ]
-  }
+  "matcher": "Write|Edit|MultiEdit",
+  "if": "Write(*.sql)|Edit(*.sql)|MultiEdit(*.sql)",
+  "hooks": [{ "type": "command", "command": "python3 $HOME/.claude/hooks/drizzle-migration-guard.py" }]
 }
 ```
-
-## Logs
-
-Hook logs are stored in `~/.claude/logs/`:
-
-- `command-log.txt` - All tool operations
-- `auto-format.log` - Formatting operations
-- `drizzle-guard.log` - Migration checks
-- `route-validator.log` - SvelteKit route validation
-- `import-validator.log` - Import path checks
-- `rls-reminder.log` - RLS policy reminders
-- `web-search.log` - Search query modifications

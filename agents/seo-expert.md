@@ -4,6 +4,7 @@ description: >
   Use this agent when analyzing and optimizing content structure, header hierarchy, and information architecture. Examples: <example>Context: User has written a blog post about drone photography techniques and wants to optimize its structure for SEO. user: "I've finished writing my blog post about drone photography techniques. Here's the content: [content]. Can you help optimize it?" assistant: "I'll use the seo-expert agent to analyze your header hierarchy, suggest schema markup, and identify internal linking opportunities for better SEO performance." <commentary>The user has content that needs structural optimization, so use the seo-expert agent to improve information architecture.</commentary></example> <example>Context: User is creating a comprehensive guide and wants proactive structure analysis. user: "I'm working on a guide about commercial drone regulations" assistant: "Let me proactively use the seo-expert agent to help you create an optimal information architecture with proper header hierarchy, schema markup, and internal linking strategy." <commentary>Since this agent should be used proactively for content structuring, analyze the guide structure even before the user explicitly asks.</commentary></example>
 model: sonnet
 color: cyan
+allowed-tools: ["Read", "Glob", "Grep", "Write", "Bash", "WebSearch", "WebFetch"]
 ---
 
 # SEO Expert Agent

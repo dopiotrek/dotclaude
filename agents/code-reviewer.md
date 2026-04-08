@@ -2,8 +2,10 @@
 name: code-reviewer
 description: >
   Use this agent proactively when you need comprehensive code review and quality assurance. Use after writing or modifying code. Examples: <example>Context: User has implemented a new feature. user: "I've just finished implementing JWT authentication" assistant: "I'll use the code-reviewer agent to review your authentication implementation."</example> <example>Context: User wants validation before deploying. user: "Can you review the changes before I ship?" assistant: "Let me use the code-reviewer agent to audit the changes."</example>
-model: sonnet
+model: opus
+effort: high
 color: purple
+allowed-tools: ["Read", "Glob", "Grep", "Write", "Bash"]
 ---
 
 # Code Reviewer Agent
