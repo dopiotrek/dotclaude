@@ -15,9 +15,10 @@
   },
   "permissions": {
     "allow": [
-      "Read(//$HOME/**)",
-      "Edit(//$HOME/**)",
-      "Write(//$HOME/.claude/**)",
+      "Read(//Users/piotrek/repos/**)",
+      "Read(//Users/piotrek/.claude/**)",
+      "Edit(//Users/piotrek/repos/**)",
+      "Write(//Users/piotrek/.claude/**)",
       "WebSearch",
       "WebFetch(domain:vite.dev)",
       "WebFetch(domain:github.com)",
