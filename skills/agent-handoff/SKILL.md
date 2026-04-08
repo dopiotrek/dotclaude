@@ -9,10 +9,10 @@ Write or update a handoff document so the next agent with fresh context can cont
 
 ## Steps
 
-1. Check if `_docs/handoff.md` already exists
+1. Check if `.docs/handoff.md` already exists
 2. If it exists, read it first to understand prior context before updating
 3. Review recent work: check `git diff`, `git log --oneline -10`, and any open files to capture the full picture
-4. Create or update `_docs/handoff.md` using the template below — skip any sections that don't apply
+4. Create or update `.docs/handoff.md` using the template below — skip any sections that don't apply
 
 ## Template
 
@@ -57,7 +57,7 @@ Ordered action items for the next session. First item should be immediately acti
 
 ## Output
 
-Save as `_docs/handoff.md`. Tell the user:
+Save as `.docs/handoff.md`. Tell the user:
 - The file path
 - A one-line summary of where things stand
-- That they can start a fresh session with: `claude "Read _docs/handoff.md and continue where we left off"`
+- That they can start a fresh session with: `claude "Read .docs/handoff.md and continue where we left off"`

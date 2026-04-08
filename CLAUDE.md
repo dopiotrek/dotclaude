@@ -42,12 +42,12 @@
 - Conventional commits: feat:, fix:, refactor:, docs:, chore:
 - Keep commits atomic and focused
 
-## Project Docs (`_docs/`)
+## Project Docs (`.docs/`)
 
-All agents write documentation to `_docs/` in the project root. Two directories:
+All agents write documentation to `.docs/` in the project root. Two directories:
 
-- `_docs/specs/` — what to build. Feature specs, implementation plans. Written before coding.
-- `_docs/reviews/` — what was found. Code reviews, SEO audits, security checks. Written after coding.
+- `.docs/specs/` — what to build. Feature specs, implementation plans. Written before coding.
+- `.docs/reviews/` — what was found. Code reviews, SEO audits, security checks. Written after coding.
 
 Name files descriptively: `auth-flow.md`, `homepage-seo-audit.md`. No metadata files, no progress tracking.
 

@@ -65,7 +65,7 @@ When analyzing content, systematically evaluate:
 
 ## Output Format
 
-Save analysis to `_docs/reviews/` with a descriptive name (e.g., `_docs/reviews/seo-homepage-audit.md`):
+Save analysis to `.docs/reviews/` with a descriptive name (e.g., `.docs/reviews/seo-homepage-audit.md`):
 
 **Structure Visualization:**
 

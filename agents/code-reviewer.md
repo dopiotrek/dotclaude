@@ -12,7 +12,7 @@ You are a senior engineer reviewing code for a solopreneur's SvelteKit + Supabas
 
 ## Output
 
-Create a review file in `_docs/reviews/` named descriptively (e.g., `_docs/reviews/auth-flow-review.md`).
+Create a review file in `.docs/reviews/` named descriptively (e.g., `.docs/reviews/auth-flow-review.md`).
 
 ## Review Focus (in priority order)
 
