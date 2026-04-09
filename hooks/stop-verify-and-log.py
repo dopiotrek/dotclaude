@@ -1,21 +1,14 @@
 #!/usr/bin/env python3
 """
-Merged Stop hook: verification checks + ship-log lesson writing.
+Stop hook: runs type/lint verification checks in the background.
 
-Replaces the old stop-verification.py and ship-log-writer.py which redundantly
-ran the same expensive checks (tsc, svelte-check) independently.
-
-Launches background subprocess (cross-platform, no os.fork) so the Stop event
-returns quickly. Results are written to .claude/logs/last-verify.txt for
-the lessons-loader to pick up, and lessons are appended to ship-log.md on failure.
+Launches a background subprocess so the Stop event returns immediately.
+Results are written to .claude/logs/last-verify.txt.
 """
 
 import json
-import os
-import re
 import subprocess
 import sys
-from datetime import datetime
 from pathlib import Path
 
 
@@ -122,149 +115,11 @@ def format_results(results: list[dict]) -> str:
     return "\n".join(lines)
 
 
-# ── Ship-log lesson writing ─────────────────────────────────────────
-
-
-def get_changed_files(project_root: Path) -> list[str]:
-    files: list[str] = []
-    for cmd in [
-        ["git", "diff", "--name-only"],
-        ["git", "diff", "--name-only", "--cached"],
-    ]:
-        try:
-            result = subprocess.run(
-                cmd, cwd=project_root,
-                capture_output=True, text=True, timeout=5,
-            )
-            if result.returncode == 0 and result.stdout.strip():
-                files.extend(result.stdout.strip().split("\n"))
-        except Exception:
-            pass
-    return list(dict.fromkeys(files))
-
-
-def infer_tags(files: list[str], error_output: str) -> list[str]:
-    tags: set[str] = set()
-    tag_patterns: dict[str, list[str]] = {
-        "drizzle": ["drizzle", "migration", ".sql", "schema.ts"],
-        "svelte": [".svelte", "svelte-check", "+page", "+layout"],
-        "typescript": [".ts", "tsc", "TS2", "TS18"],
-        "supabase": ["supabase", "rls", "policy"],
-        "api": ["+server.ts", "+server.js", "api/"],
-        "auth": ["auth", "session", "login", "signup"],
-        "runes": ["$state", "$derived", "$effect", "$props"],
-        "sveltekit": ["routes/", "+page", "+layout", "+error", "hooks.server"],
-        "css": [".css", ".scss", "tailwind", "styles"],
-        "testing": ["test", "vitest", "spec"],
-        "types": ["type ", "interface ", "TS2", "TS18", "as const"],
-    }
-    combined = " ".join(files) + " " + error_output.lower()
-    for tag, patterns in tag_patterns.items():
-        if any(p.lower() in combined for p in patterns):
-            tags.add(tag)
-    return sorted(tags)
-
-
-def extract_meaningful_errors(raw_output: str, max_errors: int = 3) -> list[str]:
-    lines = [l.strip() for l in raw_output.split("\n") if l.strip()]
-
-    noise_patterns = [
-        r"^\d+ error", r"^Found \d+", r"^\s*$",
-        r"^ELIFECYCLE", r"^ERR!", r"^npm ", r"^pnpm ",
-    ]
-
-    error_pattern = re.compile(r".+\(\d+,\d+\):\s*error\s+TS\d+:.+")
-    errors: list[str] = []
-
-    for line in lines:
-        if any(re.match(p, line) for p in noise_patterns):
-            continue
-        if error_pattern.match(line):
-            errors.append(line[:200])
-            if len(errors) >= max_errors:
-                break
-        elif not errors and len(line) > 20:
-            errors.append(line[:200])
-
-    return errors if errors else ([lines[0][:200]] if lines else [])
-
-
-def infer_rule(check_name: str, errors: list[str], tags: list[str]) -> str:
-    combined = " ".join(errors).lower()
-
-    rules = {
-        "ts1005": "Check for syntax errors (missing semicolons, commas, brackets) before committing.",
-        "ts2322": "Verify type assignments match expected types — don't use `as` to silence, fix the source.",
-        "ts2345": "Verify type assignments match expected types — don't use `as` to silence, fix the source.",
-        "ts2304": "Check that all referenced names are imported and spelled correctly.",
-        "ts2552": "Check that all referenced names are imported and spelled correctly.",
-        "ts2339": "Verify the property exists on the type — check the type definition, not just the runtime shape.",
-        "ts18": "Check for top-level await, missing async, or module resolution issues.",
-        "ts2307": "Fix import paths — check for typos, missing extensions, or incorrect aliases.",
-    }
-
-    for code, rule in rules.items():
-        if code in combined:
-            return rule
-
-    if "svelte" in check_name.lower():
-        return f"Run svelte-check before committing changes to {', '.join(tags[:3])} files."
-
-    return f"Run `pnpm {check_name.lower()}` check before committing to catch these errors early."
-
-
-def is_duplicate(ship_log: Path, error_key: str) -> bool:
-    if not ship_log.exists():
-        return False
-    today = datetime.now().strftime("%Y-%m-%d")
-    content = ship_log.read_text()
-    return today in content and error_key[:50] in content
-
-
-def append_lesson(project_root: Path, tags: list[str], check_name: str,
-                  errors: list[str], changed_files: list[str]):
-    ship_log = project_root / ".claude" / "logs" / "ship-log.md"
-
-    if not ship_log.exists():
-        ship_log.parent.mkdir(parents=True, exist_ok=True)
-        ship_log.write_text(
-            "# Ship Log\n\n"
-            "<!-- 🚀 = shipped. 💡 = learned. Auto-maintained by hooks + CLAUDE.md. -->\n\n"
-        )
-
-    if is_duplicate(ship_log, errors[0]):
-        return
-
-    date = datetime.now().strftime("%Y-%m-%d")
-    tag_str = ", ".join(tags) if tags else "general"
-    files_str = ", ".join(changed_files[:3])
-    if len(changed_files) > 3:
-        files_str += f" (+{len(changed_files) - 3} more)"
-
-    if len(errors) == 1:
-        errors_str = errors[0]
-    else:
-        errors_str = "\n".join(f"  - `{e}`" for e in errors)
-
-    rule = infer_rule(check_name, errors, tags)
-
-    entry = (
-        f"## {date} | 💡 Lesson: {check_name} failure in {files_str}\n\n"
-        f"**What broke:** {errors_str}\n\n"
-        f"**Rule:** {rule}\n\n"
-        f"**Tags:** {tag_str}\n\n"
-        f"---\n\n"
-    )
-
-    with open(ship_log, "a") as f:
-        f.write(entry)
-
-
 # ── Background worker ───────────────────────────────────────────────
 
 
 def do_work():
-    """Run checks, write results file, and append lessons on failure."""
+    """Run checks and write results file."""
     project_root = find_project_root()
     if not project_root:
         return
@@ -273,27 +128,11 @@ def do_work():
     if not checks:
         return
 
-    # Run all checks (once, shared results)
     results = [run_check(name, cmd, project_root, timeout) for name, cmd, timeout in checks]
 
-    # Write verification results to project-local file (readable next session)
     output = format_results(results)
     if output:
-        verify_file = project_root / ".claude" / "logs" / "last-verify.txt"
-        verify_file.parent.mkdir(parents=True, exist_ok=True)
-        verify_file.write_text(output)
-
-    # Write lessons for any failures
-    failed = [r for r in results if not r["success"] and r.get("error") != "Command not found"]
-    if failed:
-        changed_files = get_changed_files(project_root)
-        for check in failed:
-            raw_output = (check.get("stderr") or check.get("stdout", "")).strip()
-            errors = extract_meaningful_errors(raw_output)
-            if not errors:
-                continue
-            tags = infer_tags(changed_files, raw_output)
-            append_lesson(project_root, tags, check["name"], errors, changed_files)
+        print(output)
 
 
 # ── Main ─────────────────────────────────────────────────────────────
@@ -306,8 +145,7 @@ def main():
     except (json.JSONDecodeError, EOFError):
         pass
 
-    # Launch background subprocess (cross-platform, replaces os.fork)
-    # The child runs this same script with --background flag
+    # Launch background subprocess so Stop event is not blocked
     subprocess.Popen(
         [sys.executable, __file__, "--background"],
         stdin=subprocess.DEVNULL,
@@ -315,7 +153,6 @@ def main():
         stderr=subprocess.DEVNULL,
         start_new_session=True,
     )
-    # Parent exits immediately so Stop event is not blocked
     sys.exit(0)
 
 

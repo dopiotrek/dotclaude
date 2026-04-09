@@ -128,17 +128,7 @@ Transparently rewrites CLI commands to RTK equivalents for 60-90% token savings:
 
 Skips silently if `rtk` or `jq` are not installed.
 
-### Context & Learning
-
-#### `lessons-loader.py`
-
-**Event:** UserPromptSubmit
-
-Injects relevant past lessons into every prompt:
-
-- Reads `.claude/logs/ship-log.md` for lesson entries
-- Matches tags against current prompt keywords
-- Returns top 5 relevant lessons (max 300 chars each)
+### Verification
 
 #### `stop-verify-and-log.py`
 
@@ -151,7 +141,7 @@ Runs verification checks in background when Claude completes work:
 - Python: `mypy .`
 - Rust: `cargo check`
 
-Results saved to `.claude/logs/last-verify.txt`. Failures auto-append lessons to `.claude/logs/ship-log.md`.
+Results are printed to stdout so Claude sees them immediately.
 
 ### Dependencies
 

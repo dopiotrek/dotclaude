@@ -1,13 +1,8 @@
 {
-  "statusLine": {
-    "type": "command",
-    "command": "bash $HOME/.claude/scripts/statusline.sh"
-  },
   "fileSuggestion": {
     "type": "command",
     "command": "$HOME/.claude/scripts/file-suggest.sh"
   },
-  "autoMemoryDirectory": ".claude/memory",
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "claude-opus-4-6[1m]",
@@ -142,7 +137,7 @@
     ],
     "defaultMode": "default"
   },
-  "model": "opus",
+  "model": "sonnet",
   "hooks": {
     "SessionStart": [
       {
@@ -166,17 +161,6 @@
         ]
       }
     ],
-    "UserPromptSubmit": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/lessons-loader.py"
-          }
-        ]
-      }
-    ],
     "Stop": [
       {
         "matcher": "*",
@@ -195,7 +179,6 @@
     "PreToolUse": [
       {
         "matcher": "Bash",
-        "if": "Bash(git *)|Bash(gh *)|Bash(cargo *)|Bash(pnpm *)|Bash(npx *)|Bash(vitest *)|Bash(tsc *)|Bash(svelte-check *)|Bash(eslint *)|Bash(prettier *)|Bash(lint *)|Bash(playwright *)|Bash(prisma *)|Bash(docker *)|Bash(kubectl *)|Bash(curl *)|Bash(pytest *)|Bash(python -m pytest *)|Bash(ruff *)|Bash(pip *)|Bash(uv *)|Bash(go *)|Bash(golangci-lint *)|Bash(cat *)|Bash(rg *)|Bash(grep *)|Bash(ls *)",
         "hooks": [
           {
             "type": "command",
@@ -214,7 +197,6 @@
       },
       {
         "matcher": "Write|Edit|MultiEdit",
-        "if": "Write(*.sql)|Edit(*.sql)|MultiEdit(*.sql)|Write(**/migrations/**)|Edit(**/migrations/**)|MultiEdit(**/migrations/**)|Write(**/schema*)|Edit(**/schema*)|MultiEdit(**/schema*)",
         "hooks": [
           {
             "type": "command",
@@ -228,7 +210,6 @@
       },
       {
         "matcher": "Write|Edit|MultiEdit",
-        "if": "Write(*.ts)|Write(*.svelte)|Write(*.js)|Edit(*.ts)|Edit(*.svelte)|Edit(*.js)|MultiEdit(*.ts)|MultiEdit(*.svelte)|MultiEdit(*.js)",
         "hooks": [
           {
             "type": "command",
@@ -238,7 +219,6 @@
       },
       {
         "matcher": "Write|Edit|MultiEdit",
-        "if": "Write(**/routes/**)|Edit(**/routes/**)|MultiEdit(**/routes/**)",
         "hooks": [
           {
             "type": "command",
@@ -259,7 +239,6 @@
       },
       {
         "matcher": "Write|Edit|MultiEdit",
-        "if": "Write(**/package.json)|Edit(**/package.json)|Write(**/requirements.txt)|Edit(**/requirements.txt)|Write(**/Cargo.toml)|Edit(**/Cargo.toml)|Write(**/Gemfile)|Edit(**/Gemfile)",
         "hooks": [
           {
             "type": "command",
@@ -269,7 +248,6 @@
       },
       {
         "matcher": "Bash",
-        "if": "Bash(pnpm build *)|Bash(pnpm check *)|Bash(vite build *)",
         "hooks": [
           {
             "type": "command",
@@ -297,7 +275,13 @@
       }
     ]
   },
+  "statusLine": {
+    "type": "command",
+    "command": "bash $HOME/.claude/scripts/statusline.sh"
+  },
   "enabledPlugins": {
     "backend-development@claude-code-workflows": true
-  }
+  },
+  "autoMemoryDirectory": ".claude/memory",
+  "skipDangerousModePermissionPrompt": true
 }

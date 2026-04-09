@@ -65,5 +65,4 @@ Name files descriptively: `auth-flow.md`, `homepage-seo-audit.md`. No metadata f
 
 ## Workflow
 
-@workflow/ship-log.md
 @workflow/tmux-tasks.md
