@@ -118,9 +118,24 @@ def format_results(results: list[dict]) -> str:
 # ── Background worker ───────────────────────────────────────────────
 
 
+def send_notification(title: str, message: str) -> None:
+    """Send a macOS notification via osascript."""
+    try:
+        subprocess.run(
+            ["osascript", "-e", f'display notification "{message}" with title "{title}"'],
+            timeout=5, capture_output=True,
+        )
+    except Exception:
+        pass
+
+
 def do_work():
     """Run checks and write results file."""
     project_root = find_project_root()
+
+    # Always notify when Claude stops, regardless of checks
+    send_notification("Claude", "Done ✓")
+
     if not project_root:
         return
 

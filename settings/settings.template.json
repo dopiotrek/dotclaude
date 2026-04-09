@@ -1,5 +1,9 @@
 {
   "skipDangerousModePermissionPrompt": true,
+  "statusLine": {
+    "type": "command",
+    "command": "$HOME/.claude/scripts/statusline.sh"
+  },
   "hooks": {
     "PreToolUse": [
       {
