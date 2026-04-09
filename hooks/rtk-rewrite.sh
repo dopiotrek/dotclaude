@@ -25,8 +25,14 @@ if [[ "$CMD" =~ $CD_REGEX ]]; then
   CMD="${CMD:${#CD_PREFIX}}"
 fi
 
-# Extract the first meaningful command (before pipes, &&, etc.)
-# We only rewrite if the FIRST command in a chain matches.
+# Strip leading env var assignments (e.g., NODE_OPTIONS='...' pnpm check)
+ENV_PREFIX=""
+ENV_REGEX='^([A-Z_]+=[^ ]+ )+'
+if [[ "$CMD" =~ $ENV_REGEX ]]; then
+  ENV_PREFIX="${BASH_REMATCH[0]}"
+  CMD="${CMD:${#ENV_PREFIX}}"
+fi
+
 FIRST_CMD="$CMD"
 
 # Skip if already using rtk
@@ -34,7 +40,7 @@ case "$FIRST_CMD" in
   rtk\ *|*/rtk\ *) exit 0 ;;
 esac
 
-# Skip commands with heredocs, variable assignments as the whole command, etc.
+# Skip commands with heredocs
 case "$FIRST_CMD" in
   *'<<'*) exit 0 ;;
 esac
@@ -42,70 +48,46 @@ esac
 REWRITTEN=""
 
 # --- Git commands ---
-if echo "$FIRST_CMD" | grep -qE '^git\s+status(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed 's/^git status/rtk git status/')
-elif echo "$FIRST_CMD" | grep -qE '^git\s+diff(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed 's/^git diff/rtk git diff/')
-elif echo "$FIRST_CMD" | grep -qE '^git\s+log(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed 's/^git log/rtk git log/')
-elif echo "$FIRST_CMD" | grep -qE '^git\s+add(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed 's/^git add/rtk git add/')
-elif echo "$FIRST_CMD" | grep -qE '^git\s+commit(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed 's/^git commit/rtk git commit/')
-elif echo "$FIRST_CMD" | grep -qE '^git\s+push(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed 's/^git push/rtk git push/')
-elif echo "$FIRST_CMD" | grep -qE '^git\s+pull(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed 's/^git pull/rtk git pull/')
-elif echo "$FIRST_CMD" | grep -qE '^git\s+branch(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed 's/^git branch/rtk git branch/')
-elif echo "$FIRST_CMD" | grep -qE '^git\s+fetch(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed 's/^git fetch/rtk git fetch/')
-elif echo "$FIRST_CMD" | grep -qE '^git\s+stash(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed 's/^git stash/rtk git stash/')
-elif echo "$FIRST_CMD" | grep -qE '^git\s+show(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed 's/^git show/rtk git show/')
+if echo "$FIRST_CMD" | grep -qE '^git\s+(status|diff|log|add|commit|push|pull|branch|fetch|stash|show)(\s|$)'; then
+  REWRITTEN=$(echo "$CMD" | sed 's/^git /rtk git /')
 
 # --- GitHub CLI ---
 elif echo "$FIRST_CMD" | grep -qE '^gh\s+(pr|issue|run)(\s|$)'; then
   REWRITTEN=$(echo "$CMD" | sed 's/^gh /rtk gh /')
 
 # --- Cargo ---
-elif echo "$FIRST_CMD" | grep -qE '^cargo\s+test(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed 's/^cargo test/rtk cargo test/')
-elif echo "$FIRST_CMD" | grep -qE '^cargo\s+build(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed 's/^cargo build/rtk cargo build/')
-elif echo "$FIRST_CMD" | grep -qE '^cargo\s+clippy(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed 's/^cargo clippy/rtk cargo clippy/')
+elif echo "$FIRST_CMD" | grep -qE '^cargo\s+(test|build|clippy|check)(\s|$)'; then
+  REWRITTEN=$(echo "$CMD" | sed 's/^cargo /rtk cargo /')
 
 # --- File operations ---
-elif echo "$FIRST_CMD" | grep -qE '^cat\s+'; then
-  REWRITTEN=$(echo "$CMD" | sed 's/^cat /rtk read /')
-elif echo "$FIRST_CMD" | grep -qE '^(rg|grep)\s+'; then
-  REWRITTEN=$(echo "$CMD" | sed -E 's/^(rg|grep) /rtk grep /')
+elif echo "$FIRST_CMD" | grep -qE '^cat(\s|$)'; then
+  REWRITTEN=$(echo "$CMD" | sed 's/^cat/rtk read/')
+elif echo "$FIRST_CMD" | grep -qE '^(rg|grep)(\s|$)'; then
+  REWRITTEN=$(echo "$CMD" | sed -E 's/^(rg|grep)/rtk grep/')
 elif echo "$FIRST_CMD" | grep -qE '^ls(\s|$)'; then
   REWRITTEN=$(echo "$CMD" | sed 's/^ls/rtk ls/')
 
-# --- JS/TS tooling ---
-elif echo "$FIRST_CMD" | grep -qE '^(pnpm\s+)?vitest(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed -E 's/^(pnpm )?vitest/rtk vitest run/')
+# --- JS/TS tooling (npx, pnpm, bare) ---
+elif echo "$FIRST_CMD" | grep -qE '^(npx\s+|pnpm\s+)?vitest(\s|$)'; then
+  REWRITTEN=$(echo "$CMD" | sed -E 's/^(npx |pnpm )?vitest/rtk vitest run/')
 elif echo "$FIRST_CMD" | grep -qE '^pnpm\s+test(\s|$)'; then
   REWRITTEN=$(echo "$CMD" | sed 's/^pnpm test/rtk vitest run/')
-elif echo "$FIRST_CMD" | grep -qE '^pnpm\s+tsc(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed 's/^pnpm tsc/rtk tsc/')
-elif echo "$FIRST_CMD" | grep -qE '^(npx\s+)?tsc(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed -E 's/^(npx )?tsc/rtk tsc/')
-elif echo "$FIRST_CMD" | grep -qE '^pnpm\s+lint(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed 's/^pnpm lint/rtk lint/')
-elif echo "$FIRST_CMD" | grep -qE '^(npx\s+)?eslint(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed -E 's/^(npx )?eslint/rtk lint/')
-elif echo "$FIRST_CMD" | grep -qE '^(npx\s+)?prettier(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed -E 's/^(npx )?prettier/rtk prettier/')
-elif echo "$FIRST_CMD" | grep -qE '^(npx\s+)?playwright(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed -E 's/^(npx )?playwright/rtk playwright/')
-elif echo "$FIRST_CMD" | grep -qE '^pnpm\s+playwright(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed 's/^pnpm playwright/rtk playwright/')
+elif echo "$FIRST_CMD" | grep -qE '^(npx\s+|pnpm\s+)?tsc(\s|$)'; then
+  REWRITTEN=$(echo "$CMD" | sed -E 's/^(npx |pnpm )?tsc/rtk tsc/')
+elif echo "$FIRST_CMD" | grep -qE '^(npx\s+|pnpm\s+)?svelte-check(\s|$)'; then
+  REWRITTEN=$(echo "$CMD" | sed -E 's/^(npx |pnpm )?svelte-check/rtk svelte-check/')
+elif echo "$FIRST_CMD" | grep -qE '^(pnpm\s+)?lint(\s|$)'; then
+  REWRITTEN=$(echo "$CMD" | sed -E 's/^(pnpm )?lint/rtk lint/')
+elif echo "$FIRST_CMD" | grep -qE '^(npx\s+|pnpm\s+)?eslint(\s|$)'; then
+  REWRITTEN=$(echo "$CMD" | sed -E 's/^(npx |pnpm )?eslint/rtk lint/')
+elif echo "$FIRST_CMD" | grep -qE '^(npx\s+|pnpm\s+)?prettier(\s|$)'; then
+  REWRITTEN=$(echo "$CMD" | sed -E 's/^(npx |pnpm )?prettier/rtk prettier/')
+elif echo "$FIRST_CMD" | grep -qE '^(npx\s+|pnpm\s+)?playwright(\s|$)'; then
+  REWRITTEN=$(echo "$CMD" | sed -E 's/^(npx |pnpm )?playwright/rtk playwright/')
 elif echo "$FIRST_CMD" | grep -qE '^(npx\s+)?prisma(\s|$)'; then
   REWRITTEN=$(echo "$CMD" | sed -E 's/^(npx )?prisma/rtk prisma/')
+elif echo "$FIRST_CMD" | grep -qE '^pnpm\s+install(\s|$)'; then
+  REWRITTEN=$(echo "$CMD" | sed 's/^pnpm install/rtk pnpm install/')
 
 # --- Containers ---
 elif echo "$FIRST_CMD" | grep -qE '^docker\s+(ps|images|logs)(\s|$)'; then
@@ -122,10 +104,8 @@ elif echo "$FIRST_CMD" | grep -qE '^pnpm\s+(list|ls|outdated)(\s|$)'; then
   REWRITTEN=$(echo "$CMD" | sed 's/^pnpm /rtk pnpm /')
 
 # --- Python tooling ---
-elif echo "$FIRST_CMD" | grep -qE '^pytest(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed 's/^pytest/rtk pytest/')
-elif echo "$FIRST_CMD" | grep -qE '^python\s+-m\s+pytest(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed 's/^python -m pytest/rtk pytest/')
+elif echo "$FIRST_CMD" | grep -qE '^(python\s+-m\s+)?pytest(\s|$)'; then
+  REWRITTEN=$(echo "$CMD" | sed -E 's/^(python -m )?pytest/rtk pytest/')
 elif echo "$FIRST_CMD" | grep -qE '^ruff\s+(check|format)(\s|$)'; then
   REWRITTEN=$(echo "$CMD" | sed 's/^ruff /rtk ruff /')
 elif echo "$FIRST_CMD" | grep -qE '^pip\s+(list|outdated|install|show)(\s|$)'; then
@@ -134,17 +114,16 @@ elif echo "$FIRST_CMD" | grep -qE '^uv\s+pip\s+(list|outdated|install|show)(\s|$
   REWRITTEN=$(echo "$CMD" | sed 's/^uv pip /rtk pip /')
 
 # --- Go tooling ---
-elif echo "$FIRST_CMD" | grep -qE '^go\s+test(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed 's/^go test/rtk go test/')
-elif echo "$FIRST_CMD" | grep -qE '^go\s+build(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed 's/^go build/rtk go build/')
-elif echo "$FIRST_CMD" | grep -qE '^go\s+vet(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed 's/^go vet/rtk go vet/')
+elif echo "$FIRST_CMD" | grep -qE '^go\s+(test|build|vet)(\s|$)'; then
+  REWRITTEN=$(echo "$CMD" | sed 's/^go /rtk go /')
 elif echo "$FIRST_CMD" | grep -qE '^golangci-lint(\s|$)'; then
   REWRITTEN=$(echo "$CMD" | sed 's/^golangci-lint/rtk golangci-lint/')
 fi
 
-# Prepend cd prefix if it was stripped
+# Prepend env vars and cd prefix if they were stripped
+if [ -n "$ENV_PREFIX" ] && [ -n "$REWRITTEN" ]; then
+  REWRITTEN="${ENV_PREFIX}${REWRITTEN}"
+fi
 if [ -n "$CD_PREFIX" ] && [ -n "$REWRITTEN" ]; then
   REWRITTEN="${CD_PREFIX}${REWRITTEN}"
 fi

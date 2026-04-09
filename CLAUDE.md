@@ -51,6 +51,12 @@ All agents write documentation to `.docs/` in the project root. Two directories:
 
 Name files descriptively: `auth-flow.md`, `homepage-seo-audit.md`. No metadata files, no progress tracking.
 
+## Token Optimization
+
+- Always prefix CLI commands with `rtk` when available: `rtk git log`, `rtk ls`, `rtk read file`, `rtk grep pattern`
+- Use `rtk` for: git, gh, cat, ls, grep, rg, curl, docker, pnpm, vitest, tsc, svelte-check, eslint, prettier, playwright, cargo, pytest
+- RTK compresses verbose output before it enters context — 60-90% token savings
+
 ## Systems
 
 @RTK.md
