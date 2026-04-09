@@ -169,9 +169,12 @@ echo ""
 # 4. Generate settings.json from template
 print_step "Generating settings.json..."
 if [ -f "$SCRIPT_DIR/settings/settings.template.json" ]; then
-    # Replace $HOME with actual home directory
-    sed "s|\\\$HOME|$HOME|g" "$SCRIPT_DIR/settings/settings.template.json" > "$CLAUDE_DIR/settings.json"
-    print_success "settings.json generated with your \$HOME path"
+    # Remove any existing symlink so we write a real file, not back through the symlink
+    rm -f "$CLAUDE_DIR/settings.json"
+    # Read template into variable first, then write — avoids clobbering src via symlink
+    SETTINGS_CONTENT=$(sed "s|\\\$HOME|$HOME|g" "$SCRIPT_DIR/settings/settings.template.json")
+    echo "$SETTINGS_CONTENT" > "$CLAUDE_DIR/settings.json"
+    print_success "settings.json generated at $CLAUDE_DIR/settings.json"
 else
     print_warning "settings.template.json not found, skipping settings generation"
 fi
