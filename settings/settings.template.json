@@ -1,3 +1,100 @@
 {
-  "skipDangerousModePermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true,
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/no-secrets.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "if": "Write(*.ts)|Write(*.js)|Write(*.svelte)|Edit(*.ts)|Edit(*.js)|Edit(*.svelte)|MultiEdit(*.ts)|MultiEdit(*.js)|MultiEdit(*.svelte)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/import-path-validator.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "if": "Write(*routes*)|Edit(*routes*)|MultiEdit(*routes*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/sveltekit-route-validator.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "if": "Write(*.sql)|Edit(*.sql)|MultiEdit(*.sql)|Write(*migrations*)|Edit(*migrations*)|MultiEdit(*migrations*)|Write(*schema*)|Edit(*schema*)|MultiEdit(*schema*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/drizzle-migration-guard.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/supabase-rls-reminder.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/rtk-rewrite.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/auto-format.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "if": "Write(package.json)|Edit(package.json)|MultiEdit(package.json)|Write(requirements.txt)|Edit(requirements.txt)|Write(Cargo.toml)|Edit(Cargo.toml)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/dependency-audit.py"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "if": "Bash(*pnpm build*)|Bash(*vite build*)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/sveltekit-perf-guard.py"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/stop-verify-and-log.py"
+          }
+        ]
+      }
+    ]
+  }
 }
