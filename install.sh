@@ -182,8 +182,6 @@ chmod +x "$SCRIPT_DIR/hooks/"*.py 2>/dev/null || true
 chmod +x "$SCRIPT_DIR/scripts/"*.sh 2>/dev/null || true
 print_success "Hook scripts marked as executable"
 
-# 6. Create logs directory
-mkdir -p "$CLAUDE_DIR/logs"
 
 echo ""
 echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
