@@ -2,8 +2,9 @@
 
 ## About Me
 
-- Primary stack: SvelteKit, TypeScript, Supabase
+- Primary stack: SvelteKit, Svelte 5 (runes), TypeScript, Supabase, Drizzle ORM
 - All projects use pnpm (never npm or yarn)
+- Always use Svelte 5 runes syntax ($state, $derived, $effect) — never Svelte 4 stores or reactive declarations ($:, writable, derived)
 
 ## Communication Style
 
@@ -53,6 +54,7 @@ Name files descriptively: `auth-flow.md`, `homepage-seo-audit.md`. No metadata f
 
 ## Token Optimization
 
+# requires @RTK.md to be loaded — if missing, skip rtk prefix and use commands directly
 - Always prefix CLI commands with `rtk` when available: `rtk git log`, `rtk ls`, `rtk read file`, `rtk grep pattern`
 - Use `rtk` for: git, gh, cat, ls, grep, rg, curl, docker, pnpm, vitest, tsc, svelte-check, eslint, prettier, playwright, cargo, pytest
 - RTK compresses verbose output before it enters context — 60-90% token savings
@@ -60,7 +62,6 @@ Name files descriptively: `auth-flow.md`, `homepage-seo-audit.md`. No metadata f
 ## Systems
 
 @RTK.md
-<!-- @.claude/concept.md — uncomment after filling in product details for dronelist.io -->
 
 ## Workflow
 
