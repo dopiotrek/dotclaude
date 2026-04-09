@@ -195,6 +195,7 @@
     "PreToolUse": [
       {
         "matcher": "Bash",
+        "if": "Bash(git *)|Bash(gh *)|Bash(cargo *)|Bash(pnpm *)|Bash(vitest *)|Bash(tsc *)|Bash(eslint *)|Bash(prettier *)|Bash(docker *)|Bash(kubectl *)|Bash(curl *)|Bash(pytest *)|Bash(ruff *)|Bash(pip *)|Bash(go *)|Bash(cat *)|Bash(rg *)|Bash(grep *)|Bash(ls *)",
         "hooks": [
           {
             "type": "command",

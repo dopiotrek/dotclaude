@@ -5,6 +5,7 @@ description: >
 model: opus
 effort: high
 color: red
+isolation: worktree
 allowed-tools: ["Read", "Glob", "Grep", "Edit", "Write", "Bash"]
 ---
 

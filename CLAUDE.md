@@ -53,8 +53,8 @@ Name files descriptively: `auth-flow.md`, `homepage-seo-audit.md`. No metadata f
 
 ## Systems
 
-@.claude/concept.md
 @RTK.md
+<!-- @.claude/concept.md — uncomment after filling in product details for dronelist.io -->
 
 ## Workflow
 
