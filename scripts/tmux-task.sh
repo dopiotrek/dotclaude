@@ -28,16 +28,17 @@ case "$cmd" in
     tmux kill-session -t "$session" 2>/dev/null || true
 
     # Create detached session running the command
-    # Wrap in subshell that writes exit code to a marker file
+    # Tee output to a log file so `read` works even after the session exits
     marker="/tmp/tmux-task-${name}.done"
-    rm -f "$marker"
+    log="/tmp/tmux-task-${name}.log"
+    rm -f "$marker" "$log"
     tmux new-session -d -s "$session" -x 200 -y 50 \
-      "( $* ); echo \$? > $marker"
+      "( $* ) 2>&1 | tee $log; echo \${PIPESTATUS[0]} > $marker"
 
     echo "✅ Started: $session"
     echo "   Command: $*"
-    echo "   Check:   tmux-task.sh status $name"
-    echo "   Read:    tmux-task.sh read $name"
+    echo "   Check:   ~/.claude/scripts/tmux-task.sh status $name"
+    echo "   Read:    ~/.claude/scripts/tmux-task.sh read $name"
     ;;
 
   status)
@@ -63,11 +64,16 @@ case "$cmd" in
     name="${1:?Usage: tmux-task.sh read <name> [lines]}"
     lines="${2:-50}"
     session="${PREFIX}${name}"
+    log="/tmp/tmux-task-${name}.log"
 
     if tmux has-session -t "$session" 2>/dev/null; then
+      # Still running — capture live pane
       tmux capture-pane -t "$session" -p -S "-${lines}"
+    elif [ -f "$log" ]; then
+      # Session exited but log persists — tail it
+      tail -n "$lines" "$log"
     else
-      echo "No active session: $session"
+      echo "No output found for task: $name"
       exit 1
     fi
     ;;
@@ -86,8 +92,9 @@ case "$cmd" in
 
     if [ -f "$marker" ]; then
       code=$(cat "$marker")
-      # Capture final output
-      tmux capture-pane -t "$session" -p -S -100 2>/dev/null || true
+      # Print final output from log (works even if session already exited)
+      log="/tmp/tmux-task-${name}.log"
+      [ -f "$log" ] && tail -n 100 "$log" || tmux capture-pane -t "$session" -p -S -100 2>/dev/null || true
       exit "$code"
     else
       echo "⏰ Timeout after ${timeout}s"
@@ -99,7 +106,7 @@ case "$cmd" in
     name="${1:?Usage: tmux-task.sh kill <name>}"
     session="${PREFIX}${name}"
     tmux kill-session -t "$session" 2>/dev/null && echo "Killed: $session" || echo "No such session"
-    rm -f "/tmp/tmux-task-${name}.done"
+    rm -f "/tmp/tmux-task-${name}.done" "/tmp/tmux-task-${name}.log"
     ;;
 
   list)
