@@ -1,8 +1,8 @@
 # Tmux Background Tasks
 
-Use `tmux-task.sh` to run CLI tasks in background tmux sessions.
+Use `~/.claude/scripts/tmux-task.sh` to run CLI tasks in background tmux sessions.
 
-> **PATH requirement**: `~/.claude/scripts` must be on your PATH. `install.sh` adds this automatically. If the command isn't found, run `source ~/.zshrc` (or `~/.bashrc`) or re-run `install.sh`.
+> **Always use the full path** `~/.claude/scripts/tmux-task.sh` — Claude Code subshells do not source `.zshrc` and won't have `~/.claude/scripts` on PATH.
 
 ## When to Use
 
@@ -20,44 +20,44 @@ Use `tmux-task.sh` to run CLI tasks in background tmux sessions.
 ## Commands
 
 ```bash
-tmux-task.sh run <name> <command...>   # Spawn background task
-tmux-task.sh status <name>             # Check: running/done/failed
-tmux-task.sh read <name> [lines]       # Read output (default: last 50 lines)
-tmux-task.sh wait <name> [timeout]     # Block until done (default: 300s)
-tmux-task.sh kill <name>               # Kill a task
-tmux-task.sh list                      # List active tasks
+~/.claude/scripts/tmux-task.sh run <name> <command...>   # Spawn background task
+~/.claude/scripts/tmux-task.sh status <name>             # Check: running/done/failed
+~/.claude/scripts/tmux-task.sh read <name> [lines]       # Read output (default: last 50 lines)
+~/.claude/scripts/tmux-task.sh wait <name> [timeout]     # Block until done (default: 300s)
+~/.claude/scripts/tmux-task.sh kill <name>               # Kill a task
+~/.claude/scripts/tmux-task.sh list                      # List active tasks
 ```
 
 ## Patterns
 
 ### Parallel build + lint
 ```bash
-tmux-task.sh run build "cd $PROJECT && pnpm build"
-tmux-task.sh run check "cd $PROJECT && pnpm check"
+~/.claude/scripts/tmux-task.sh run build "cd $PROJECT && pnpm build"
+~/.claude/scripts/tmux-task.sh run check "cd $PROJECT && pnpm check"
 # ... do other work ...
-tmux-task.sh wait build && tmux-task.sh read build
-tmux-task.sh wait check && tmux-task.sh read check
+~/.claude/scripts/tmux-task.sh wait build && ~/.claude/scripts/tmux-task.sh read build
+~/.claude/scripts/tmux-task.sh wait check && ~/.claude/scripts/tmux-task.sh read check
 ```
 
 ### Delegate to Gemini CLI
 ```bash
-tmux-task.sh run gemini-review "gemini -m flash 'Review this file for bugs' < src/lib/auth.ts"
+~/.claude/scripts/tmux-task.sh run gemini-review "gemini -m flash 'Review this file for bugs' < src/lib/auth.ts"
 # ... continue working ...
-tmux-task.sh read gemini-review
+~/.claude/scripts/tmux-task.sh read gemini-review
 ```
 
 ### Persistent dev server
 ```bash
-tmux-task.sh run dev "cd $PROJECT && pnpm dev"
+~/.claude/scripts/tmux-task.sh run dev "cd $PROJECT && pnpm dev"
 # Server stays alive across tool calls
-tmux-task.sh read dev  # Check for errors
-tmux-task.sh kill dev  # When done
+~/.claude/scripts/tmux-task.sh read dev  # Check for errors
+~/.claude/scripts/tmux-task.sh kill dev  # When done
 ```
 
 ### GitHub operations
 ```bash
-tmux-task.sh run pr "gh pr create --fill --draft"
-tmux-task.sh wait pr && tmux-task.sh read pr
+~/.claude/scripts/tmux-task.sh run pr "gh pr create --fill --draft"
+~/.claude/scripts/tmux-task.sh wait pr && ~/.claude/scripts/tmux-task.sh read pr
 ```
 
 ## Rules
