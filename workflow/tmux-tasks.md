@@ -1,6 +1,8 @@
 # Tmux Background Tasks
 
-Use `~/.claude/scripts/tmux-task.sh` to run CLI tasks in background tmux sessions.
+Use `tmux-task.sh` to run CLI tasks in background tmux sessions.
+
+> **PATH requirement**: `~/.claude/scripts` must be on your PATH. `install.sh` adds this automatically. If the command isn't found, run `source ~/.zshrc` (or `~/.bashrc`) or re-run `install.sh`.
 
 ## When to Use
 

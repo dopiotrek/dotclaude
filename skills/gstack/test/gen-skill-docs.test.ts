@@ -213,11 +213,20 @@ describe('gen-skill-docs', () => {
     expect(browseTmpl).toContain('{{PREAMBLE}}');
   });
 
-  test('generated SKILL.md contains contributor mode check', () => {
+  test('generated SKILL.md contains operational self-improvement (replaced contributor mode)', () => {
     const content = fs.readFileSync(path.join(ROOT, 'SKILL.md'), 'utf-8');
-    expect(content).toContain('Contributor Mode');
-    expect(content).toContain('gstack_contributor');
-    expect(content).toContain('contributor-logs');
+    expect(content).not.toContain('Contributor Mode');
+    expect(content).not.toContain('gstack_contributor');
+    expect(content).not.toContain('contributor-logs');
+    expect(content).toContain('Operational Self-Improvement');
+    expect(content).toContain('gstack-learnings-log');
+    expect(content).toContain('gstack-learnings-search --limit 3');
+  });
+
+  test('generated SKILL.md with LEARNINGS_LOG contains operational type', () => {
+    // Check a skill that has LEARNINGS_LOG (e.g., review)
+    const content = fs.readFileSync(path.join(ROOT, 'review', 'SKILL.md'), 'utf-8');
+    expect(content).toContain('operational');
   });
 
   test('generated SKILL.md contains session awareness', () => {
@@ -232,11 +241,13 @@ describe('gen-skill-docs', () => {
     expect(content).toContain('git branch --show-current');
   });
 
-  test('tier 2+ skills contain ELI16 simplification rules (AskUserQuestion format)', () => {
+  test('tier 2+ skills contain ELI10 simplification rules (AskUserQuestion format)', () => {
     // Root SKILL.md is tier 1 (no AskUserQuestion format). Check a tier 2+ skill instead.
+    // v1.7.0.0 Pros/Cons format uses "ELI10 (ALWAYS)" rather than "Simplify (ELI10".
     const content = fs.readFileSync(path.join(ROOT, 'cso', 'SKILL.md'), 'utf-8');
-    expect(content).toContain('No raw function names');
+    expect(content).toContain('ELI10');
     expect(content).toContain('plain English');
+    expect(content).toContain('not function names');
   });
 
   test('tier 1 skills do NOT contain AskUserQuestion format', () => {
@@ -349,10 +360,17 @@ describe('gen-skill-docs', () => {
     const qaOnlyContent = fs.readFileSync(path.join(ROOT, 'qa-only', 'SKILL.md'), 'utf-8');
     expect(qaOnlyContent).toContain('Never fix bugs');
     expect(qaOnlyContent).toContain('NEVER fix anything');
-    // Should not have Edit, Glob, or Grep in allowed-tools
-    expect(qaOnlyContent).not.toMatch(/allowed-tools:[\s\S]*?Edit/);
-    expect(qaOnlyContent).not.toMatch(/allowed-tools:[\s\S]*?Glob/);
-    expect(qaOnlyContent).not.toMatch(/allowed-tools:[\s\S]*?Grep/);
+    // Should not have Edit, Glob, or Grep in allowed-tools.
+    // Scope to frontmatter (between the first two --- lines) — the body can
+    // legitimately mention these tool names in prose (e.g., Claude model
+    // overlay says "prefer Read, Edit, Write, Glob, Grep over Bash").
+    const fmMatch = qaOnlyContent.match(/^---\n([\s\S]*?)\n---/);
+    expect(fmMatch).not.toBeNull();
+    const frontmatter = fmMatch![1];
+    expect(frontmatter).toMatch(/allowed-tools:/);
+    expect(frontmatter).not.toMatch(/allowed-tools:[\s\S]*?- Edit/);
+    expect(frontmatter).not.toMatch(/allowed-tools:[\s\S]*?- Glob/);
+    expect(frontmatter).not.toMatch(/allowed-tools:[\s\S]*?- Grep/);
   });
 
   test('qa has fix-loop tools and phases', () => {
@@ -740,6 +758,22 @@ describe('TEST_COVERAGE_AUDIT placeholders', () => {
       expect(shipSkill).toContain(phrase);
     }
   });
+
+  test('ship SKILL.md contains review army specialist dispatch', () => {
+    expect(shipSkill).toContain('Specialist Dispatch');
+    expect(shipSkill).toContain('Step 9.1');
+    expect(shipSkill).toContain('Step 9.2');
+  });
+
+  test('ship SKILL.md contains cross-review finding dedup', () => {
+    expect(shipSkill).toContain('Cross-review finding dedup');
+    expect(shipSkill).toContain('Step 9.3');
+  });
+
+  test('ship SKILL.md contains re-run idempotency behavior', () => {
+    expect(shipSkill).toContain('Re-run behavior (idempotency)');
+    expect(shipSkill).toContain('Never skip a verification step');
+  });
 });
 
 // --- {{TEST_FAILURE_TRIAGE}} resolver tests ---
@@ -814,7 +848,7 @@ describe('PLAN_COMPLETION_AUDIT placeholders', () => {
 
   test('ship SKILL.md contains plan completion audit step', () => {
     expect(shipSkill).toContain('Plan Completion Audit');
-    expect(shipSkill).toContain('Step 3.45');
+    expect(shipSkill).toContain('Step 8');
   });
 
   test('review SKILL.md contains plan completion in scope drift', () => {
@@ -863,7 +897,7 @@ describe('PLAN_VERIFICATION_EXEC placeholder', () => {
   const shipSkill = fs.readFileSync(path.join(ROOT, 'ship', 'SKILL.md'), 'utf-8');
 
   test('ship SKILL.md contains plan verification step', () => {
-    expect(shipSkill).toContain('Step 3.47');
+    expect(shipSkill).toContain('Step 8.1');
     expect(shipSkill).toContain('Plan Verification');
   });
 
@@ -921,7 +955,7 @@ describe('Ship metrics logging', () => {
   const shipSkill = fs.readFileSync(path.join(ROOT, 'ship', 'SKILL.md'), 'utf-8');
 
   test('ship SKILL.md contains metrics persistence step', () => {
-    expect(shipSkill).toContain('Step 8.75');
+    expect(shipSkill).toContain('Step 20');
     expect(shipSkill).toContain('coverage_pct');
     expect(shipSkill).toContain('plan_items_total');
     expect(shipSkill).toContain('plan_items_done');
@@ -976,6 +1010,18 @@ describe('Plan status footer in preamble', () => {
     expect(content).toContain('gstack-review-read');
     expect(content).toContain('ExitPlanMode');
     expect(content).toContain('NO REVIEWS YET');
+  });
+});
+
+// --- Skill invocation during plan mode in preamble ---
+
+describe('Skill invocation during plan mode in preamble', () => {
+  test('preamble contains skill invocation plan mode section', () => {
+    const content = fs.readFileSync(path.join(ROOT, 'office-hours', 'SKILL.md'), 'utf-8');
+    expect(content).toContain('Skill Invocation During Plan Mode');
+    expect(content).toContain('precedence over generic plan mode behavior');
+    expect(content).toContain('Do not continue the workflow');
+    expect(content).toContain('cancel the skill or leave plan mode');
   });
 });
 
@@ -1317,10 +1363,21 @@ describe('preamble routing injection', () => {
   });
 
   test('routing section content includes key routing rules', () => {
-    expect(shipContent).toContain('invoke office-hours');
-    expect(shipContent).toContain('invoke investigate');
-    expect(shipContent).toContain('invoke ship');
-    expect(shipContent).toContain('invoke qa');
+    expect(shipContent).toContain('invoke /office-hours');
+    expect(shipContent).toContain('invoke /investigate');
+    expect(shipContent).toContain('invoke /ship');
+    expect(shipContent).toContain('invoke /qa');
+  });
+
+  test('routing section uses renamed checkpoint skills (not stale /checkpoint)', () => {
+    expect(shipContent).toContain('invoke /context-save');
+    expect(shipContent).toContain('invoke /context-restore');
+    expect(shipContent).not.toContain('invoke checkpoint');
+  });
+
+  test('routing section uses soft "when in doubt" policy, not hard "ALWAYS invoke"', () => {
+    expect(shipContent).toContain('When in doubt, invoke the skill');
+    expect(shipContent).not.toContain('Do NOT answer directly');
   });
 });
 
@@ -1718,7 +1775,13 @@ describe('Codex generation (--host codex)', () => {
   test('Claude output unchanged: all Claude skills have zero Codex paths', () => {
     for (const skill of ALL_SKILLS) {
       const content = fs.readFileSync(path.join(ROOT, skill.dir, 'SKILL.md'), 'utf-8');
-      expect(content).not.toContain('~/.codex/');
+      // pair-agent legitimately documents how Codex agents store credentials.
+      // codex + autoplan document the Codex CLI auth file (~/.codex/auth.json)
+      // and log path (~/.codex/logs/) — those are user-facing Codex CLI paths,
+      // not the gstack Codex host install path.
+      if (skill.dir !== 'pair-agent' && skill.dir !== 'codex' && skill.dir !== 'autoplan') {
+        expect(content).not.toContain('~/.codex/');
+      }
       // gstack-upgrade legitimately references .agents/skills for cross-platform detection
       if (skill.dir !== 'gstack-upgrade') {
         expect(content).not.toContain('.agents/skills');
@@ -1877,19 +1940,95 @@ describe('Factory generation (--host factory)', () => {
   });
 });
 
+// ─── Parameterized host smoke tests (config-driven) ─────────
+
+import { ALL_HOST_CONFIGS, getExternalHosts } from '../hosts/index';
+
+describe('Parameterized host smoke tests', () => {
+  for (const hostConfig of getExternalHosts()) {
+    describe(`${hostConfig.displayName} (--host ${hostConfig.name})`, () => {
+      const hostDir = path.join(ROOT, hostConfig.hostSubdir, 'skills');
+
+      test('generates output that exists on disk', () => {
+        // Generated dir should exist (created by earlier bun run gen:skill-docs --host all)
+        if (!fs.existsSync(hostDir)) {
+          // Generate if not already done
+          Bun.spawnSync(['bun', 'run', 'scripts/gen-skill-docs.ts', '--host', hostConfig.name], {
+            cwd: ROOT, stdout: 'pipe', stderr: 'pipe',
+          });
+        }
+        expect(fs.existsSync(hostDir)).toBe(true);
+        const skills = fs.readdirSync(hostDir).filter(d =>
+          fs.existsSync(path.join(hostDir, d, 'SKILL.md'))
+        );
+        expect(skills.length).toBeGreaterThan(0);
+      });
+
+      test('no .claude/skills path leakage in non-root skills', () => {
+        if (!fs.existsSync(hostDir)) return; // skip if not generated
+        const skills = fs.readdirSync(hostDir);
+        for (const skill of skills) {
+          // Skip root gstack skill — it contains preamble with intentional .claude/skills
+          // fallback paths for binary lookup and skill prefix instructions
+          if (skill === 'gstack') continue;
+          const skillMd = path.join(hostDir, skill, 'SKILL.md');
+          if (!fs.existsSync(skillMd)) continue;
+          const content = fs.readFileSync(skillMd, 'utf-8');
+          // Strip bash blocks (which have legitimate fallback paths)
+          const noBash = content.replace(/```bash\n[\s\S]*?```/g, '');
+          const leaks = noBash.split('\n').filter(l => l.includes('.claude/skills'));
+          if (leaks.length > 0) {
+            throw new Error(`${skill}: .claude/skills leakage:\n${leaks.slice(0, 3).join('\n')}`);
+          }
+        }
+      });
+
+      test('frontmatter has name and description', () => {
+        if (!fs.existsSync(hostDir)) return;
+        const skills = fs.readdirSync(hostDir);
+        for (const skill of skills) {
+          const skillMd = path.join(hostDir, skill, 'SKILL.md');
+          if (!fs.existsSync(skillMd)) continue;
+          const content = fs.readFileSync(skillMd, 'utf-8');
+          expect(content).toMatch(/^---\n/);
+          expect(content).toMatch(/^name:\s/m);
+          expect(content).toMatch(/^description:\s/m);
+        }
+      });
+
+      test('--dry-run freshness check passes', () => {
+        const result = Bun.spawnSync(
+          ['bun', 'run', 'scripts/gen-skill-docs.ts', '--host', hostConfig.name, '--dry-run'],
+          { cwd: ROOT, stdout: 'pipe', stderr: 'pipe' }
+        );
+        expect(result.exitCode).toBe(0);
+        const output = result.stdout.toString();
+        expect(output).not.toContain('STALE');
+      });
+
+      if (hostConfig.generation.skipSkills?.includes('codex')) {
+        test('/codex skill excluded', () => {
+          expect(fs.existsSync(path.join(hostDir, 'gstack-codex', 'SKILL.md'))).toBe(false);
+        });
+      }
+    });
+  }
+});
+
 // ─── --host all tests ────────────────────────────────────────
 
 describe('--host all', () => {
-  test('--host all generates for claude, codex, and factory', () => {
+  test('--host all generates for all registered hosts', () => {
     const result = Bun.spawnSync(['bun', 'run', 'scripts/gen-skill-docs.ts', '--host', 'all', '--dry-run'], {
       cwd: ROOT, stdout: 'pipe', stderr: 'pipe',
     });
     expect(result.exitCode).toBe(0);
     const output = result.stdout.toString();
-    // All three hosts should appear in output
+    // All hosts should appear in output
     expect(output).toContain('FRESH: SKILL.md');           // claude
-    expect(output).toContain('FRESH: .agents/skills/');     // codex
-    expect(output).toContain('FRESH: .factory/skills/');    // factory
+    for (const hostConfig of getExternalHosts()) {
+      expect(output).toContain(`FRESH: ${hostConfig.hostSubdir}/skills/`);
+    }
   });
 });
 
@@ -1960,24 +2099,55 @@ describe('setup script validation', () => {
     expect(fnBody).toContain('gstack*');
   });
 
-  test('link_claude_skill_dirs creates relative symlinks', () => {
-    // Claude links should be relative: ln -snf "gstack/$dir_name"
-    // Uses dir_name (not skill_name) because symlink target must point to the physical directory
+  test('link_claude_skill_dirs creates real directories with absolute SKILL.md symlinks', () => {
+    // Claude links should be real directories with absolute SKILL.md symlinks
+    // to ensure Claude Code discovers them as top-level skills (not nested under gstack/)
     const fnStart = setupContent.indexOf('link_claude_skill_dirs()');
     const fnEnd = setupContent.indexOf('}', setupContent.indexOf('linked[@]}', fnStart));
     const fnBody = setupContent.slice(fnStart, fnEnd);
-    expect(fnBody).toContain('ln -snf "gstack/$dir_name"');
+    expect(fnBody).toContain('mkdir -p "$target"');
+    expect(fnBody).toContain('ln -snf "$gstack_dir/$dir_name/SKILL.md" "$target/SKILL.md"');
   });
 
-  test('setup supports --host auto|claude|codex|kiro', () => {
+  // REGRESSION: cleanup functions must handle both old symlinks AND new real-directory pattern
+  test('cleanup functions handle real directories with symlinked SKILL.md', () => {
+    // cleanup_old_claude_symlinks must detect and remove real dirs with SKILL.md symlinks
+    const cleanupOldStart = setupContent.indexOf('cleanup_old_claude_symlinks()');
+    const cleanupOldEnd = setupContent.indexOf('}', setupContent.indexOf('cleaned up old', cleanupOldStart));
+    const cleanupOldBody = setupContent.slice(cleanupOldStart, cleanupOldEnd);
+    expect(cleanupOldBody).toContain('-d "$old_target"');
+    expect(cleanupOldBody).toContain('-L "$old_target/SKILL.md"');
+    expect(cleanupOldBody).toContain('rm -rf "$old_target"');
+
+    // cleanup_prefixed_claude_symlinks must also handle the new pattern
+    const cleanupPrefixedStart = setupContent.indexOf('cleanup_prefixed_claude_symlinks()');
+    const cleanupPrefixedEnd = setupContent.indexOf('}', setupContent.indexOf('cleaned up prefixed', cleanupPrefixedStart));
+    const cleanupPrefixedBody = setupContent.slice(cleanupPrefixedStart, cleanupPrefixedEnd);
+    expect(cleanupPrefixedBody).toContain('-d "$prefixed_target"');
+    expect(cleanupPrefixedBody).toContain('-L "$prefixed_target/SKILL.md"');
+    expect(cleanupPrefixedBody).toContain('rm -rf "$prefixed_target"');
+  });
+
+  // REGRESSION: link function must upgrade old directory symlinks
+  test('link_claude_skill_dirs removes old directory symlinks before creating real dirs', () => {
+    const fnStart = setupContent.indexOf('link_claude_skill_dirs()');
+    const fnEnd = setupContent.indexOf('}', setupContent.indexOf('linked[@]}', fnStart));
+    const fnBody = setupContent.slice(fnStart, fnEnd);
+    // Must check for and remove old symlinks before mkdir
+    expect(fnBody).toContain('if [ -L "$target" ]');
+    expect(fnBody).toContain('rm -f "$target"');
+  });
+
+  test('setup supports --host auto|claude|codex|kiro|opencode', () => {
     expect(setupContent).toContain('--host');
-    expect(setupContent).toContain('claude|codex|kiro|factory|auto');
+    expect(setupContent).toContain('claude|codex|kiro|factory|opencode|auto');
   });
 
-  test('auto mode detects claude, codex, and kiro binaries', () => {
+  test('auto mode detects claude, codex, kiro, and opencode binaries', () => {
     expect(setupContent).toContain('command -v claude');
     expect(setupContent).toContain('command -v codex');
     expect(setupContent).toContain('command -v kiro-cli');
+    expect(setupContent).toContain('command -v opencode');
   });
 
   // T1: Sidecar skip guard — prevents .agents/skills/gstack from being linked as a skill
@@ -1997,12 +2167,26 @@ describe('setup script validation', () => {
     expect(content).toContain('$GSTACK_BIN/');
   });
 
-  // T3: Kiro host support in setup script
   test('setup supports --host kiro with install section and sed rewrites', () => {
     expect(setupContent).toContain('INSTALL_KIRO=');
     expect(setupContent).toContain('kiro-cli');
     expect(setupContent).toContain('KIRO_SKILLS=');
     expect(setupContent).toContain('~/.kiro/skills/gstack');
+  });
+
+  test('setup supports --host opencode with install section and OpenCode skill path vars', () => {
+    expect(setupContent).toContain('INSTALL_OPENCODE=');
+    expect(setupContent).toContain('OPENCODE_SKILLS="$HOME/.config/opencode/skills"');
+    expect(setupContent).toContain('OPENCODE_GSTACK="$OPENCODE_SKILLS/gstack"');
+  });
+
+  test('setup installs OpenCode skills into a nested gstack runtime root', () => {
+    expect(setupContent).toContain('create_opencode_runtime_root');
+    expect(setupContent).toContain('.opencode/skills');
+    expect(setupContent).toContain('review/specialists');
+    expect(setupContent).toContain('qa/templates');
+    expect(setupContent).toContain('qa/references');
+    expect(setupContent).toContain('dx-hall-of-fame.md');
   });
 
   test('create_agents_sidecar links runtime assets', () => {
@@ -2540,5 +2724,143 @@ describe('gen-skill-docs prefix warning (#620/#578)', () => {
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }
+  });
+});
+
+describe('voice-triggers processing', () => {
+  const { extractVoiceTriggers, processVoiceTriggers } = require('../scripts/gen-skill-docs') as {
+    extractVoiceTriggers: (content: string) => string[];
+    processVoiceTriggers: (content: string) => string;
+  };
+
+  test('extractVoiceTriggers parses valid YAML list', () => {
+    const content = `---\nname: cso\ndescription: |\n  Security audit.\nvoice-triggers:\n  - "see-so"\n  - "security review"\n---\nBody`;
+    const triggers = extractVoiceTriggers(content);
+    expect(triggers).toEqual(['see-so', 'security review']);
+  });
+
+  test('extractVoiceTriggers returns [] when no field present', () => {
+    const content = `---\nname: qa\ndescription: |\n  QA testing.\n---\nBody`;
+    expect(extractVoiceTriggers(content)).toEqual([]);
+  });
+
+  test('processVoiceTriggers appends voice triggers to description', () => {
+    const content = `---\nname: cso\ndescription: |\n  Security audit. (gstack)\nvoice-triggers:\n  - "see-so"\n  - "security review"\n---\nBody`;
+    const result = processVoiceTriggers(content);
+    expect(result).toContain('Voice triggers (speech-to-text aliases): "see-so", "security review".');
+  });
+
+  test('processVoiceTriggers strips voice-triggers field from output', () => {
+    const content = `---\nname: cso\ndescription: |\n  Security audit. (gstack)\nvoice-triggers:\n  - "see-so"\n---\nBody`;
+    const result = processVoiceTriggers(content);
+    expect(result).not.toContain('voice-triggers:');
+  });
+
+  test('processVoiceTriggers returns content unchanged when no voice-triggers', () => {
+    const content = `---\nname: qa\ndescription: |\n  QA testing.\n---\nBody`;
+    expect(processVoiceTriggers(content)).toBe(content);
+  });
+
+  test('generated CSO SKILL.md contains voice triggers in description', () => {
+    const content = fs.readFileSync(path.join(ROOT, 'cso', 'SKILL.md'), 'utf-8');
+    expect(content).toContain('"see-so"');
+    expect(content).toContain('Voice triggers (speech-to-text aliases):');
+  });
+
+  test('generated CSO SKILL.md does NOT contain raw voice-triggers field', () => {
+    const content = fs.readFileSync(path.join(ROOT, 'cso', 'SKILL.md'), 'utf-8');
+    const fmEnd = content.indexOf('\n---', 4);
+    const frontmatter = content.slice(0, fmEnd);
+    expect(frontmatter).not.toContain('voice-triggers:');
+  });
+});
+
+describe('plan-mode handshake (interactive: true) resolver', () => {
+  const INTERACTIVE_SKILLS = [
+    'plan-ceo-review',
+    'plan-eng-review',
+    'plan-design-review',
+    'plan-devex-review',
+  ];
+
+  const HANDSHAKE_MARKER = '## Plan Mode Handshake';
+
+  test.each(INTERACTIVE_SKILLS)(
+    '%s (Claude host) SKILL.md contains the handshake section',
+    (skill) => {
+      const content = fs.readFileSync(path.join(ROOT, skill, 'SKILL.md'), 'utf-8');
+      expect(content).toContain(HANDSHAKE_MARKER);
+      expect(content).toContain(
+        'Plan mode is active. The user indicated that they do not want you to execute yet',
+      );
+    },
+  );
+
+  test('handshake is absent from non-interactive Claude skills', () => {
+    const nonInteractive = ['ship', 'review', 'qa', 'office-hours', 'codex', 'retro', 'cso'];
+    for (const skill of nonInteractive) {
+      const content = fs.readFileSync(path.join(ROOT, skill, 'SKILL.md'), 'utf-8');
+      expect(content).not.toContain(HANDSHAKE_MARKER);
+    }
+  });
+
+  test('handshake is absent from non-Claude host outputs when present on disk', () => {
+    // Non-Claude hosts render to hostSubdirs (.agents/, .openclaw/, etc). The
+    // handshake resolver returns '' when ctx.host !== 'claude', so those
+    // outputs must not contain the marker. The current gen-skill-docs layout
+    // prefixes skill names as `gstack-<skill>` under the hostSubdir; older
+    // layouts used `gstack/<skill>` (no prefix). Only stable-present paths
+    // are asserted — older ones may or may not exist per install history.
+    const candidateOutputs = [
+      // Current prefixed layout
+      path.join(ROOT, '.agents', 'skills', 'gstack-plan-ceo-review', 'SKILL.md'),
+      path.join(ROOT, '.openclaw', 'skills', 'gstack-plan-ceo-review', 'SKILL.md'),
+      path.join(ROOT, '.opencode', 'skills', 'gstack-plan-ceo-review', 'SKILL.md'),
+      path.join(ROOT, '.factory', 'skills', 'gstack-plan-ceo-review', 'SKILL.md'),
+      path.join(ROOT, '.hermes', 'skills', 'gstack-plan-ceo-review', 'SKILL.md'),
+    ];
+    let checked = 0;
+    for (const out of candidateOutputs) {
+      if (fs.existsSync(out)) {
+        const content = fs.readFileSync(out, 'utf-8');
+        expect(content).not.toContain(HANDSHAKE_MARKER);
+        checked++;
+      }
+    }
+    // At least one non-Claude host's output should exist after a full gen
+    // run; this test is meaningful only if we checked something. If no
+    // non-Claude outputs exist locally, the cross-host guarantee is still
+    // enforced by the resolver's ctx.host check; this test is belt-and-
+    // suspenders and becomes a no-op rather than a false positive.
+    if (checked === 0) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        'plan-mode handshake: no non-Claude host outputs found for cross-host absence check — ' +
+          'run `bun run gen:skill-docs --host all` to populate',
+      );
+    }
+  });
+
+  test('0C-bis STOP block present in plan-ceo-review/SKILL.md', () => {
+    const content = fs.readFileSync(path.join(ROOT, 'plan-ceo-review', 'SKILL.md'), 'utf-8');
+    const presentIdx = content.indexOf('Present these approach options via AskUserQuestion');
+    const preludeIdx = content.indexOf('### 0D-prelude');
+    expect(presentIdx).toBeGreaterThan(0);
+    expect(preludeIdx).toBeGreaterThan(presentIdx);
+    const between = content.slice(presentIdx, preludeIdx);
+    expect(between).toContain('**STOP.**');
+    expect(between).toContain('Do NOT proceed to Step 0D or 0F until the user responds to 0C-bis');
+  });
+
+  test('handshake resolver is wired BEFORE generateUpgradeCheck in preamble', () => {
+    const content = fs.readFileSync(
+      path.join(ROOT, 'plan-ceo-review', 'SKILL.md'),
+      'utf-8',
+    );
+    const handshakeIdx = content.indexOf(HANDSHAKE_MARKER);
+    const upgradeIdx = content.indexOf('UPGRADE_AVAILABLE');
+    expect(handshakeIdx).toBeGreaterThan(0);
+    expect(upgradeIdx).toBeGreaterThan(0);
+    expect(handshakeIdx).toBeLessThan(upgradeIdx);
   });
 });

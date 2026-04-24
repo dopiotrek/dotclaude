@@ -185,6 +185,33 @@ chmod +x "$SCRIPT_DIR/hooks/"*.py 2>/dev/null || true
 chmod +x "$SCRIPT_DIR/scripts/"*.sh 2>/dev/null || true
 print_success "Hook scripts marked as executable"
 
+# 6. Add ~/.claude/scripts to PATH in shell profile
+print_step "Adding ~/.claude/scripts to PATH..."
+PATH_LINE='export PATH="$HOME/.claude/scripts:$PATH"'
+SHELL_PROFILE=""
+
+# Detect shell profile
+if [ -f "$HOME/.zshrc" ]; then
+    SHELL_PROFILE="$HOME/.zshrc"
+elif [ -f "$HOME/.bashrc" ]; then
+    SHELL_PROFILE="$HOME/.bashrc"
+elif [ -f "$HOME/.bash_profile" ]; then
+    SHELL_PROFILE="$HOME/.bash_profile"
+fi
+
+if [ -n "$SHELL_PROFILE" ]; then
+    if grep -q '\.claude/scripts' "$SHELL_PROFILE" 2>/dev/null; then
+        print_success "PATH already configured in $SHELL_PROFILE"
+    else
+        echo "" >> "$SHELL_PROFILE"
+        echo "# dotclaude scripts" >> "$SHELL_PROFILE"
+        echo "$PATH_LINE" >> "$SHELL_PROFILE"
+        print_success "Added to $SHELL_PROFILE — run: source $SHELL_PROFILE"
+    fi
+else
+    print_warning "Could not detect shell profile. Add manually:"
+    echo "         $PATH_LINE"
+fi
 
 echo ""
 echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
