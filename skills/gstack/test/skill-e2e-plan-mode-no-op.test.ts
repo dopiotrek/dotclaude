@@ -1,43 +1,48 @@
 /**
- * Plan-mode handshake negative regression (gate tier, paid).
+ * Plan-mode-info no-op regression (gate tier, paid, real-PTY).
  *
- * Asserts: when /plan-ceo-review is invoked WITHOUT the plan-mode distinctive
- * phrase in the system reminder, the handshake does NOT fire. The skill
- * should proceed to its normal Step 0 flow. This is the REGRESSION RULE
- * guardrail — the handshake must be a no-op outside plan mode or it breaks
- * every existing interactive-review session.
+ * Asserts: when /plan-ceo-review is invoked OUTSIDE plan mode (no
+ * --permission-mode plan flag, no plan-mode reminder injected), the skill
+ * still reaches a terminal outcome ('asked' or 'plan_ready'). This is the
+ * negative coverage to the per-skill plan-mode smokes — if the
+ * plan-mode-info preamble section ever starts misfiring for non-plan-mode
+ * sessions (e.g., gating questions on a phrase that isn't there), this
+ * test catches it.
  *
- * Cost: ~$0.50 per run. Gated: EVALS=1 EVALS_TIER=gate.
+ * Why this matters: outside plan mode, claude doesn't render a native
+ * confirmation UI. The skill must drive its own AskUserQuestion. Same
+ * runner, same outcome contract — just `inPlanMode: false`.
  */
 
 import { describe, test, expect } from 'bun:test';
-import {
-  runPlanModeHandshakeTest,
-  PLAN_MODE_REMINDER,
-} from './helpers/plan-mode-handshake-helpers';
+import { runPlanSkillObservation } from './helpers/claude-pty-runner';
 
 const shouldRun = !!process.env.EVALS && process.env.EVALS_TIER === 'gate';
 const describeE2E = shouldRun ? describe : describe.skip;
 
-describeE2E('plan-mode handshake no-op outside plan mode (gate regression)', () => {
-  test('handshake does NOT fire when distinctive phrase is absent', async () => {
-    const result = await runPlanModeHandshakeTest({
+describeE2E('plan-mode-info no-op outside plan mode (gate regression)', () => {
+  test('skill reaches a terminal outcome outside plan mode', async () => {
+    const obs = await runPlanSkillObservation({
       skillName: 'plan-ceo-review',
-      answerLabel: 'Exit', // ignored — handshake should never fire
-      omitPlanModeReminder: true,
-      maxTurns: 3, // enough to see Step 0 start, but bounded
+      inPlanMode: false,
+      timeoutMs: 300_000,
     });
 
-    // The handshake AskUserQuestion should NOT have fired during Step 0 entry.
-    // Other AskUserQuestions may fire later in the skill (e.g., Step 0C-bis),
-    // but they will NOT have the handshake's question text.
-    for (const aq of result.askUserQuestions) {
-      const questions = aq.input.questions as Array<{ question: string }>;
-      for (const q of questions) {
-        // The handshake's question mentions the distinctive phrase in its
-        // prose; a non-handshake AskUserQuestion won't.
-        expect(q.question).not.toContain(PLAN_MODE_REMINDER);
-      }
+    if (obs.outcome === 'silent_write' || obs.outcome === 'exited' || obs.outcome === 'timeout') {
+      throw new Error(
+        `plan-mode no-op regression FAILED: outcome=${obs.outcome}\n` +
+          `summary: ${obs.summary}\n` +
+          `elapsed: ${obs.elapsedMs}ms\n` +
+          `--- evidence (last 2KB visible) ---\n${obs.evidence}`,
+      );
     }
-  }, 120_000);
+    expect(['asked', 'plan_ready']).toContain(obs.outcome);
+
+    // Negative regression: the rendered output must NOT echo the plan-mode
+    // distinctive reminder phrase. If it does, the plan-mode preamble
+    // section is leaking outside plan mode.
+    const PLAN_MODE_REMINDER =
+      'Plan mode is active. The user indicated that they do not want you to execute yet';
+    expect(obs.evidence).not.toContain(PLAN_MODE_REMINDER);
+  }, 360_000);
 });

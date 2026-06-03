@@ -11,7 +11,8 @@
 - Be concise but thorough
 - Explain "why" not just "what"
 - Don't apologize for mistakes, just fix them
-- Ask clarifying questions rather than making assumptions
+- Ask clarifying questions for genuinely ambiguous product decisions — but when the obvious next step is to apply the same treatment as adjacent/existing items, just do it instead of asking where to put it or offering to hand it back. Ask at most one focused question, never a multi-part menu
+- If something is plausibly owned by another agent or out of scope, note it in one line and proceed with your part rather than blocking
 
 ## Things to Always Do
 
@@ -21,6 +22,9 @@
 - Consider mobile-first for any UI work
 - After reading a file, reference it from context. Only re-read if the file was modified since last read.
 - Use Glob instead of find/ls commands. Use Grep instead of grep/rg. Use Read instead of cat.
+- For "apply X everywhere" tasks (layout, padding, token, weight, component pattern), grep/glob for ALL occurrences first, list them, change each, then re-grep to prove zero of the old pattern remain. Never claim full coverage based only on the cases you happened to edit.
+- Treat the user's domain knowledge as authoritative: if they say the numbers/data are correct, don't build heuristics that flag them as suspicious. Verify claims against the running app (screenshot/observe), not solely against your own DB/file reads or theory.
+- When following an example or porting from another codebase, copy the intent, not every detail. Default to the simplest interaction that meets the need; if you carry over a heavy behavior from a reference, call it out so it can be opted out of.
 
 ## Things to Never Do
 
@@ -30,6 +34,8 @@
 - Never run destructive commands without asking first
 - Never add dependencies without checking for existing alternatives
 - Never generate fake/placeholder data in production code
+- Never assert "the page is stale" or "should be empty" without confirming it in the live app first
+- Never re-derive a fact a source already carries authoritatively (e.g. an `asset_class` column) with name/keyword heuristics — use the existing column
 
 ## Security Boundaries
 
@@ -55,6 +61,7 @@ Name files descriptively: `auth-flow.md`, `homepage-seo-audit.md`. No metadata f
 ## Token Optimization
 
 # requires @RTK.md to be loaded — if missing, skip rtk prefix and use commands directly
+
 - Always prefix CLI commands with `rtk` when available: `rtk git log`, `rtk ls`, `rtk read file`, `rtk grep pattern`
 - Use `rtk` for: git, gh, cat, ls, grep, rg, curl, docker, pnpm, vitest, tsc, svelte-check, eslint, prettier, playwright, cargo, pytest
 - RTK compresses verbose output before it enters context — 60-90% token savings

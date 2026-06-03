@@ -1,5 +1,5 @@
 ---
-name: gstack-unfreeze
+name: unfreeze
 version: 0.1.0
 description: |
   Clear the freeze boundary set by /freeze, allowing edits to all directories
@@ -29,7 +29,8 @@ echo '{"skill":"unfreeze","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(bas
 ## Clear the boundary
 
 ```bash
-STATE_DIR="${CLAUDE_PLUGIN_DATA:-$HOME/.gstack}"
+eval "$(~/.claude/skills/gstack/bin/gstack-paths)"
+STATE_DIR="$GSTACK_STATE_ROOT"
 if [ -f "$STATE_DIR/freeze-dir.txt" ]; then
   PREV=$(cat "$STATE_DIR/freeze-dir.txt")
   rm -f "$STATE_DIR/freeze-dir.txt"

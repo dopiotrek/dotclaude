@@ -21,7 +21,10 @@ reset='\033[0m'
 # ===== Extract data from JSON =====
 model_name=$(echo "$input" | jq -r '.model.display_name // "Claude"')
 dir=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // ""')
-dir_name="${dir##*/}"
+# Use git root name instead of cwd (avoids showing subfolders like _input)
+git_root=$(git -C "$dir" rev-parse --show-toplevel 2>/dev/null)
+dir_name="${git_root##*/}"
+[ -z "$dir_name" ] && dir_name="${dir##*/}"
 
 # Context window
 size=$(echo "$input" | jq -r '.context_window.context_window_size // 200000')
@@ -116,10 +119,11 @@ if [ -f "$settings_path" ]; then
     [ "$thinking_val" = "true" ] && thinking=" ${dim}|${reset} ${orange}think${reset}"
 fi
 
-# ===== Output: Model | Branch | Context (%) | Thinking =====
-line="${blue}${model_name}${reset}"
-# [ -n "$dir_name" ] && line+=" ${dim}|${reset} 📁 ${dim}${dir_name}${reset}"  # uncomment to show repo name
+# ===== Output: Dir | Branch | Model | Context (%) | Thinking =====
+line=""
+[ -n "$dir_name" ] && line+="${dim}${dir_name}${reset}"
 [ -n "$branch" ] && line+=" ${dim}|${reset} ${cyan}${branch}${reset}"
+line+=" ${dim}|${reset} ${blue}${model_name}${reset}"
 line+=" ${dim}|${reset} ${ctx_color}${used_str}/${total_str} ${dim}(${pct_used}%)${reset}"
 # line+=" ${dim}|${reset} ${yellow}${cost_fmt}${reset}"  # uncomment for cost
 # line+=" ${dim}|${reset} ⏱ ${dim}${mins}m ${secs}s${reset}"  # uncomment for duration

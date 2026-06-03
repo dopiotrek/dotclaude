@@ -1,40 +1,76 @@
 /**
- * plan-ceo-review plan-mode handshake E2E (gate tier, paid).
+ * plan-ceo-review plan-mode smoke (gate, paid, real-PTY).
  *
- * Asserts: when /plan-ceo-review is invoked with the plan-mode distinctive
- * phrase in the system reminder, the skill fires AskUserQuestion FIRST
- * (before any Write or Edit), the question has exactly 2 options (A exit,
- * C cancel), picking "Exit" leads to an orderly exit with no plan file
- * written.
+ * Asserts: when /plan-ceo-review is invoked in plan mode, the FIRST terminal
+ * outcome is 'asked' — a skill-question numbered list. Permission dialogs
+ * (which also render numbered lists) are filtered out by `runPlanSkillObservation`
+ * via its `isPermissionDialogVisible(visible.slice(-1500))` short-circuit.
  *
- * Cost: ~$0.50–$1.00 per run. Gated: EVALS=1 EVALS_TIER=gate.
- * Depends on: scripts/resolvers/preamble/generate-plan-mode-handshake.ts,
- * test/helpers/agent-sdk-runner.ts (canUseTool extension).
+ * Reaching 'plan_ready' first IS the regression we want to catch: the agent
+ * skipped Step 0 entirely and went straight to ExitPlanMode. The original
+ * failure had the assistant read a diff, write a plan with two issues, and
+ * call ExitPlanMode without ever firing AskUserQuestion — the user had to
+ * manually call out the missing per-issue questions.
+ *
+ * Why this skill is special: unlike plan-eng-review / plan-design-review /
+ * plan-devex-review (whose smokes accept either 'asked' or 'plan_ready'),
+ * plan-ceo-review's template mandates Step 0A premise challenge (3 baked-in
+ * questions) AND Step 0F mode selection BEFORE any plan write. There is no
+ * legitimate path to plan_ready that does not first emit a skill-question
+ * numbered prompt.
+ *
+ * Env passthrough: passes `QUESTION_TUNING=false` and `EXPLAIN_LEVEL=default`
+ * via the runner's env option. Today these are advisory — `gstack-config`
+ * reads `~/.gstack/config.yaml`, not env vars, so a contributor with
+ * `question_tuning: true` set in their YAML config can still see AUTO_DECIDE
+ * masking. The env passthrough is wired so a future gstack-config change to
+ * honor env overrides will make this test hermetic without further edits.
+ * Tracked as a post-merge follow-up.
+ *
+ * FAIL conditions: 'plan_ready' first, silent Write/Edit before any prompt,
+ * claude crash, timeout.
+ *
+ * See test/helpers/claude-pty-runner.ts for runner internals.
  */
 
-import { describe, test, expect } from 'bun:test';
+import { describe, test } from 'bun:test';
 import {
-  runPlanModeHandshakeTest,
-  assertHandshakeShape,
-} from './helpers/plan-mode-handshake-helpers';
+  runPlanSkillObservation,
+  assertReportAtBottomIfPlanWritten,
+} from './helpers/claude-pty-runner';
 
 const shouldRun = !!process.env.EVALS && process.env.EVALS_TIER === 'gate';
 const describeE2E = shouldRun ? describe : describe.skip;
 
-describeE2E('plan-ceo-review plan-mode handshake (gate)', () => {
-  test('handshake fires before any Write/Edit when plan mode is detected', async () => {
-    const result = await runPlanModeHandshakeTest({
+describeE2E('plan-ceo-review plan-mode smoke (gate)', () => {
+  test('first terminal outcome is asked (Step 0 fires before any plan write)', async () => {
+    const obs = await runPlanSkillObservation({
       skillName: 'plan-ceo-review',
-      answerLabel: 'Exit',
+      inPlanMode: true,
+      timeoutMs: 300_000,
+      env: { QUESTION_TUNING: 'false', EXPLAIN_LEVEL: 'default' },
     });
 
-    // Handshake must have fired at least once.
-    expect(result.askUserQuestions.length).toBeGreaterThanOrEqual(1);
-    // Critically: no Write or Edit fired before the first AskUserQuestion.
-    // This is the bug v1.10.2.0 fixes — plan mode used to allow silent
-    // plan-file writes without any interactive gate.
-    expect(result.writeOrEditBeforeAsk).toBe(false);
-    // Handshake shape: 2 options (Exit/Cancel), Option B dropped per D8.
-    assertHandshakeShape(result.askUserQuestions[0]!);
-  }, 120_000);
+    if (obs.outcome !== 'asked') {
+      const diagnosis =
+        obs.outcome === 'plan_ready'
+          ? `'plan_ready' first means the agent skipped Step 0 entirely and went straight to ExitPlanMode without asking.`
+          : obs.outcome === 'timeout'
+            ? `Timeout means the agent neither asked nor completed within the budget — likely hung mid-question or stuck on a permission dialog.`
+            : obs.outcome === 'silent_write'
+              ? `Silent Write/Edit fired to an unsanctioned path before any AskUserQuestion — also a Step 0 skip.`
+              : `Outcome '${obs.outcome}' is unexpected; investigate the evidence below.`;
+      throw new Error(
+        `plan-ceo-review smoke FAILED: outcome=${obs.outcome}\n` +
+          `${diagnosis}\n` +
+          `Expected 'asked'. See plan-ceo-review/SKILL.md.tmpl: the Step 0 STOP rules ` +
+          `and the "One issue = one AskUserQuestion call" rule under "CRITICAL RULE — ` +
+          `How to ask questions".\n` +
+          `summary: ${obs.summary}\n` +
+          `elapsed: ${obs.elapsedMs}ms\n` +
+          `--- evidence (last 2KB visible) ---\n${obs.evidence}`,
+      );
+    }
+    assertReportAtBottomIfPlanWritten(obs);
+  }, 360_000);
 });
