@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Learn — map</title>
+<style>
+  :root {
+    --bg: #fbfbfd; --panel: #ffffff; --ink: #1c1d22; --muted: #6b6f76;
+    --line: #e7e8ec; --line-strong: #d4d6dc; --accent: #5b54e6; --accent-soft: #ece9ff;
+    --good: #2e9e6b; --warn: #c8861a; --due: #d8542f; --due-soft: #fdeee8;
+    --radius: 12px; --shadow: 0 1px 2px rgba(20,20,40,.04), 0 8px 24px rgba(20,20,40,.05);
+    --maxw: 1080px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, system-ui, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #111217; --panel: #181a21; --ink: #e9eaee; --muted: #9aa0ab;
+      --line: #262934; --line-strong: #333744; --accent: #8c86ff; --accent-soft: #20203a;
+      --good: #4cc08a; --warn: #d8a64a; --due: #f0805a; --due-soft: #2a1c18;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  [data-theme="dark"] {
+    --bg: #111217; --panel: #181a21; --ink: #e9eaee; --muted: #9aa0ab;
+    --line: #262934; --line-strong: #333744; --accent: #8c86ff; --accent-soft: #20203a;
+    --good: #4cc08a; --warn: #d8a64a; --due: #f0805a; --due-soft: #2a1c18;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font);
+    line-height: 1.55; -webkit-font-smoothing: antialiased; padding-bottom: 6rem;
+  }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 1.25rem; }
+  a { color: var(--accent); }
+
+  /* header */
+  header.top { padding: 2.4rem 0 1.2rem; }
+  .eyebrow { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  h1 { font-size: clamp(1.6rem, 3.4vw, 2.3rem); margin: .35rem 0 .5rem; line-height: 1.15; letter-spacing: -.02em; }
+  .one-sentence { font-size: clamp(1.02rem, 1.8vw, 1.18rem); color: var(--ink); max-width: 62ch;
+    border-left: 3px solid var(--accent); padding-left: .9rem; margin: .6rem 0 1rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: .5rem; margin: .6rem 0; }
+  .chip { font-size: .8rem; color: var(--muted); background: var(--panel); border: 1px solid var(--line);
+    padding: .28rem .6rem; border-radius: 999px; }
+  .chip b { color: var(--ink); font-weight: 600; }
+
+  .progress-wrap { display: flex; align-items: center; gap: .8rem; margin-top: 1rem; }
+  .bar { flex: 1; height: 9px; background: var(--line); border-radius: 999px; overflow: hidden; }
+  .bar > i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--good)); border-radius: 999px; transition: width .4s; }
+  .bar-label { font-size: .82rem; color: var(--muted); white-space: nowrap; }
+
+  /* controls */
+  .controls { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin-top: 1.1rem; }
+  .search { flex: 1; min-width: 180px; display: flex; align-items: center; gap: .5rem;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: .5rem .7rem; }
+  .search input { border: 0; background: transparent; color: var(--ink); font: inherit; width: 100%; outline: none; }
+  .btn { font: inherit; font-size: .85rem; cursor: pointer; background: var(--panel); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 10px; padding: .5rem .8rem; display: inline-flex; gap: .4rem; align-items: center; }
+  .btn:hover { border-color: var(--line-strong); }
+  .btn.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+  /* sticky nav */
+  nav.regions { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 86%, transparent);
+    backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); padding: .55rem 0; margin-top: 1.4rem; }
+  nav.regions .wrap { display: flex; gap: .4rem; overflow-x: auto; scrollbar-width: thin; }
+  .navpill { white-space: nowrap; font-size: .82rem; color: var(--muted); text-decoration: none;
+    padding: .32rem .7rem; border-radius: 999px; border: 1px solid transparent; }
+  .navpill:hover { color: var(--ink); background: var(--panel); }
+  .navpill.here { color: var(--accent); background: var(--accent-soft); }
+  .navpill .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: .35rem; vertical-align: middle; }
+
+  /* sections + panels */
+  section.block { margin: 2rem 0; }
+  .section-title { font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: .9rem; }
+
+  .terrain { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1rem 1rem .6rem; }
+  .terrain svg { width: 100%; height: auto; display: block; }
+  .legend { display: flex; flex-wrap: wrap; gap: 1rem; font-size: .76rem; color: var(--muted); padding: .4rem .3rem 0; }
+  .legend span { display: inline-flex; align-items: center; gap: .4rem; }
+  .swatch { width: 12px; height: 12px; border-radius: 4px; display: inline-block; }
+
+  .region { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow); margin-bottom: 1rem; overflow: hidden; scroll-margin-top: 4rem; }
+  .region > summary { list-style: none; cursor: pointer; padding: 1rem 1.1rem; display: flex; align-items: center; gap: .8rem; }
+  .region > summary::-webkit-details-marker { display: none; }
+  .region .rtitle { font-weight: 650; font-size: 1.05rem; flex: 1; }
+  .region .rtitle small { display: block; font-weight: 400; font-size: .85rem; color: var(--muted); margin-top: .15rem; }
+  .region .caret { color: var(--muted); transition: transform .2s; }
+  .region[open] .caret { transform: rotate(90deg); }
+  .core-badge { font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; font-weight: 700;
+    color: var(--accent); background: var(--accent-soft); padding: .2rem .45rem; border-radius: 6px; }
+  .rprog { font-size: .78rem; color: var(--muted); white-space: nowrap; }
+
+  .region .body { padding: 0 1.1rem 1.1rem; border-top: 1px solid var(--line); }
+  ul.chunks { list-style: none; margin: 0; padding: 0; }
+  .chunk { padding: .85rem 0; border-bottom: 1px dashed var(--line); }
+  .chunk:last-child { border-bottom: 0; }
+  .chunk h4 { margin: 0 0 .25rem; font-size: .98rem; display: flex; gap: .55rem; align-items: baseline; }
+  .status-ico { font-size: .9rem; flex: none; }
+  .s-learned { color: var(--good); } .s-learning { color: var(--warn); } .s-locked { color: var(--muted); }
+  .chunk .note { color: var(--ink); margin: .15rem 0 .4rem; }
+  .recall { margin-top: .4rem; }
+  .recall summary { cursor: pointer; font-size: .87rem; color: var(--accent); list-style: none; }
+  .recall summary::-webkit-details-marker { display: none; }
+  .recall .ans { margin-top: .4rem; padding: .55rem .7rem; background: var(--accent-soft); border-radius: 8px; font-size: .9rem; }
+  .due-tag { font-size: .72rem; color: var(--muted); margin-left: auto; white-space: nowrap; }
+  .due-tag.now { color: var(--due); font-weight: 600; }
+
+  .grammar { background: linear-gradient(180deg, var(--accent-soft), transparent); border: 1px solid var(--accent);
+    border-radius: 10px; padding: .85rem 1rem; margin: .9rem 0 .2rem; }
+  .grammar .glabel { font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; font-weight: 700; color: var(--accent); }
+  .grammar .vars { display: flex; flex-wrap: wrap; gap: .4rem; margin: .5rem 0; }
+  .grammar .var { font-size: .8rem; font-family: var(--mono); background: var(--panel); border: 1px solid var(--accent);
+    color: var(--ink); padding: .2rem .5rem; border-radius: 6px; }
+
+  /* due + questions panels */
+  .panel { border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); box-shadow: var(--shadow); padding: 1.1rem; }
+  .panel.due-due { border-color: var(--due); background: var(--due-soft); }
+  .panel h3 { margin: 0 0 .2rem; font-size: 1rem; display: flex; align-items: center; gap: .5rem; }
+  .count-badge { font-size: .74rem; font-weight: 700; color: #fff; background: var(--due); border-radius: 999px; padding: .1rem .5rem; }
+  .count-badge.zero { background: var(--good); }
+  .due-list { list-style: none; margin: .7rem 0 0; padding: 0; }
+  .due-item { padding: .55rem 0; border-top: 1px dashed var(--line-strong); }
+  .due-item:first-child { border-top: 0; }
+  .due-item .q { font-size: .92rem; }
+  .due-item .meta { font-size: .74rem; color: var(--muted); }
+  .empty { color: var(--muted); font-size: .9rem; }
+
+  footer { color: var(--muted); font-size: .78rem; text-align: center; margin: 3rem 0 1rem; }
+  .hidden { display: none !important; }
+  mark { background: #ffe8a3; color: inherit; border-radius: 3px; padding: 0 .1em; }
+  [data-theme="dark"] mark { background: #6b5a1f; }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow" id="eyebrow">Learning map</div>
+    <h1 id="topic">—</h1>
+    <div class="one-sentence" id="one-sentence"></div>
+    <div class="chips" id="chips"></div>
+    <div class="progress-wrap">
+      <div class="bar"><i id="bar-fill" style="width:0%"></i></div>
+      <div class="bar-label" id="bar-label"></div>
+    </div>
+    <div class="controls">
+      <label class="search">
+        <span aria-hidden="true">⌕</span>
+        <input id="search" type="search" placeholder="Filter chunks…  ( / )" autocomplete="off" />
+      </label>
+      <button class="btn" id="due-only-btn">Show due only</button>
+      <button class="btn" id="here-btn">↩ You are here</button>
+      <button class="btn" id="theme-btn">◑ Theme</button>
+    </div>
+  </div>
+</header>
+
+<nav class="regions"><div class="wrap" id="nav"></div></nav>
+
+<main class="wrap">
+  <section class="block">
+    <div class="section-title">The terrain</div>
+    <div class="terrain">
+      <svg id="terrain-svg" viewBox="0 0 1000 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Terrain map"></svg>
+      <div class="legend">
+        <span><i class="swatch" style="background:var(--accent)"></i> core region</span>
+        <span><i class="swatch" style="background:var(--panel);border:1px solid var(--line-strong)"></i> peripheral</span>
+        <span><i class="swatch" style="background:var(--good)"></i> fully learned</span>
+        <span><i class="swatch" style="border:2px solid var(--accent);background:transparent"></i> you are here</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="due-block">
+    <div class="section-title">Due for review</div>
+    <div class="panel" id="due-panel"></div>
+  </section>
+
+  <section class="block">
+    <div class="section-title">Deep dives</div>
+    <div id="sections"></div>
+  </section>
+
+  <section class="block" id="questions-block">
+    <div class="section-title">Parked questions</div>
+    <div class="panel" id="questions-panel"></div>
+  </section>
+
+  <footer>Generated from <code>state.json</code> by build_map.py · the file is the source of truth, this page is a view.</footer>
+</main>
+
+<script id="learn-state" type="application/json">__STATE_JSON__</script>
+<script>
+(function () {
+  "use strict";
+  // ---- load state -------------------------------------------------------
+  var STATE;
+  try { STATE = JSON.parse(document.getElementById("learn-state").textContent); }
+  catch (e) { document.body.innerHTML = '<div class="wrap" style="padding:3rem">Could not parse state.json.</div>'; return; }
+
+  var REGIONS = (STATE.terrain && STATE.terrain.regions) || [];
+  var EDGES = (STATE.terrain && STATE.terrain.edges) || [];
+  var CHUNKS = STATE.chunks || [];
+  var GRAMMARS = STATE.grammars || [];
+  var QUESTIONS = (STATE.open_questions || []).filter(function (q) { return !q.resolved; });
+
+  // ---- helpers ----------------------------------------------------------
+  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
+  var todayStr = new Date().toISOString().slice(0, 10);
+  function isDue(d) { return d && d <= todayStr; }
+  function chunksOf(rid) { return CHUNKS.filter(function (c) { return c.region === rid; }); }
+  function regionProg(rid) {
+    var cs = chunksOf(rid), learned = cs.filter(function (c) { return c.status === "learned"; }).length;
+    return { learned: learned, total: cs.length, pct: cs.length ? Math.round(100 * learned / cs.length) : 0 };
+  }
+  function grammarOf(rid) { return GRAMMARS.filter(function (g) { return g.region === rid; }); }
+
+  // ---- header -----------------------------------------------------------
+  document.title = (STATE.topic || "Learning map") + " — map";
+  document.getElementById("topic").textContent = STATE.topic || "Untitled topic";
+  var os = document.getElementById("one-sentence");
+  if (STATE.one_sentence) os.textContent = STATE.one_sentence; else os.classList.add("hidden");
+
+  var chips = [];
+  if (STATE.goal) chips.push("<span class='chip'><b>Goal</b> " + esc(STATE.goal) + "</span>");
+  if (STATE.level) chips.push("<span class='chip'><b>From</b> " + esc(STATE.level) + "</span>");
+  var totalLearned = CHUNKS.filter(function (c) { return c.status === "learned"; }).length;
+  chips.push("<span class='chip'><b>" + REGIONS.length + "</b> regions</span>");
+  chips.push("<span class='chip'><b>" + GRAMMARS.length + "</b> grammar" + (GRAMMARS.length === 1 ? "" : "s") + "</span>");
+  document.getElementById("chips").innerHTML = chips.join("");
+
+  var pct = CHUNKS.length ? Math.round(100 * totalLearned / CHUNKS.length) : 0;
+  document.getElementById("bar-fill").style.width = pct + "%";
+  document.getElementById("bar-label").textContent = totalLearned + " / " + CHUNKS.length + " chunks learned (" + pct + "%)";
+
+  // ---- terrain svg ------------------------------------------------------
+  (function terrain() {
+    var svg = document.getElementById("terrain-svg");
+    var W = 1000, NW = 188, NH = 70, ns = "http://www.w3.org/2000/svg";
+    var core = REGIONS.filter(function (r) { return r.core; });
+    var periph = REGIONS.filter(function (r) { return !r.core; });
+    var pos = {};
+    function place(list, y) {
+      var n = list.length; if (!n) return;
+      var gap = (W - n * NW) / (n + 1);
+      list.forEach(function (r, i) {
+        pos[r.id] = { x: gap + i * (NW + gap), y: y, r: r };
+      });
+    }
+    var topY = 40, midY = periph.length ? 210 : 150;
+    place(periph, topY);
+    place(core, midY);
+    var H = (periph.length ? 210 : 150) + NH + 50;
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+
+    // arrowhead
+    var defs = document.createElementNS(ns, "defs");
+    defs.innerHTML = '<marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto">' +
+      '<path d="M0,0 L7,3 L0,6 Z" fill="var(--line-strong)"/></marker>';
+    svg.appendChild(defs);
+
+    // edges
+    EDGES.forEach(function (e) {
+      var a = pos[e.from], b = pos[e.to]; if (!a || !b) return;
+      var ax = a.x + NW / 2, ay = a.y + NH / 2, bx = b.x + NW / 2, by = b.y + NH / 2;
+      var sameRow = Math.abs(ay - by) < 4;
+      var path = document.createElementNS(ns, "path");
+      var d;
+      if (sameRow) { var dip = ay + NH / 2 + 34; d = "M" + ax + "," + (ay + NH / 2) + " Q" + ((ax + bx) / 2) + "," + dip + " " + bx + "," + (by + NH / 2); }
+      else { d = "M" + ax + "," + ay + " L" + bx + "," + by; }
+      path.setAttribute("d", d); path.setAttribute("fill", "none");
+      path.setAttribute("stroke", "var(--line-strong)"); path.setAttribute("stroke-width", "1.6");
+      path.setAttribute("marker-end", "url(#arrow)"); svg.appendChild(path);
+      if (e.label) {
+        var mx = (ax + bx) / 2, my = sameRow ? ay + NH / 2 + 30 : (ay + by) / 2;
+        var t = document.createElementNS(ns, "text");
+        t.setAttribute("x", mx); t.setAttribute("y", my); t.setAttribute("text-anchor", "middle");
+        t.setAttribute("font-size", "11"); t.setAttribute("fill", "var(--muted)");
+        t.setAttribute("font-family", "var(--font)"); t.textContent = e.label;
+        // simple bg via paint-order
+        t.setAttribute("paint-order", "stroke"); t.setAttribute("stroke", "var(--panel)"); t.setAttribute("stroke-width", "4");
+        svg.appendChild(t);
+      }
+    });
+
+    // nodes
+    REGIONS.forEach(function (r) {
+      var p = pos[r.id]; if (!p) return;
+      var prog = regionProg(r.id);
+      var here = STATE.you_are_here === r.id;
+      var g = document.createElementNS(ns, "g");
+      g.style.cursor = "pointer";
+      g.addEventListener("click", function () { jumpTo(r.id); });
+
+      var rect = document.createElementNS(ns, "rect");
+      rect.setAttribute("x", p.x); rect.setAttribute("y", p.y);
+      rect.setAttribute("width", NW); rect.setAttribute("height", NH); rect.setAttribute("rx", 12);
+      var full = prog.total > 0 && prog.learned === prog.total;
+      rect.setAttribute("fill", full ? "var(--good)" : (r.core ? "var(--accent-soft)" : "var(--panel)"));
+      rect.setAttribute("stroke", here ? "var(--accent)" : (r.core ? "var(--accent)" : "var(--line-strong)"));
+      rect.setAttribute("stroke-width", here ? "3" : "1.4");
+      g.appendChild(rect);
+
+      var title = document.createElementNS(ns, "text");
+      title.setAttribute("x", p.x + 14); title.setAttribute("y", p.y + 27);
+      title.setAttribute("font-size", "14"); title.setAttribute("font-weight", "650");
+      title.setAttribute("fill", full ? "#fff" : "var(--ink)"); title.setAttribute("font-family", "var(--font)");
+      var tt = (r.title || "").length > 22 ? (r.title.slice(0, 21) + "…") : (r.title || "");
+      title.textContent = tt; var ttl = document.createElementNS(ns, "title"); ttl.textContent = r.title || ""; title.appendChild(ttl);
+      g.appendChild(title);
+
+      var sub = document.createElementNS(ns, "text");
+      sub.setAttribute("x", p.x + 14); sub.setAttribute("y", p.y + 45);
+      sub.setAttribute("font-size", "11"); sub.setAttribute("fill", full ? "rgba(255,255,255,.85)" : "var(--muted)");
+      sub.setAttribute("font-family", "var(--font)");
+      sub.textContent = prog.total ? (prog.learned + "/" + prog.total + " chunks") : "not started";
+      g.appendChild(sub);
+
+      // mini progress
+      var track = document.createElementNS(ns, "rect");
+      track.setAttribute("x", p.x + 14); track.setAttribute("y", p.y + NH - 14);
+      track.setAttribute("width", NW - 28); track.setAttribute("height", 4); track.setAttribute("rx", 2);
+      track.setAttribute("fill", full ? "rgba(255,255,255,.35)" : "var(--line)"); g.appendChild(track);
+      if (prog.pct > 0 && !full) {
+        var fill = document.createElementNS(ns, "rect");
+        fill.setAttribute("x", p.x + 14); fill.setAttribute("y", p.y + NH - 14);
+        fill.setAttribute("width", (NW - 28) * prog.pct / 100); fill.setAttribute("height", 4); fill.setAttribute("rx", 2);
+        fill.setAttribute("fill", "var(--accent)"); g.appendChild(fill);
+      }
+      svg.appendChild(g);
+    });
+  })();
+
+  // ---- nav --------------------------------------------------------------
+  (function nav() {
+    var el = document.getElementById("nav");
+    el.innerHTML = REGIONS.map(function (r) {
+      var prog = regionProg(r.id);
+      var col = prog.total && prog.learned === prog.total ? "var(--good)" : prog.learned ? "var(--accent)" : "var(--line-strong)";
+      var here = STATE.you_are_here === r.id ? " here" : "";
+      return "<a class='navpill" + here + "' href='#region-" + esc(r.id) + "'>" +
+        "<span class='dot' style='background:" + col + "'></span>" + esc(r.title) + "</a>";
+    }).join("");
+  })();
+
+  // ---- due panel --------------------------------------------------------
+  (function due() {
+    var items = [];
+    CHUNKS.forEach(function (c) { if (c.reviews && isDue(c.reviews.next_due)) items.push({ t: "chunk", o: c }); });
+    GRAMMARS.forEach(function (g) { if (g.reviews && isDue(g.reviews.next_due)) items.push({ t: "grammar", o: g }); });
+    var panel = document.getElementById("due-panel");
+    if (!items.length) {
+      panel.innerHTML = "<h3>Reviews <span class='count-badge zero'>0</span></h3><p class='empty'>Nothing due today. Come back when items ripen.</p>";
+      return;
+    }
+    panel.classList.add("due-due");
+    var rows = items.map(function (it, i) {
+      var o = it.o;
+      var q = it.t === "grammar" ? ("Reconstruct the grammar of <b>" + esc(o.region) + "</b> from its variables.") : esc(o.recall_q || o.title);
+      var a = it.t === "grammar" ? esc(o.paragraph || "") : esc(o.recall_a || o.note || "");
+      var rg = "id " + esc(o.id);
+      return "<li class='due-item'><div class='q'>" + q + "</div>" +
+        "<details class='recall'><summary>reveal</summary><div class='ans'>" + a + "</div></details>" +
+        "<div class='meta'>" + (it.t === "grammar" ? "grammar · " : "chunk · ") + rg + " · due " + esc(o.reviews.next_due) + "</div></li>";
+    }).join("");
+    panel.innerHTML = "<h3>Reviews <span class='count-badge'>" + items.length + "</span></h3>" +
+      "<p class='empty'>Answer each from memory, then reveal. Tell your tutor easy / ok / hard so it can reschedule.</p>" +
+      "<ul class='due-list'>" + rows + "</ul>";
+  })();
+
+  // ---- region sections --------------------------------------------------
+  (function sections() {
+    var host = document.getElementById("sections");
+    host.innerHTML = REGIONS.map(function (r) {
+      var prog = regionProg(r.id);
+      var here = STATE.you_are_here === r.id;
+      var cs = chunksOf(r.id);
+      var chunkHtml = cs.length ? cs.map(renderChunk).join("") : "<p class='empty'>No chunks here yet — undived terrain.</p>";
+      var gram = grammarOf(r.id).map(renderGrammar).join("");
+      var openAttr = (here || prog.learned > 0) ? " open" : "";
+      return "<details class='region' id='region-" + esc(r.id) + "'" + openAttr + ">" +
+        "<summary><span class='caret'>▸</span>" +
+        "<span class='rtitle'>" + esc(r.title) + (r.summary ? "<small>" + esc(r.summary) + "</small>" : "") + "</span>" +
+        (r.core ? "<span class='core-badge'>core</span>" : "") +
+        (here ? "<span class='core-badge' style='color:var(--good);background:transparent;border:1px solid var(--good)'>here</span>" : "") +
+        "<span class='rprog'>" + prog.learned + "/" + prog.total + "</span>" +
+        "</summary><div class='body'>" + gram + "<ul class='chunks'>" + chunkHtml + "</ul></div></details>";
+    }).join("");
+    wireChunkSearch();
+  })();
+
+  function renderChunk(c) {
+    var ico = { learned: "<span class='status-ico s-learned'>✓</span>", learning: "<span class='status-ico s-learning'>◐</span>" }[c.status] ||
+      "<span class='status-ico s-locked'>○</span>";
+    var due = "";
+    if (c.reviews && c.reviews.next_due) {
+      var now = isDue(c.reviews.next_due);
+      due = "<span class='due-tag" + (now ? " now" : "") + "'>" + (now ? "review due" : "review " + esc(c.reviews.next_due)) + "</span>";
+    }
+    var recall = c.recall_q ? "<details class='recall'><summary>recall question</summary>" +
+      "<div class='ans'><b>Q.</b> " + esc(c.recall_q) + (c.recall_a ? "<br><b>A.</b> " + esc(c.recall_a) : "") + "</div></details>" : "";
+    var text = (c.title + " " + (c.note || "") + " " + (c.recall_q || "")).toLowerCase();
+    return "<li class='chunk' data-text=\"" + esc(text) + "\"><h4>" + ico + "<span>" + esc(c.title) + "</span>" + due + "</h4>" +
+      (c.note ? "<div class='note'>" + esc(c.note) + "</div>" : "") + recall + "</li>";
+  }
+
+  function renderGrammar(g) {
+    var vars = (g.variables || []).map(function (v) { return "<span class='var'>" + esc(v) + "</span>"; }).join("");
+    return "<div class='grammar'><div class='glabel'>Grammar — the generative core</div>" +
+      (vars ? "<div class='vars'>" + vars + "</div>" : "") +
+      "<div>" + esc(g.paragraph || "") + "</div></div>";
+  }
+
+  // ---- questions --------------------------------------------------------
+  (function questions() {
+    var panel = document.getElementById("questions-panel");
+    if (!QUESTIONS.length) { document.getElementById("questions-block").classList.add("hidden"); return; }
+    panel.innerHTML = "<h3>Open threads <span class='count-badge' style='background:var(--warn)'>" + QUESTIONS.length + "</span></h3>" +
+      "<ul class='due-list'>" + QUESTIONS.map(function (q) {
+        return "<li class='due-item'><div class='q'>" + esc(q.text) + "</div>" +
+          (q.added ? "<div class='meta'>parked " + esc(q.added) + "</div>" : "") + "</li>";
+      }).join("") + "</ul>";
+  })();
+
+  // ---- interactions -----------------------------------------------------
+  function jumpTo(rid) {
+    var el = document.getElementById("region-" + rid);
+    if (el) { el.open = true; el.scrollIntoView({ behavior: "smooth", block: "start" }); }
+  }
+  window.__learnJump = jumpTo;
+
+  function wireChunkSearch() {
+    var input = document.getElementById("search");
+    input.addEventListener("input", function () {
+      var q = input.value.trim().toLowerCase();
+      document.querySelectorAll(".region").forEach(function (reg) {
+        var any = false;
+        reg.querySelectorAll(".chunk").forEach(function (ch) {
+          var hit = !q || (ch.getAttribute("data-text") || "").indexOf(q) !== -1;
+          ch.classList.toggle("hidden", !hit); if (hit) any = true;
+        });
+        if (q) { reg.open = any; reg.classList.toggle("hidden", !any); }
+        else { reg.classList.remove("hidden"); }
+      });
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "/" && document.activeElement !== input) { e.preventDefault(); input.focus(); }
+    });
+  }
+
+  // due-only toggle
+  var dueOnly = false;
+  document.getElementById("due-only-btn").addEventListener("click", function () {
+    dueOnly = !dueOnly; this.classList.toggle("active", dueOnly);
+    document.querySelectorAll(".region").forEach(function (reg) {
+      var any = false;
+      reg.querySelectorAll(".chunk").forEach(function (ch) {
+        if (!dueOnly) { ch.classList.remove("hidden"); any = true; return; }
+        var tag = ch.querySelector(".due-tag.now"); ch.classList.toggle("hidden", !tag); if (tag) any = true;
+      });
+      reg.open = dueOnly ? any : reg.open;
+    });
+  });
+
+  document.getElementById("here-btn").addEventListener("click", function () {
+    if (STATE.you_are_here) jumpTo(STATE.you_are_here);
+  });
+  if (!STATE.you_are_here) document.getElementById("here-btn").classList.add("hidden");
+
+  // theme toggle with graceful storage
+  var store = (function () { try { return window.localStorage; } catch (e) { return null; } })();
+  var themeBtn = document.getElementById("theme-btn");
+  var saved = store && store.getItem("learn-theme");
+  if (saved) document.documentElement.setAttribute("data-theme", saved);
+  themeBtn.addEventListener("click", function () {
+    var cur = document.documentElement.getAttribute("data-theme");
+    var dark = cur ? cur === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var next = dark ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    if (store) try { store.setItem("learn-theme", next); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>

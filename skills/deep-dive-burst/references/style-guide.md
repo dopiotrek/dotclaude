@@ -1,8 +1,17 @@
 # Style Guide — Piotrek's Voice
 
-Distilled from exemplars in `deep-dives/style/`. This is the standing reference the critique loop reads every round. When the user adds or changes exemplars, re-distill this file — raw posts are the source, this is the compiled artifact.
+The standing reference the critique loop reads every round. It has two halves, and they're not the same thing:
 
-## The target voice
+- **My voice (Part A)** — how Piotrek actually sounds, distilled from his OWN published posts. This is the real target. It starts thin (few posts yet) and grows: re-distill it from `deep-dives/<subject>/posts/*.md` once 3+ posts exist, and refresh it every handful of posts after. A voice profile built from someone else's writing isn't your voice — so as real posts accumulate, Part A outweighs Part B.
+- **North star (Part B)** — writers Piotrek admires (the exemplars in `deep-dives/style/`). Direction, not a costume. Where Part A is thin, lean on Part B; where they conflict, Part A (his actual voice) wins. Never make a draft sound more like the north star but less like him.
+
+The rhythm and rules below apply to both — they're Piotrek's stated preferences.
+
+## Part A — My voice (from my own writing)
+
+> Not enough published posts yet to distill reliably. Until then, aim at the north star (Part B) and capture early signal from the voice-capture interview (see the skill). Re-distill this section from `posts/*.md` once 3+ posts exist — pull real sentence patterns, openings, recurring phrases, how he handles uncertainty and opinion. Quote actual lines from his posts as anchors.
+
+## Part B — North star (writers I admire)
 
 Paul Graham's essays plus observation-driven tech-Twitter. A person reasoning out loud, landing on a claim, willing to be wrong in public. Two moves define it:
 

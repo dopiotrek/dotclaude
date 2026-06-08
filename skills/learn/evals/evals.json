@@ -1,0 +1,44 @@
+{
+  "skill_name": "learn",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I keep wiring up OAuth2 / OIDC in my SvelteKit apps by copy-pasting config from the last project and praying. I want to actually understand it — authorization code flow, PKCE, what the tokens really are, why the redirects work the way they do. Teach me properly, from the ground up.",
+      "expected_output": "A first learning session: frames briefly, shows a terrain map of the whole OAuth2/OIDC domain (regions + one-sentence), generates a navigable map.html via build_map.py, then delivers ONE first chunk from first principles and stops to make the learner explain it back. A persistent state.json with a spaced-repetition schedule is created.",
+      "files": [],
+      "expectations": [
+        "Leads with a whole-domain terrain map or overview of all the major regions before deep-diving into any single one.",
+        "Generates a navigable HTML map artifact (map.html) via build_map.py that embeds the learn-state JSON and contains an inline SVG terrain.",
+        "Creates a well-formed state.json containing terrain.regions (>=4 regions) and a one_sentence summary of the whole domain.",
+        "Delivers a single first chunk and then stops to make the learner explain it back or answer a recall question, instead of dumping the whole topic in one response.",
+        "Establishes spaced-repetition scheduling (at least one chunk or grammar carries a next_due review date) rather than a generic linear study plan."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "We're weighing Kafka for the swissCRM event pipeline and I don't really understand it beyond buzzwords. I want to learn how it actually works — topics, partitions, offsets, consumer groups, the whole model — before I make an architecture call. Where do I start?",
+      "expected_output": "A first learning session that maps the Kafka terrain first, picks an opinionated starting region, generates the HTML map, and teaches one chunk with a recall gate. state.json with terrain regions and a review schedule is created.",
+      "files": [],
+      "expectations": [
+        "Leads with a whole-domain terrain map or overview of all the major regions before deep-diving into any single one.",
+        "Generates a navigable HTML map artifact (map.html) via build_map.py that embeds the learn-state JSON and contains an inline SVG terrain.",
+        "Creates a well-formed state.json containing terrain.regions (>=4 regions) and a one_sentence summary of the whole domain.",
+        "Delivers a single first chunk and then stops to make the learner explain it back or answer a recall question, instead of dumping the whole topic in one response.",
+        "Establishes spaced-repetition scheduling (at least one chunk or grammar carries a next_due review date) rather than a generic linear study plan."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I want to finally understand the linear algebra behind embeddings and attention — vectors, matrices, dot products, projections — the stuff that keeps showing up when I read about transformers. I learn best when I can see the whole map first. Start me off.",
+      "expected_output": "A first learning session that opens with the terrain map (honoring the explicit 'see the whole map first' request), generates the HTML map, and delivers one first-principles chunk with a recall gate. Persistent state.json with spaced repetition.",
+      "files": [],
+      "expectations": [
+        "Leads with a whole-domain terrain map or overview of all the major regions before deep-diving into any single one.",
+        "Generates a navigable HTML map artifact (map.html) via build_map.py that embeds the learn-state JSON and contains an inline SVG terrain.",
+        "Creates a well-formed state.json containing terrain.regions (>=4 regions) and a one_sentence summary of the whole domain.",
+        "Delivers a single first chunk and then stops to make the learner explain it back or answer a recall question, instead of dumping the whole topic in one response.",
+        "Establishes spaced-repetition scheduling (at least one chunk or grammar carries a next_due review date) rather than a generic linear study plan."
+      ]
+    }
+  ]
+}

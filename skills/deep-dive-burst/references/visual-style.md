@@ -51,3 +51,17 @@ Keep the primary action and current status always visible; everything optional i
 - **Post visual (for readers):** honesty of tone first. Clean and plain, not corporate-glossy — over-polished consultant charts signal fake expertise. A simple labelled chart, a tidy table, or a hand-drawn-style schema all fit the learner-notebook brand.
 
 Chart styling: follow NYT conventions — square bars (no rounded corners), thin axis/gridlines or none, direct labels on the data rather than a separate legend where possible, one accent plus greys, generous whitespace. Readable at a glance beats dense and decorated.
+
+### Pick the right form (default to the simplest that carries the point)
+
+Most of the time a **table** is the honest answer — reach for a chart only when the *shape* of the data is the point, not the numbers themselves.
+
+- **Table** — a handful of items compared on a few attributes; exact values matter; mixed types (text + numbers). Default here. (E.g. SpaceX segments × what-they-sell × who-pays.)
+- **Bar chart** — comparing one number across categories (ranking, magnitude). Horizontal bars when labels are long or there are many categories. (E.g. revenue by segment.)
+- **Line chart** — one or a few series changing over continuous time; the trend/direction is the point. (E.g. Falcon 9 launches per year.)
+- **Area chart** — only when a cumulative total or composition over time genuinely matters; otherwise prefer a line (area is easy to misread). Use sparingly.
+- **Stacked bar / 100% stacked** — parts of a whole across a few categories (composition). Cap at ~4–5 segments or it turns to mush.
+- **Scatter** — relationship between two numeric variables across many points. Rare for these posts.
+- **Simple schema / flow / 2×2 / spectrum** — relationships, positioning, or a sorting that isn't numeric at all. Often the strongest "one visual" for a learning post (e.g. a believe→skeptic spectrum of ambitions). Hand-drawn-style fits the brand.
+
+Rules of thumb: one chart makes one point — if it needs a legend of 6 colours, it's two charts. Never a pie chart with more than 2–3 slices (a bar is clearer). Don't chart 3 numbers you could just say in a sentence. If exact figures matter more than the trend, use a table. When unsure between a chart and a table, choose the table.
