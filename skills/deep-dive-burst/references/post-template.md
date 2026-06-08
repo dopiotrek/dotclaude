@@ -12,9 +12,9 @@ Every post, same six beats, same order. Readers should be able to predict the sh
 
 4. **What surprised me / what I got wrong.** Mandatory, even if small. This is the honesty beat and the differentiator from every analyst post on X. If a takeaway genuinely earns a place, it goes here as one sentence on top ("If you remember one thing: X. What I got wrong though: Y") — subordinate to the surprise, never replacing it.
 
-5. **Open loop.** Name the next question on the ladder. Every post ends pointing at the next one — this is the signature move that builds the series mechanically and gives readers a reason to follow rather than just like.
+5. **Next question.** Name the next question on the ladder. Every post ends pointing at the next one — this is the signature move that builds the series mechanically and gives readers a reason to follow rather than just like.
 
-6. **The Kitchen.** Fixed footer, fixed name. The ONE prompt that cracked this post's question + one line on what it did and which model/tool ran it. Framing: "this is what I asked" — never "run this to replicate my results" (model, date, and follow-ups make replication claims dishonest). Full log lives in `prompts.md`, linked for the rare reader who wants it.
+6. **"Prompts I used".** Fixed footer, fixed name. The ONE prompt that cracked this post's question + one line on what it did and which model/tool ran it. Framing: "this is what I asked" — never "run this to replicate my results" (model, date, and follow-ups make replication claims dishonest). Full log lives in `prompts.md`, linked for the rare reader who wants it.
 
 ## Banned moves
 
@@ -22,12 +22,12 @@ Every post, same six beats, same order. Readers should be able to predict the sh
 - More than one visual
 - Claims without a source (or without an explicit "my guess:" label)
 - Expert posture: recommendations, price targets, "investors should…" — the voice is "here's what I now understand", not "here's what you should do"
-- Prompt dumps — one prompt max in the Kitchen
+- Prompt dumps — one prompt max in the "Prompts I used" section
 - Closed endings — a post that doesn't name the next question is unfinished
 
 ## HEIT mapping (completeness check, not a replacement)
 
-Hook/Explain/Illustrate map to beats 1 and 3 — no post ships without a clear Explain and an Illustrate. But beats 4–5 (surprise + open loop) must never be swapped for a generic "Takeaway"; they are the signature. Pure HEIT produces interchangeable explainer content — exactly what this series is not.
+Hook/Explain/Illustrate map to beats 1 and 3 — no post ships without a clear Explain and an Illustrate. But beats 4–5 (surprise + next question) must never be swapped for a generic "Takeaway"; they are the signature. Pure HEIT produces interchangeable explainer content — exactly what this series is not.
 
 ## Voice rules
 
