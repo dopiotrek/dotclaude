@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{SUBJECT}} — {{RUNG}}</title>
+<style>
+  /* Technical Swiss: 4px grid, neutral palette, one accent (actions/progress only), mono for data. */
+  :root{
+    --bg:#ffffff; --panel:#ffffff; --subtle:#fafafa;
+    --ink:#18181b; --muted:#71717a; --faint:#a1a1aa; --line:#e4e4e7;
+    --accent:#2563eb;                               /* the single accent */
+    --ok:#16a34a; --now:#d97706; --todo:#d4d4d8;    /* small status dots only */
+    --mono:ui-monospace,SFMono-Regular,"Geist Mono",Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --z-dialog:50;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{--bg:#0c0c0d;--panel:#141416;--subtle:#1a1a1d;--ink:#f4f4f5;--muted:#a1a1aa;--faint:#71717a;--line:#27272a;--todo:#3f3f46;}
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1000px;margin:0 auto;padding:24px 24px 96px}
+  .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+  /* Header */
+  header.bar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+  header.bar h1{font-size:22px;line-height:1.2;margin:2px 0 0;text-wrap:balance}
+  .meta{display:flex;align-items:center;gap:8px;flex:none}
+  .tag{font-family:var(--mono);font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:3px 8px;white-space:nowrap}
+  .iconbtn{display:inline-grid;place-items:center;width:32px;height:32px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--muted);cursor:pointer}
+  .iconbtn:hover{color:var(--ink);border-color:var(--faint)}
+
+  /* Process stepper — the spine, always visible */
+  .process{margin:20px 0 0;border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:14px 16px}
+  .process .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .process .top h2{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-family:var(--mono);margin:0}
+  .process .top .pct{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .process .top .pct b{color:var(--ink)}
+  ol.steps{list-style:none;margin:0;padding:0;display:flex;gap:0;overflow-x:auto}
+  ol.steps li{flex:1 1 0;min-width:78px;position:relative;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;padding-top:4px}
+  ol.steps li .dot{width:14px;height:14px;border-radius:50%;background:var(--panel);border:2px solid var(--todo);z-index:1}
+  ol.steps li::before{content:"";position:absolute;top:11px;left:-50%;width:100%;height:2px;background:var(--todo)}
+  ol.steps li:first-child::before{display:none}
+  ol.steps li .name{font-size:12px;color:var(--muted);text-align:center;line-height:1.25}
+  ol.steps li.done .dot{background:var(--ok);border-color:var(--ok)}
+  ol.steps li.done::before{background:var(--ok)}
+  ol.steps li.done .name{color:var(--muted)}
+  ol.steps li.now .dot{background:var(--now);border-color:var(--now);box-shadow:0 0 0 4px color-mix(in srgb,var(--now) 20%,transparent)}
+  ol.steps li.now .name{color:var(--ink);font-weight:700}
+  ol.steps li:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+  /* Tabs */
+  .tabs{display:flex;gap:2px;margin:20px 0 0;border-bottom:1px solid var(--line);overflow-x:auto}
+  .tab{appearance:none;background:none;border:none;font:14px var(--sans);color:var(--muted);padding:10px 14px;cursor:pointer;
+    border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;display:flex;align-items:center;gap:7px}
+  .tab:hover{color:var(--ink)}
+  .tab[aria-selected="true"]{color:var(--ink);font-weight:600;border-bottom-color:var(--accent)}
+  .tab .count{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .panel{display:none;padding-top:18px}
+  .panel.active{display:block;animation:fade .15s ease-out}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  @media (prefers-reduced-motion:reduce){.panel.active{animation:none}}
+
+  /* Cards */
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .card+.card{margin-top:14px}
+  .card h2{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:0 0 10px;font-family:var(--mono);display:flex;align-items:center;justify-content:space-between}
+  .claim{border-left:3px solid var(--accent);padding-left:14px}
+  .claim .text{font-size:18px;line-height:1.45;font-weight:600;text-wrap:pretty}
+  .text{text-wrap:pretty}
+
+  /* Editor */
+  textarea{width:100%;min-height:480px;resize:vertical;border:1px solid var(--line);border-radius:10px;
+    padding:16px;background:var(--subtle);color:var(--ink);font:14px/1.7 var(--mono);outline:none}
+  textarea:focus{border-color:var(--accent)}
+  .toolbar{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+  button.act{font:13px var(--sans);border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:8px 12px;cursor:pointer}
+  button.act:hover{border-color:var(--faint)}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+  button.primary:hover{filter:brightness(.95)}
+  .toolbar .spacer{margin-left:auto}
+  .status{font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .hint{color:var(--muted);font-size:12.5px;margin:12px 0 0;text-wrap:pretty}
+  .research{white-space:pre-wrap;color:var(--ink);line-height:1.6;font-size:13.5px}
+  iframe{width:100%;height:440px;border:1px solid var(--line);border-radius:8px;background:#fff}
+  ul.check{margin:0;padding-left:18px;color:var(--ink);font-size:14px;line-height:1.7}
+  code{font-family:var(--mono);font-size:12.5px;color:var(--ink);background:var(--subtle);padding:1px 5px;border-radius:5px}
+
+  /* Tooltip */
+  .tip{position:relative;display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;border:1px solid var(--line);color:var(--faint);font-size:10px;font-family:var(--mono);cursor:help;margin-left:6px}
+  .tip:hover{color:var(--ink)}
+  .tip::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);right:-4px;width:230px;background:var(--ink);color:var(--bg);font:12px/1.45 var(--sans);padding:8px 10px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .12s ease-out;text-transform:none;letter-spacing:0;z-index:var(--z-dialog)}
+  .tip:hover::after{opacity:1}
+
+  /* Dialog */
+  dialog{border:1px solid var(--line);border-radius:14px;padding:0;max-width:520px;width:calc(100% - 32px);color:var(--ink);background:var(--panel)}
+  dialog::backdrop{background:rgba(0,0,0,.4)}
+  .dlg-h{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--line)}
+  .dlg-h h3{margin:0;font-size:15px}
+  .dlg-b{padding:16px;font-size:14px;line-height:1.6;color:var(--muted);text-wrap:pretty}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="bar">
+    <div>
+      <div class="eyebrow">Deep dive · {{TRACK}}</div>
+      <h1>{{SUBJECT}} — {{RUNG}}</h1>
+    </div>
+    <div class="meta">
+      <span class="tag">{{DATE}}</span>
+      <button class="iconbtn" aria-label="About this workspace" onclick="document.getElementById('about').showModal()">i</button>
+    </div>
+  </header>
+
+  <!-- PROCESS STEPPER (the spine) -->
+  <div class="process">
+    <div class="top">
+      <h2>Process</h2>
+      <div class="pct"><b id="stageCount">0/0</b> · <span id="ringPct">0%</span></div>
+    </div>
+    <!-- {{STAGES}} injects <li> items. class: done | now | todo. Structure:
+         <li class="now"><span class="dot"></span><span class="name">Research</span></li>
+         JS maps each step to a tab by its name. -->
+    <ol class="steps" id="steps">{{STAGES}}</ol>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs" role="tablist" aria-label="Workspace sections">
+    <button class="tab" role="tab" id="tab-overview" aria-controls="p-overview" aria-selected="true">Overview</button>
+    <button class="tab" role="tab" id="tab-research" aria-controls="p-research" aria-selected="false">Research</button>
+    <button class="tab" role="tab" id="tab-visuals"  aria-controls="p-visuals"  aria-selected="false">Visuals</button>
+    <button class="tab" role="tab" id="tab-draft"    aria-controls="p-draft"    aria-selected="false">Draft <span class="count" id="wc">0w</span></button>
+    <button class="tab" role="tab" id="tab-ship"     aria-controls="p-ship"     aria-selected="false">Ship</button>
+  </div>
+
+  <!-- OVERVIEW -->
+  <section class="panel active" id="p-overview" role="tabpanel" aria-labelledby="tab-overview">
+    <div class="card claim">
+      <h2>My claim · the view this post argues
+        <span class="tip" data-tip="One claim, argued — not a complete explanation. Empty here means the burst has no angle yet, and there's no post.">?</span>
+      </h2>
+      <div class="text">{{CLAIM}}</div>
+    </div>
+    <div class="card">
+      <h2>The question</h2>
+      <div class="text" style="font-size:16px">{{QUESTION}}</div>
+    </div>
+    <div class="card">
+      <h2>Foundation
+        <span class="tip" data-tip="The bedrock the subject rests on, in one plain sentence. Set before anything narrow.">?</span>
+      </h2>
+      <div class="text" style="font-size:15px">{{FOUNDATION}}</div>
+    </div>
+  </section>
+
+  <!-- RESEARCH -->
+  <section class="panel" id="p-research" role="tabpanel" aria-labelledby="tab-research">
+    <div class="card">
+      <h2>Brief &amp; findings</h2>
+      <div class="research">{{RESEARCH}}</div>
+      <p class="hint">Source of truth: <code>research/{{RUNG_SLUG}}.md</code></p>
+    </div>
+  </section>
+
+  <!-- VISUALS (rendered inline — no separate file) -->
+  <section class="panel" id="p-visuals" role="tabpanel" aria-labelledby="tab-visuals">
+    <div class="card">
+      <h2>Learning visuals
+        <span class="tip" data-tip="Built only from researched data, sources noted. Mark one as the post visual — keep it clean, not glossy.">?</span>
+      </h2>
+      {{VISUALS_EMBED}}
+    </div>
+  </section>
+
+  <!-- DRAFT -->
+  <section class="panel" id="p-draft" role="tabpanel" aria-labelledby="tab-draft">
+    <div class="card">
+      <h2>Draft <span class="status num" id="wc2">0 words</span></h2>
+      <textarea id="draft" placeholder="Six beats: hook · question · answer + one visual · what surprised me · open loop · the Kitchen.">{{DRAFT}}</textarea>
+      <div class="toolbar">
+        <button class="act primary" onclick="copyDraft()">Copy draft</button>
+        <button class="act" onclick="downloadDraft()">Download .md</button>
+        <button class="act" onclick="resetDraft()" aria-label="Reset editor to file version">Reset</button>
+        <span class="status spacer" id="status">autosaving locally…</span>
+      </div>
+      <p class="hint">Canonical draft: <code>posts/{{RUNG_SLUG}}.md</code>. This editor autosaves to your browser only — hit <b>Copy draft</b> and let the skill write it back.</p>
+    </div>
+  </section>
+
+  <!-- SHIP -->
+  <section class="panel" id="p-ship" role="tabpanel" aria-labelledby="tab-ship">
+    <div class="card">
+      <h2>Ship checklist</h2>
+      <ul class="check">
+        <li>Cross-post set: Substack full post + X (article / thread / single tweet / quote-tweet — match the idea)</li>
+        <li>One short standalone X post: the single most surprising fact + link</li>
+        <li>Promote one learning visual to the post visual, restyled clean-not-glossy</li>
+        <li>Update <code>series-state.md</code>: tick the rung, move to Published with link, set next question</li>
+        <li>Confirm <code>prompts.md</code> updated; pick the Kitchen prompt</li>
+      </ul>
+      <p class="hint">Publishing itself is manual — paste into Substack and X yourself.</p>
+    </div>
+  </section>
+
+</div>
+
+<dialog id="about">
+  <div class="dlg-h"><h3>About this workspace</h3>
+    <button class="iconbtn" aria-label="Close" onclick="document.getElementById('about').close()">✕</button></div>
+  <div class="dlg-b">
+    One page for one burst. The <b>Process</b> bar shows where you are; the tabs hold the work for each stage.
+    The markdown files stay canonical — this page is a dashboard plus a scratch editor. The draft textarea autosaves
+    to <em>this browser only</em>; the source of truth is <code>posts/{{RUNG_SLUG}}.md</code>. Use <b>Copy draft</b>
+    to round-trip your writing back through the skill so the trail and git history stay intact.
+  </div>
+</dialog>
+
+<script>
+  // ---------- Tabs ----------
+  const tabs=[...document.querySelectorAll('[role=tab]')];
+  const TABKEY="deepdive:{{SUBJECT_SLUG}}:{{RUNG_SLUG}}:tab";
+  function selectTab(id,store=true){
+    tabs.forEach(t=>{
+      const on=t.id===id; t.setAttribute('aria-selected',on);
+      document.getElementById(t.getAttribute('aria-controls')).classList.toggle('active',on);
+    });
+    if(store) localStorage.setItem(TABKEY,id);
+  }
+  tabs.forEach((t,i)=>{
+    t.addEventListener('click',()=>selectTab(t.id));
+    t.addEventListener('keydown',e=>{
+      if(e.key==='ArrowRight'||e.key==='ArrowLeft'){
+        e.preventDefault();
+        const n=(i+(e.key==='ArrowRight'?1:tabs.length-1))%tabs.length;
+        tabs[n].focus(); selectTab(tabs[n].id);
+      }
+    });
+  });
+
+  // ---------- Process stepper: status + progress, click to jump to the right tab ----------
+  const STAGE_TAB={shape:'tab-overview',frame:'tab-overview',research:'tab-research',gate:'tab-overview',
+                   draft:'tab-draft',critique:'tab-draft',ship:'tab-ship'};
+  (function(){
+    const items=[...document.querySelectorAll('#steps li')];
+    const total=items.length, done=items.filter(li=>li.classList.contains('done')).length;
+    const pct=total?Math.round(done/total*100):0;
+    document.getElementById('ringPct').textContent=pct+'%';
+    document.getElementById('stageCount').textContent=done+'/'+total;
+    items.forEach((li,idx)=>{
+      const key=(li.textContent||'').trim().toLowerCase().split(/\s+/)[0];
+      const tab=STAGE_TAB[key];
+      li.tabIndex=0; li.setAttribute('role','button');
+      li.setAttribute('aria-label','Stage '+(idx+1)+': '+li.textContent.trim());
+      const go=()=>{ if(tab) selectTab(tab); };
+      li.addEventListener('click',go);
+      li.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
+    });
+    // On first open, land on the current stage's tab.
+    const now=items.find(li=>li.classList.contains('now'));
+    const stored=localStorage.getItem(TABKEY);
+    if(stored && document.getElementById(stored)) selectTab(stored,false);
+    else if(now){ const k=now.textContent.trim().toLowerCase().split(/\s+/)[0]; if(STAGE_TAB[k]) selectTab(STAGE_TAB[k],false); }
+  })();
+
+  // ---------- Draft persistence (convenience only; posts/<rung>.md is canonical) ----------
+  const KEY="deepdive:{{SUBJECT_SLUG}}:{{RUNG_SLUG}}:draft";
+  const ta=document.getElementById('draft'), status=document.getElementById('status');
+  const wc=document.getElementById('wc'), wc2=document.getElementById('wc2');
+  const fileVersion=ta.value;
+  const saved=localStorage.getItem(KEY);
+  if(saved!==null && saved!==fileVersion){ta.value=saved;status.textContent='restored local work';}
+  function count(){const n=ta.value.trim()?ta.value.trim().split(/\s+/).length:0;wc.textContent=n+'w';wc2.textContent=n+' word'+(n===1?'':'s');}
+  let t; ta.addEventListener('input',()=>{count();clearTimeout(t);t=setTimeout(()=>{localStorage.setItem(KEY,ta.value);status.textContent='saved '+new Date().toLocaleTimeString();},400);});
+  function copyDraft(){navigator.clipboard.writeText(ta.value).then(()=>status.textContent='copied — paste back to the skill');}
+  function downloadDraft(){const b=new Blob([ta.value],{type:'text/markdown'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='{{RUNG_SLUG}}.md';a.click();URL.revokeObjectURL(a.href);}
+  function resetDraft(){if(confirm('Replace editor contents with the file version?')){ta.value=fileVersion;localStorage.removeItem(KEY);count();status.textContent='reset to file version';}}
+  count();
+</script>
+</body>
+</html>

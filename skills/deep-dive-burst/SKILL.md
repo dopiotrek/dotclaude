@@ -65,9 +65,11 @@ The first time a subject is worked on, lay out its folder in one explicit, idemp
 deep-dives/<subject>/
 ├── series-state.md     # the index: track, ladder, what's published, what's next
 ├── prompts.md          # prompt log; the Kitchen pulls from here
-├── research/           # one <rung-slug>.md per rung: brief + findings (the trail)
+├── research/           # per rung: <rung>.md (brief + findings — the trail)
 │   └── .gitkeep
-└── posts/              # one <rung-slug>.md per post (working draft → final)
+└── posts/              # per post: <rung>.md (draft → final, CANONICAL) +
+                        #           <rung>-workspace.html (ONE self-contained burst page: stages, research,
+                        #           inline visuals, scratch editor — everything in a single file)
 ```
 
 Seed `series-state.md` from this template, filled from the Shape output:
@@ -91,6 +93,24 @@ Foundation: <the one plain-sentence base from Shape>
 
 `series-state.md` is the single source of truth for "where am I" — it's what you read at the start of every future burst and what you update at Ship. Keep the ladder checkboxes and the Published list current; that's what makes the series glanceable months later. After scaffolding, tell the user the paths you created so they can open them.
 
+## Visuals (HTML) — build them after the facts, never before
+
+The user learns visually and wants graphics for two jobs: to understand, and to accompany posts. Both live **inline in the burst workspace's Visuals tab** — do not create separate visual files. One self-contained HTML per burst holds everything.
+
+**Learning visuals (for understanding, right after research).** Once findings are in (end of Phase 2, before or at the gate), generate as many as help: charts (Chart.js from CDN), comparison tables (plain HTML), schemas / flow diagrams (inline SVG or Mermaid from CDN). Render them directly into the workspace's Visuals tab by filling `{{VISUALS_EMBED}}`. Build them ONLY from researched data, note the source next to each figure, and never invent numbers — if data is missing, leave the gap visible and labelled. Accuracy over polish; seeing the shape of what was learned helps the user pass the gate.
+
+**Post visual (for readers, during Draft/Critique).** Exactly one per post — the template's one-visual rule stands. Pick the single learning visual that best carries the claim and mark it in the Visuals tab as "post visual"; keep it clean and plain, not corporate-glossy (consultant-style charts signal the fake expertise the method avoids — a simple labelled chart, tidy table, or hand-drawn-style schema fits the learner-notebook brand). To upload it, export that one to PNG (screenshot or a small export button); no separate file needs to persist.
+
+Timing rule in one line: visuals follow facts. Nothing at the very start (no data = inventing); generate learning visuals when research lands; mark the one post visual once the claim is set.
+
+## The burst workspace (one HTML to see everything)
+
+The user wants a single page that shows the whole burst at a glance — stages, the question, foundation and claim, the research brief + findings, the learning visuals, and a scratch editor to write the draft in. Generate it from `references/workspace.html` into `posts/<rung-slug>-workspace.html` at burst start, and refresh it as the burst progresses (after research lands, after the claim is set, when stages flip). It is ONE self-contained file — fill the `{{...}}` placeholders from the burst's files and render the learning visuals inline into `{{VISUALS_EMBED}}` (charts/tables/SVG directly in the markup, no external file), or drop in a "not generated yet" line.
+
+**Canonical-source rule (don't break this):** the markdown files stay the source of truth. The workspace's textarea is a convenience editor that autosaves to the browser only — it cannot write to disk on its own. When the user finishes writing there, they hit "Copy draft" and you write it into `posts/<rung-slug>.md`. Never treat the textarea's browser-saved copy as canonical; always round-trip the real draft through the `.md` so the trail and git history stay intact. Regenerating the workspace re-reads the `.md`, so the file is always the anchor.
+
+Keep it simple for now — a plain textarea, no rich editor. If the user later wants real save-to-disk, that needs a small local server and is a deliberate next step, not a default.
+
 ## Show the user where they stand
 
 At burst start, create a visible phase checklist so the user can always see progress at a glance. Use the native todo/task list (it renders live in the Claude Code terminal) — don't hand-draw ASCII boxes that fall out of sync. Seed it with the six phases of THIS burst, naming the actual question:
@@ -102,7 +122,7 @@ At burst start, create a visible phase checklist so the user can always see prog
 5. Critique loop — iterate to shippable
 6. Ship — cross-post, update state
 
-Mark exactly one phase in-progress at a time and flip it to done the moment it closes, before announcing the next. The gate (3) and the critique loop (5) are the phases the user most wants to see status on, so keep those current. If the burst splits across two sessions, the checklist carries the state — show it again at the top of the second session so the user picks up where they stopped.
+Mark exactly one phase in-progress at a time and flip it to done the moment it closes, before announcing the next. Keep the burst workspace's Stages section in sync with this checklist when you refresh it. The gate (3) and the critique loop (5) are the phases the user most wants to see status on, so keep those current. If the burst splits across two sessions, the checklist carries the state — show it again at the top of the second session so the user picks up where they stopped.
 
 ## Three ways a burst starts
 
@@ -159,6 +179,8 @@ Keep the timebox honest: if the user is 60+ minutes in and drifting into adjacen
 
 Log every substantive prompt/query used into `prompts.md` with one line on what it produced. The user publishes their best prompt in each post's Kitchen footer, so this log is content, not bookkeeping.
 
+When findings are in, offer to generate **learning visuals** inline in the workspace's Visuals tab (see "Visuals"). For a visual learner this is often where the topic clicks — a schema of who-pays-whom, a table comparing competitors, a chart of the numbers found. Built only from researched data with sources noted. Optional per burst but usually worth it.
+
 ### Phase 3 — The Gate (hard stop)
 Before any drafting or editing happens, the user must write their one-paragraph answer to the question **from memory, with no notes or AI output visible**. Ask for it explicitly and wait. Do not proceed to Phase 4–5 work without it — this is the single most important enforcement in the skill, because it's the rabbit-hole defense and the proof of learning.
 
@@ -167,7 +189,7 @@ When they paste it, run the Hole-finder pass: identify factual errors, missing l
 Then, before drafting, run the **so-what push once on the gate paragraph**: the from-memory answer is almost always pure explanation (that's fine, it proves understanding). Ask "now — so what do YOU think about this?" and get a one-line claim out of them, written next to the foundation. That claim is the spine of the draft. Drafting an explainer-shaped post is far harder to fix later than extracting the view now, so do it here.
 
 ### Phase 4 — Draft (45–60 min, hands off)
-The user writes. Your involvement is limited to answering factual questions ("what was that margin number again?") and pointing them at the template (`references/post-template.md`). Do not produce sentences for the post body, do not "give them a starting point", do not outline it for them — the six-beat template IS the outline. This includes example sentences offered "just as illustration": describing what a beat does ("the hook names the gap between owning and understanding") is fine; writing words that could be pasted into the post is not. Quoting the template's own canonical examples from `references/post-template.md` is the one exception.
+The user writes — in the workspace's scratch editor (`posts/<rung-slug>-workspace.html`) or straight in the `.md`, their choice. When they finish in the editor, they hit "Copy draft" and you save it to `posts/<rung-slug>.md` (canonical). The user writes. Your involvement is limited to answering factual questions ("what was that margin number again?") and pointing them at the template (`references/post-template.md`). Do not produce sentences for the post body, do not "give them a starting point", do not outline it for them — the six-beat template IS the outline. This includes example sentences offered "just as illustration": describing what a beat does ("the hook names the gap between owning and understanding") is fine; writing words that could be pasted into the post is not. Quoting the template's own canonical examples from `references/post-template.md` is the one exception.
 
 ### Phase 5 — Critique loop (comment, never rewrite)
 Iterate critique rounds with the user until the draft is *shippable* — not perfect. Each round: numbered comments tied to specific lines, never a rewritten version, never "here's a cleaner way to phrase the whole section". Suggesting a replacement for a single clunky sentence is fine when asked; replacing paragraphs is not.
@@ -175,6 +197,8 @@ Iterate critique rounds with the user until the draft is *shippable* — not per
 **The ship bar (what you check every round):** all six beats present (hook / question / answer + exactly one visual / what surprised me / open loop / Kitchen) · every jargon term translated in one line · every claim sourced or marked as the user's own guess — each unsourced factual claim (numbers especially: market shares, revenue splits, percentages) gets its own numbered comment naming the claim, never just a passing mention · no expert posture ("investors should…" is banned; "here's what I now understand" is the voice) · under 1000 words · open loop names a real next-rung question · Kitchen has exactly ONE prompt with one line of context, framed as "this is what I asked", never as a replication promise.
 
 **Explicitly NOT the bar — never flag these:** grammar slips, incomplete sentences, abrupt transitions, informal phrasing. The target tone is conversational, with unfinished thoughts left visible sometimes. That's the style, not a defect. Critiquing the user toward polished prose is a failure of this skill.
+
+**Lock the post visual.** From the learning visuals in the workspace's Visuals tab, mark the single one that best carries the post's claim as the post visual, restyle it clean-not-glossy, and export it to PNG for upload. One visual only. If none fits the claim, a simple new one or a hand-drawn-style schema is fine — accuracy and honesty of tone over polish.
 
 **Voice and originality checks (every round, these matter more than structure):**
 - **Source ventriloquism**: quote any sentence that sounds like the 10-K, an analyst note, or a Wikipedia summary rather than the user, and ask directly: "is this what YOU think, or what you read?" Reported views must be attributed; the rest must sound like a person.

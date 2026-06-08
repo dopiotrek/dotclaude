@@ -8,7 +8,7 @@ Every post, same six beats, same order. Readers should be able to predict the sh
 
 2. **The question.** Stated in one plain sentence. This is the burst's framed question, verbatim or near it.
 
-3. **The answer at my current level.** What the user now understands, in their own words, with exactly **one visual** (Excalidraw-style diagram, screenshot, or chart). One — not zero, not two. The hand-drawn learner's-notebook aesthetic is deliberate: polished consulting charts signal fake expertise.
+3. **The answer at my current level.** What the user now understands, in their own words, with exactly **one visual** — one, not zero, not two. It's chosen during draft/critique from the learning visuals in the workspace's Visuals tab (the rest stay there for understanding) and restyled clean-not-glossy. Hand-drawn schema, simple labelled chart, or tidy table all fit; polished consulting charts signal fake expertise.
 
 4. **What surprised me / what I got wrong.** Mandatory, even if small. This is the honesty beat and the differentiator from every analyst post on X. If a takeaway genuinely earns a place, it goes here as one sentence on top ("If you remember one thing: X. What I got wrong though: Y") — subordinate to the surprise, never replacing it.
 
