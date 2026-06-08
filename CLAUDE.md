@@ -25,6 +25,8 @@
 - For "apply X everywhere" tasks (layout, padding, token, weight, component pattern), grep/glob for ALL occurrences first, list them, change each, then re-grep to prove zero of the old pattern remain. Never claim full coverage based only on the cases you happened to edit.
 - Treat the user's domain knowledge as authoritative: if they say the numbers/data are correct, don't build heuristics that flag them as suspicious. Verify claims against the running app (screenshot/observe), not solely against your own DB/file reads or theory.
 - When following an example or porting from another codebase, copy the intent, not every detail. Default to the simplest interaction that meets the need; if you carry over a heavy behavior from a reference, call it out so it can be opted out of.
+- Before implementing a metric/stat/calculation, restate exactly which inputs feed it and confirm the definition before coding — don't assume (e.g. passive income ≠ total investment return). One line, then proceed.
+- When fanning out work to multiple subagents (design-system ports, audits, migrations), scope each to one self-contained slice with a clear contract, and require a passing type-check on that slice before integrating it — never merge a slice you haven't seen compile.
 
 ## Things to Never Do
 
@@ -36,6 +38,8 @@
 - Never generate fake/placeholder data in production code
 - Never assert "the page is stale" or "should be empty" without confirming it in the live app first
 - Never re-derive a fact a source already carries authoritatively (e.g. an `asset_class` column) with name/keyword heuristics — use the existing column
+- Never delete a file/module during cleanup without first grepping the repo for imports/usages of it — over-deletion of still-referenced modules has broken pages before
+- When a reported error can't be reproduced, suspect a stale dev server, build cache, or stale HMR state before deep-diving the code — restart/hard-reload first, then investigate
 
 ## Security Boundaries
 

@@ -129,23 +129,43 @@ def send_notification(title: str, message: str) -> None:
         pass
 
 
+def write_log(project_root: Path, output: str) -> None:
+    """Persist verification output so it can be read after the turn ends."""
+    try:
+        log_dir = project_root / ".claude" / "logs"
+        log_dir.mkdir(parents=True, exist_ok=True)
+        (log_dir / "last-verify.txt").write_text(output.strip() + "\n")
+    except Exception:
+        pass  # Background — never crash on logging
+
+
 def do_work():
-    """Run checks and write results file."""
+    """Run checks, persist results, and notify with pass/fail status."""
     project_root = find_project_root()
 
-    # Always notify when Claude stops, regardless of checks
-    send_notification("Claude", "Done ✓")
-
+    # No project (or no applicable checks) — just confirm Claude stopped.
     if not project_root:
+        send_notification("Claude", "Done ✓")
         return
 
     checks = detect_checks(project_root)
     if not checks:
+        send_notification("Claude", "Done ✓")
         return
 
     results = [run_check(name, cmd, project_root, timeout) for name, cmd, timeout in checks]
 
     output = format_results(results)
+    write_log(project_root, output)
+
+    # Notification reflects the actual check status, not just "stopped".
+    failed = [r for r in results if not r["success"]]
+    if failed:
+        names = ", ".join(r["name"] for r in failed)
+        send_notification("Claude", f"❌ {names} failed — see .claude/logs/last-verify.txt")
+    else:
+        send_notification("Claude", "Done ✓ — all checks passed")
+
     if output:
         print(output)
 

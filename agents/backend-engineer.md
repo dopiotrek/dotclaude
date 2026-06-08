@@ -73,25 +73,28 @@ When implementing SvelteKit backend features, you will:
 
 ```typescript
 // +page.server.ts
-import type { PageServerLoad } from './$types';
-import { error } from '@sveltejs/kit';
+import type { PageServerLoad } from "./$types";
+import { error } from "@sveltejs/kit";
 
 export const load: PageServerLoad = async ({ params, locals, setHeaders }) => {
-	try {
-		// Parallel data fetching
-		const [userData, posts] = await Promise.all([fetchUser(params.id), fetchUserPosts(params.id)]);
+  try {
+    // Parallel data fetching
+    const [userData, posts] = await Promise.all([
+      fetchUser(params.id),
+      fetchUserPosts(params.id),
+    ]);
 
-		return {
-			user: userData,
-			posts,
-			// Stream additional data
-			streamed: {
-				comments: fetchComments(params.id)
-			}
-		};
-	} catch (err) {
-		throw error(404, 'User not found');
-	}
+    return {
+      user: userData,
+      posts,
+      // Stream additional data
+      streamed: {
+        comments: fetchComments(params.id),
+      },
+    };
+  } catch (err) {
+    throw error(404, "User not found");
+  }
 };
 ```
 
@@ -99,27 +102,27 @@ export const load: PageServerLoad = async ({ params, locals, setHeaders }) => {
 
 ```typescript
 // +page.server.ts
-import type { Actions } from './$types';
-import { fail, redirect } from '@sveltejs/kit';
+import type { Actions } from "./$types";
+import { fail, redirect } from "@sveltejs/kit";
 
 export const actions: Actions = {
-	create: async ({ request, locals }) => {
-		const data = await request.formData();
+  create: async ({ request, locals }) => {
+    const data = await request.formData();
 
-		// Validate input
-		const validation = validateFormData(data);
-		if (!validation.success) {
-			return fail(400, {
-				errors: validation.errors,
-				values: Object.fromEntries(data)
-			});
-		}
+    // Validate input
+    const validation = validateFormData(data);
+    if (!validation.success) {
+      return fail(400, {
+        errors: validation.errors,
+        values: Object.fromEntries(data),
+      });
+    }
 
-		// Process action
-		const result = await createResource(validation.data);
+    // Process action
+    const result = await createResource(validation.data);
 
-		throw redirect(303, `/resource/${result.id}`);
-	}
+    throw redirect(303, `/resource/${result.id}`);
+  },
 };
 ```
 
@@ -174,6 +177,7 @@ export const actions: Actions = {
 ## Quality Assurance
 
 You will:
+- **Run the type-checker on your changes** (`pnpm check` / `svelte-check`) before reporting done, and paste the result. Never claim type-safety on the basis that it "should" compile — run it. If you handled only one slice of a larger change, that slice must compile cleanly on its own.
 - Verify all server-side logic handles edge cases and errors
 - Ensure proper TypeScript types are used throughout
 - Implement comprehensive input validation and sanitization

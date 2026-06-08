@@ -42,7 +42,8 @@ The user's series lives in a `deep-dives/` folder in their workspace:
 
 ```
 deep-dives/
-├── playbook.md              # the method — read it at burst start
+├── playbook.md              # the method narrative — read at burst start
+├── config.yaml              # the knobs that change (channels, accent, tools, cadence) — read at burst start
 ├── style/                   # exemplar posts by authors the user admires — used in the critique loop
 └── <company>/
     ├── series-state.md      # which questions are published, links, next question
@@ -51,7 +52,7 @@ deep-dives/
     └── posts/               # one .md per published post
 ```
 
-The `<subject>/` folder is any subject — a company on the company track, a topic on the curiosity track (e.g. `amsterdam-traffic/`). There is no default subject; never assume one. At the start of any burst: read `playbook.md` and, if it exists, the subject's `series-state.md`. If no subject folder or state file exists, treat it as a true cold start — ask the user what they want to dive into; do not infer a subject from leftover files, examples in the playbook, or this skill's own illustrations. If the subject folder doesn't exist yet, run the scaffolding step (see "Scaffolding a new subject") before Phase 1. Always know — and tell the user — which question is next before doing anything else.
+The `<subject>/` folder is any subject — a company on the company track, a topic on the curiosity track (e.g. `amsterdam-traffic/`). There is no default subject; never assume one. At the start of any burst: read `playbook.md`, `config.yaml` (if present), and, if it exists, the subject's `series-state.md`. **Config separates the changeable values from the stable method** (the same split that keeps a model's assumptions out of its formulas): the method lives in this skill; the user's channels, accent colour, research tools, cadence, and voice pointers live in `config.yaml`. Use config values where they apply — research tool order, Ship channels, the workspace accent — and fall back to sensible defaults if a key or the file is missing. Never hardcode a value into the skill that belongs in config. If no subject folder or state file exists, treat it as a true cold start — ask the user what they want to dive into; do not infer a subject from leftover files, examples in the playbook, or this skill's own illustrations. If the subject folder doesn't exist yet, run the scaffolding step (see "Scaffolding a new subject") before Phase 1. Always know — and tell the user — which question is next before doing anything else.
 
 **Company ladder** (a company owned or on the watchlist) — Act I, The Thing: *Why I care* (or why I'm eyeing it), *What they sell* (& who pays), *Where they sit* (in the chain). Act II, The Machine: *How it works* (the tech), *How they make money*. Act III, The Bet: *What could kill it*, *My lens* (one chosen lens), *What I got wrong* (the retro — for a watchlist name, also where the buy/pass call lands).
 
@@ -105,7 +106,7 @@ Timing rule in one line: visuals follow facts. Nothing at the very start (no dat
 
 ## The burst workspace (one HTML to see everything)
 
-The user wants a single page that shows the whole burst at a glance — stages, the question, foundation and claim, the research brief + findings, the learning visuals, and a scratch editor to write the draft in. Generate it from `references/workspace.html` into `posts/<rung-slug>-workspace.html` at burst start, and refresh it as the burst progresses (after research lands, after the claim is set, when stages flip). It is ONE self-contained file — fill the `{{...}}` placeholders from the burst's files and render the learning visuals inline into `{{VISUALS_EMBED}}` (charts/tables/SVG directly in the markup, no external file), or drop in a "not generated yet" line.
+The user wants a single page that shows the whole burst at a glance — stages, the question, foundation and claim, the research brief + findings, the learning visuals, and a scratch editor to write the draft in. Generate it from `references/workspace.html` into `posts/<rung-slug>-workspace.html` at burst start, and refresh it as the burst progresses (after research lands, after the claim is set, when stages flip). It is ONE self-contained file — fill the `{{...}}` placeholders from the burst's files (use `{{ACCENT}}` from config's `workspace.accent_color`, default `#2563eb`) and render the learning visuals inline into `{{VISUALS_EMBED}}` (charts/tables/SVG directly in the markup, no external file), or drop in a "not generated yet" line.
 
 **Canonical-source rule (don't break this):** the markdown files stay the source of truth. The workspace's textarea is a convenience editor that autosaves to the browser only — it cannot write to disk on its own. When the user finishes writing there, they hit "Copy draft" and you write it into `posts/<rung-slug>.md`. Never treat the textarea's browser-saved copy as canonical; always round-trip the real draft through the `.md` so the trail and git history stay intact. Regenerating the workspace re-reads the `.md`, so the file is always the anchor.
 
@@ -211,7 +212,7 @@ Iterate critique rounds with the user until the draft is *shippable* — not per
 ### Phase 6 — Ship (15 min)
 Publishing itself is manual (Substack + X paste) — do not offer to automate it. Your job:
 
-1. Produce the cross-post set FROM the user's final text. Substack gets the full post. For X, match format to the idea rather than defaulting — Twitter has its own laws:
+1. Produce the cross-post set FROM the user's final text, aimed at the channels in `config.yaml` (canonical home, X handle, allowed formats). The canonical channel gets the full post. For X, match format to the idea rather than defaulting — Twitter has its own laws:
    - **X article** — when the idea needs the full argument to land (most ladder posts).
    - **Thread** — when the post breaks cleanly into 3–5 beats that each stand alone; lead with the sharpest line, not a "🧵 here's what I learned" warm-up.
    - **Single tweet** — when one observation or surprising fact carries the whole thing. Often the strongest move; don't pad an idea into a thread because a thread feels like more effort.

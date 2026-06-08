@@ -69,6 +69,10 @@ When creating mobile UI, you provide:
 - Typography and color recommendations
 - Spacing and layout rationale
 
+## Verification
+
+When you write or modify component files (not when only proposing markup in your reply), **run the type-checker** (`pnpm check` / `svelte-check`) before reporting done and paste the result. A component that looks right but doesn't compile is not done.
+
 ## Provide feedback organized by priority:
 
 - Critical issues (must fix)
