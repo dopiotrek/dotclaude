@@ -1,0 +1,44 @@
+{
+  "last_mined": "2026-06-10",
+  "patterns": {
+    "agent claims 'applied everywhere' but instances remain": [
+      "5e8afb29-7f82-43a7-b62e-a1be4805b634",
+      "da08404c-12b5-4420-b788-52809bef250a",
+      "f3820f04-dd9c-46a0-a574-d7830a439691"
+    ],
+    "agent declares fix done without verifying in the running app": [
+      "1fe0c070-e848-48a5-95e4-4281a35d8fbf",
+      "5e8afb29-7f82-43a7-b62e-a1be4805b634",
+      "da08404c-12b5-4420-b788-52809bef250a",
+      "ec7f03d7-5952-450e-8c2c-4d67ad838988"
+    ],
+    "agent works from stale spec/skill file after user updated it": [
+      "0fd3eee8-92eb-4e63-b870-4b21f12f1ed4",
+      "3047e92a-44fc-495e-a367-a20cfb20fc43",
+      "7fd5ccb9-80d3-4f25-afdf-af8c4e3d8c6f"
+    ],
+    "agent asserts code is absent based on a single grep (false negative)": [
+      "adf5b5fd-6643-4067-add0-6d76275d5854",
+      "e442e48a-0b57-4b62-8d93-1ba1f27f6039"
+    ],
+    "agent leaves worktrees/branches dangling after merge": [
+      "661bc58a-9458-4df7-b1d9-44176ed9548c",
+      "adf5b5fd-6643-4067-add0-6d76275d5854",
+      "e442e48a-0b57-4b62-8d93-1ba1f27f6039"
+    ],
+    "calculated numbers contradict user's authoritative real-world figures": [
+      "07cd3b56-951a-4b04-953a-e3a98bce78ae",
+      "1fe0c070-e848-48a5-95e4-4281a35d8fbf"
+    ],
+    "env files staged in commit despite gitignore intent": [
+      "489e4cce-9623-47a9-af6d-e55f5ca8ae93"
+    ],
+    "report/artifact claimed ready but user cannot see or parse it": [
+      "3659ced8-fcf2-4156-9b10-9dd84f3a820a",
+      "965e2f11-76ec-450d-a17d-348862912670"
+    ],
+    "user manually inserts dry-run gates before db deploys": [
+      "cc851966-ad7b-49f5-9109-aa6a757d0910"
+    ]
+  }
+}

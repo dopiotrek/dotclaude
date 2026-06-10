@@ -1,9 +1,10 @@
 # State schema — the source of truth
 
-Every topic is one folder under `learn/<slug>/`:
+Every topic is one folder under `<topics_dir>/<slug>/` (from `config.yaml`,
+default `yoda/<slug>/`):
 
 ```
-learn/kubernetes/
+yoda/kubernetes/
 ├── state.json     ← authoritative. The agent edits ONLY this.
 ├── map.html       ← generated. The navigable map the learner opens.
 └── map.md         ← generated. Readable mirror for editor / GitHub diffs.
@@ -35,11 +36,13 @@ reconstructing from chat.
 
   "terrain": {
     "regions": [
-      { "id": "objects",    "title": "Core objects",        "core": true,  "summary": "the nouns you declare: Pod, Deployment, Service" },
-      { "id": "scheduling", "title": "Scheduling & control loop", "core": true, "summary": "how a declaration becomes a running thing" },
-      { "id": "networking", "title": "Networking & Services","core": true,  "summary": "how pods reach each other and the outside world" },
-      { "id": "config",     "title": "Config & secrets",     "core": false, "summary": "injecting settings without rebuilds" },
-      { "id": "storage",    "title": "Storage & volumes",    "core": false, "summary": "state that outlives a pod" }
+      { "id": "objects",    "title": "Core objects",        "tier": "foundation", "core": true,  "summary": "the nouns you declare: Pod, Deployment, Service",
+        "models": [ { "name": "Declarative vs imperative", "note": "you declare desired state, not the steps" } ] },
+      { "id": "scheduling", "title": "Scheduling & control loop", "tier": "foundation", "core": true, "summary": "how a declaration becomes a running thing",
+        "models": [ { "name": "Reconciliation loop", "note": "observe → diff → act, forever" } ] },
+      { "id": "networking", "title": "Networking & Services","tier": "core", "core": true,  "summary": "how pods reach each other and the outside world" },
+      { "id": "config",     "title": "Config & secrets",     "tier": "core", "core": false, "summary": "injecting settings without rebuilds" },
+      { "id": "storage",    "title": "Storage & volumes",    "tier": "advanced", "core": false, "summary": "state that outlives a pod" }
     ],
     "edges": [
       { "from": "objects",    "to": "scheduling", "label": "are reconciled by" },
@@ -54,11 +57,23 @@ reconstructing from chat.
       "region": "objects",
       "title": "A Pod is the unit of scheduling",
       "status": "learned",
+      "mastery": 3,
+      "gap": "to reach Expert: predict what happens to a Pod when its node dies",
       "note": "k8s never schedules a bare container — only a Pod, which wraps 1+ containers sharing one network + storage namespace.",
       "recall_q": "Why can't you schedule a bare container directly?",
       "recall_a": "The scheduler only places Pods; the Pod is the namespace boundary containers share.",
+      "models": [ { "name": "Bin packing", "note": "the scheduler fits Pods onto nodes like items into bins" } ],
       "learned_on": "2026-06-08",
+      "schema": { "type": "flow", "nodes": ["Scheduler", "Pod", "Node"], "labels": ["places", "onto"] },
       "reviews": { "ease": 2.3, "interval": 1, "reps": 1, "last_review": "2026-06-08", "next_due": "2026-06-09", "history": [{ "date": "2026-06-08", "grade": "ok" }] }
+    },
+    {
+      "id": "c2",
+      "region": "objects",
+      "title": "Deployments manage ReplicaSets",
+      "status": "locked",
+      "mastery": 0,
+      "note": ""
     }
   ],
 
@@ -83,10 +98,15 @@ reconstructing from chat.
 
 **Top level** — `topic`, `slug`, `goal`, `level`, `one_sentence` (the whole
 domain in a line; the map is suspect until this exists), `you_are_here` (id of the
-region currently being learned), `created`/`updated` (ISO dates).
+region currently being learned), `created`/`updated` (ISO dates). Optional
+`tier_labels` (4 strings) and `mastery_labels` (5 strings) override the ladder names
+on the map — copy them from `config.yaml` if the user renamed them.
 
-**terrain.regions[]** — `id` (stable slug), `title`, `core` (true = on the
-critical path; rendered prominently), `summary` (one phrase). Keep to 4–8.
+**terrain.regions[]** — `id` (stable slug), `title`, `summary` (one phrase),
+`tier` (`foundation` | `core` | `advanced` | `frontier` — the map bands regions by
+this, foundations at the base), `core` (optional bool for extra prominence), and
+`models` (optional list of `{ name, note }` — the key theories/frameworks for the
+region, shown in its drawer). Keep to 4–8 regions.
 
 **terrain.edges[]** — `from`/`to` region ids and a short `label`; these draw the
 map's connections. Optional but they're what make it a *map* and not a list.
@@ -94,10 +114,19 @@ map's connections. Optional but they're what make it a *map* and not a list.
 **terrain.not_covered[]** — the edges of the territory. Naming what's *out* of
 scope is half of what makes a learner feel oriented.
 
-**chunks[]** — one learned idea. `status` is `locked` | `learning` | `learned`.
-`note` is the one-paragraph essence (also shown on the map). `recall_q` /
-`recall_a` power both the gate and future reviews. `reviews` drives scheduling
-(below).
+**chunks[]** — one idea. `status` is `locked` | `learning` | `learned`. `mastery`
+is the learner's grip, **0–4** (0 Unseen · 1 Fragile · 2 Working · 3 Solid · 4
+Expert) — set honestly after each answer; it's what the node badge shows. `gap` is
+the one-line, blunt delta to the next level (empty at 4). `note` is the
+one-paragraph essence. `recall_q` / `recall_a` power both the gate and future
+reviews. `models` (optional) is the same `{ name, note }` list as regions, for
+chunk-specific theories. `reviews` drives scheduling (below). `schema` (optional) is
+a small box-and-arrow diagram shown in the node's detail drawer —
+`{ "type": "flow" | "stack", "nodes": [...], "labels": [...] }` where `labels` (one
+shorter than `nodes`) sit on the arrows; add it only for chunks whose shape is worth
+seeing. **Planned-but-unlearned chunks are real entries** with `status: locked`,
+`mastery: 0`, and no `reviews` — that's how the roadmap shows the whole curriculum
+up front.
 
 **grammars[]** — a compressed region. `variables` (2–4; if more, you haven't
 compressed enough), `paragraph` (the grammar in prose), plus its own `reviews`.
@@ -168,7 +197,7 @@ status to `learned`.
 python scripts/build_map.py build learn/kubernetes/state.json
 
 # Apply a review grade to one item (chunk or grammar) — updates schedule, rebuilds
-python scripts/build_map.py review learn/kubernetes/state.json --item c1 --grade ok
+python scripts/build_map.py review yoda/kubernetes/state.json --item c1 --grade ok
 
 # List items due on/before a date (default today) — for starting a session or a scheduled task
 python scripts/build_map.py due learn/kubernetes/state.json

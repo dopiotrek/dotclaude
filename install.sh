@@ -143,6 +143,15 @@ else
         print_success "RTK.md    → $SCRIPT_DIR/RTK.md"
     fi
 
+    # Session-mining state files (if present)
+    for item in coding-sessions.md content-ideas.md .session-mining-ledger.json; do
+        if [ -f "$SCRIPT_DIR/$item" ]; then
+            rm -f "$CLAUDE_DIR/$item"
+            ln -s "$SCRIPT_DIR/$item" "$CLAUDE_DIR/$item"
+            print_success "$item → $SCRIPT_DIR/$item"
+        fi
+    done
+
     # Hooks directory
     rm -rf "$CLAUDE_DIR/hooks"
     ln -s "$SCRIPT_DIR/hooks" "$CLAUDE_DIR/hooks"

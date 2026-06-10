@@ -1,5 +1,5 @@
 {
-  "skill_name": "learn",
+  "skill_name": "yoda",
   "evals": [
     {
       "id": 1,
@@ -8,7 +8,7 @@
       "files": [],
       "expectations": [
         "Leads with a whole-domain terrain map or overview of all the major regions before deep-diving into any single one.",
-        "Generates a navigable HTML map artifact (map.html) via build_map.py that embeds the learn-state JSON and contains an inline SVG terrain.",
+        "Generates a navigable HTML map artifact (map.html) via build_map.py that embeds the yoda-state JSON and contains an inline SVG terrain.",
         "Creates a well-formed state.json containing terrain.regions (>=4 regions) and a one_sentence summary of the whole domain.",
         "Delivers a single first chunk and then stops to make the learner explain it back or answer a recall question, instead of dumping the whole topic in one response.",
         "Establishes spaced-repetition scheduling (at least one chunk or grammar carries a next_due review date) rather than a generic linear study plan."
@@ -21,7 +21,7 @@
       "files": [],
       "expectations": [
         "Leads with a whole-domain terrain map or overview of all the major regions before deep-diving into any single one.",
-        "Generates a navigable HTML map artifact (map.html) via build_map.py that embeds the learn-state JSON and contains an inline SVG terrain.",
+        "Generates a navigable HTML map artifact (map.html) via build_map.py that embeds the yoda-state JSON and contains an inline SVG terrain.",
         "Creates a well-formed state.json containing terrain.regions (>=4 regions) and a one_sentence summary of the whole domain.",
         "Delivers a single first chunk and then stops to make the learner explain it back or answer a recall question, instead of dumping the whole topic in one response.",
         "Establishes spaced-repetition scheduling (at least one chunk or grammar carries a next_due review date) rather than a generic linear study plan."
@@ -34,7 +34,7 @@
       "files": [],
       "expectations": [
         "Leads with a whole-domain terrain map or overview of all the major regions before deep-diving into any single one.",
-        "Generates a navigable HTML map artifact (map.html) via build_map.py that embeds the learn-state JSON and contains an inline SVG terrain.",
+        "Generates a navigable HTML map artifact (map.html) via build_map.py that embeds the yoda-state JSON and contains an inline SVG terrain.",
         "Creates a well-formed state.json containing terrain.regions (>=4 regions) and a one_sentence summary of the whole domain.",
         "Delivers a single first chunk and then stops to make the learner explain it back or answer a recall question, instead of dumping the whole topic in one response.",
         "Establishes spaced-repetition scheduling (at least one chunk or grammar carries a next_due review date) rather than a generic linear study plan."

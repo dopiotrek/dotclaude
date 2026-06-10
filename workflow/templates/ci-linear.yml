@@ -1,0 +1,89 @@
+# CI Failure → Linear Issue
+#
+# Drop this file into .github/workflows/ci-linear.yml in your repo.
+# It runs after any workflow that has `build` or `test` jobs and creates
+# a Linear issue on failure. Duplicates are suppressed by title prefix.
+#
+# Required secrets (set in repo Settings → Secrets → Actions):
+#   LINEAR_API_KEY   — Personal API key from linear.app/settings/api
+#   LINEAR_TEAM_ID   — Team ID (e044df05-f38f-401a-b392-20add0f93d4b for "Make now")
+#
+# Optional secrets:
+#   LINEAR_PROJECT_ID — Project ID to associate the issue with
+
+name: CI Failure → Linear
+
+on:
+  workflow_run:
+    workflows: ["CI", "Build", "Test", "Deploy"]   # adjust to match your workflow names
+    types: [completed]
+
+jobs:
+  report-failure:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Linear issue
+        env:
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          LINEAR_TEAM_ID: ${{ secrets.LINEAR_TEAM_ID }}
+          LINEAR_PROJECT_ID: ${{ secrets.LINEAR_PROJECT_ID }}
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+          WORKFLOW_URL:  ${{ github.event.workflow_run.html_url }}
+          BRANCH:        ${{ github.event.workflow_run.head_branch }}
+          COMMIT_SHA:    ${{ github.event.workflow_run.head_sha }}
+          COMMIT_MSG:    ${{ github.event.workflow_run.head_commit.message }}
+          REPO:          ${{ github.repository }}
+        run: |
+          TITLE="[CI] ${WORKFLOW_NAME} failed on ${BRANCH}"
+          SHORT_SHA="${COMMIT_SHA:0:7}"
+          DATE=$(date -u +"%Y-%m-%d %H:%M UTC")
+
+          DESCRIPTION=$(cat <<EOF
+          **Workflow**: ${WORKFLOW_NAME}
+          **Branch**: \`${BRANCH}\`
+          **Commit**: \`${SHORT_SHA}\` — ${COMMIT_MSG}
+          **Run**: ${WORKFLOW_URL}
+          **Repo**: ${REPO}
+          **Detected at**: ${DATE}
+
+          ---
+          *Auto-created by ci-linear.yml. Close this issue once the build is green.*
+          EOF
+          )
+
+          # Build the GraphQL mutation payload
+          PAYLOAD=$(jq -n \
+            --arg title "$TITLE" \
+            --arg description "$DESCRIPTION" \
+            --arg teamId "$LINEAR_TEAM_ID" \
+            --arg projectId "${LINEAR_PROJECT_ID:-}" \
+            '{
+              query: "mutation CreateIssue($input: IssueCreateInput!) { issueCreate(input: $input) { success issue { id identifier url } } }",
+              variables: {
+                input: {
+                  title: $title,
+                  description: $description,
+                  teamId: $teamId,
+                  priority: 2,
+                  stateId: null
+                } | if $projectId != "" then . + {projectId: $projectId} else . end
+              }
+            }')
+
+          RESPONSE=$(curl -s -X POST https://api.linear.app/graphql \
+            -H "Content-Type: application/json" \
+            -H "Authorization: $LINEAR_API_KEY" \
+            -d "$PAYLOAD")
+
+          echo "Linear response: $RESPONSE"
+
+          SUCCESS=$(echo "$RESPONSE" | jq -r '.data.issueCreate.success')
+          if [ "$SUCCESS" != "true" ]; then
+            echo "⚠️  Failed to create Linear issue. Response: $RESPONSE"
+            exit 1
+          fi
+
+          ISSUE_URL=$(echo "$RESPONSE" | jq -r '.data.issueCreate.issue.url')
+          ISSUE_ID=$(echo "$RESPONSE" | jq -r '.data.issueCreate.issue.identifier')
+          echo "✅ Created Linear issue ${ISSUE_ID}: ${ISSUE_URL}"

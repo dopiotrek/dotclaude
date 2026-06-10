@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""build_map.py — render a learn/ topic map and run spaced-repetition scheduling.
+"""build_map.py — render a yoda topic map and run spaced-repetition scheduling.
 
 Source of truth is state.json (see references/state-schema.md). This script never
 asks the agent to do date math: `review` applies the SM-2-lite algorithm, `build`
@@ -128,11 +128,15 @@ def stats(state: dict) -> dict:
     total = len(chunks)
     today = dt.date.today()
     due = len(due_items(state, today))
+    started = [int(c["mastery"]) for c in chunks
+               if isinstance(c.get("mastery"), (int, float)) and c["mastery"] > 0]
+    level = round(sum(started) / len(started), 1) if started else 0
     return {
         "learned": learned,
         "total": total,
         "pct": round(100 * learned / total) if total else 0,
         "due": due,
+        "level": level,
         "regions": len(state.get("terrain", {}).get("regions", [])),
         "grammars": len(state.get("grammars", [])),
     }
@@ -168,9 +172,12 @@ def render_md(state: dict) -> str:
     if meta:
         L.append("  ·  ".join(meta))
         L.append("")
+    mlabels = state.get("mastery_labels") or ["Unseen", "Fragile", "Working", "Solid", "Expert"]
+    lvl = s["level"]
+    lbl = mlabels[int(round(lvl))] if (mlabels and lvl) else "—"
     L.append(
         f"**Progress:** {s['learned']}/{s['total']} chunks ({s['pct']}%)  ·  "
-        f"{s['grammars']} grammar(s)  ·  {s['due']} due for review"
+        f"overall level **{lvl}** ({lbl})  ·  {s['grammars']} grammar(s)  ·  {s['due']} due"
     )
     L.append("")
     L.append("_Generated from state.json — do not edit by hand._")
@@ -181,16 +188,20 @@ def render_md(state: dict) -> str:
     L.append("")
     for r in regions:
         flag = "★" if r.get("core") else "·"
+        tier = r.get("tier")
+        tierlbl = f" _[{tier}]_" if tier else ""
         youhere = "  ← you are here" if r.get("id") == here else ""
-        L.append(f"- {flag} **{r.get('title','?')}** — {r.get('summary','')}{youhere}")
+        L.append(f"- {flag} **{r.get('title','?')}**{tierlbl} — {r.get('summary','')}{youhere}")
+        for mm in (r.get("models") or []):
+            L.append(f"    - _model:_ **{mm.get('name','?')}** — {mm.get('note','')}")
     notc = state.get("terrain", {}).get("not_covered", [])
     if notc:
         L.append("")
         L.append(f"_Out of scope: {', '.join(notc)}._")
     L.append("")
 
-    # Chunks by region
-    L.append("## What's been learned")
+    # The path — chunks by region, with mastery
+    L.append("## The path")
     L.append("")
     for r in regions:
         rid = r.get("id")
@@ -201,11 +212,21 @@ def render_md(state: dict) -> str:
         L.append("")
         for c in items:
             box = {"learned": "[x]", "learning": "[~]"}.get(c.get("status"), "[ ]")
+            m = c.get("mastery")
+            mstr = f" · L{int(m)}" if isinstance(m, (int, float)) else ""
             nd = c.get("reviews", {}).get("next_due")
             duestr = f" _(review {nd})_" if nd else ""
-            L.append(f"- {box} **{c.get('title','?')}**{duestr}")
+            L.append(f"- {box} **{c.get('title','?')}**{mstr}{duestr}")
             if c.get("note"):
                 L.append(f"  - {c['note']}")
+            if c.get("gap"):
+                L.append(f"  - _gap →_ {c['gap']}")
+            for mm in (c.get("models") or []):
+                L.append(f"  - _model:_ **{mm.get('name','?')}** — {mm.get('note','')}")
+            sch = c.get("schema")
+            if sch and sch.get("nodes"):
+                sep = " ↓ " if sch.get("type") == "stack" else " → "
+                L.append(f"  - _schema:_ {sep.join(sch['nodes'])}")
             if c.get("recall_q"):
                 L.append(f"  - ❓ {c['recall_q']}")
         L.append("")
@@ -284,7 +305,7 @@ def main(argv=None):
     if argv and argv[0].endswith(".json"):
         argv = ["build"] + argv
 
-    parser = argparse.ArgumentParser(description="Render a learn/ topic map and schedule reviews.")
+    parser = argparse.ArgumentParser(description="Render a yoda topic map and schedule reviews.")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     b = sub.add_parser("build", help="regenerate map.html + map.md")

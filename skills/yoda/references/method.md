@@ -23,9 +23,12 @@ A good chunk, in order:
    know how a spreadsheet recalculates a cell when its input changes…"
 2. **One move.** Introduce exactly one new idea built on the anchor. "…a reactive
    signal is that, generalized: a value that knows who depends on it."
-3. **One analogy**, from a domain they already own. For Piotrek: drones, airline
-   asset management, RFP scoring, Svelte reactivity, Supabase/Postgres,
-   double-entry bookkeeping. Concrete beats clever.
+3. **One analogy** — concrete and _visualizable_. Pull from the wells in
+   `config.yaml` (`analogies.prefer`): reach for an **airport/airline** picture
+   first (the learner knows it cold), then **everyday physical life**. Avoid
+   framework internals and abstract math as analogies unless asked. The test: can
+   they _see_ it as a physical scene? If not, it's the wrong analogy. Concrete
+   beats clever.
 4. **Stop.** Do not bolt on the next idea because it's "right there." The stop is
    what keeps working memory from overflowing.
 
@@ -35,6 +38,26 @@ a region, not a chunk — split it.
 Banned: buzzwords, throat-clearing ("it's important to note"), and undefined
 jargon. If a term is load-bearing, derive it from the anchor so the learner earns
 the word instead of memorizing a label.
+
+### Where analogies come from
+
+Default to two wells, in this order (set in `config.yaml`):
+
+1. **Airlines and airports** — professional home turf, so the picture lands
+   instantly. Some that travel well:
+   - _Idempotency_: scanning the same boarding pass twice still boards you once.
+   - _A queue vs a log_: the baggage belt (each bag taken off once, then gone) vs
+     the departure board (everyone reads the same listing; reading doesn't consume
+     it).
+   - _Cache with a TTL_: a gate change announced once and trusted until it expires.
+   - _Load balancing_: extra check-in desks opening to drain one long line.
+   - _Rate limiting_: the jet bridge only lets so many board per minute.
+2. **Everyday physical life** — luggage, queues, the post, a kitchen, traffic.
+   Use when an airline frame would be a stretch; never force one.
+
+Avoid explaining the unfamiliar with the unfamiliar (framework internals, abstract
+math). The analogy's whole job is to turn an abstract idea into a scene the learner
+can watch happen.
 
 ### First principles, concretely
 
@@ -101,6 +124,54 @@ Record the grade on the chunk in `state.json`; the interval math in
 `references/state-schema.md` consumes it.
 
 ---
+
+## Rating mastery (be brutally honest)
+
+The recall grade (easy/ok/hard) drives _scheduling_. Mastery is a different axis —
+_how well the learner actually owns the idea_, 0–4 — and it drives the roadmap and
+the honest feedback. Rate it after every answer and say the number out loud.
+
+The cardinal rule: **no flattery.** A half-answer that gets a "nice!" robs the
+learner of the one thing they came for — an accurate read of where they stand.
+Praise a 2 and they walk away thinking they're a 3, and the gap compounds.
+
+Map the answer to a level, name the **specific** thing missing, and give the **one
+move** that raises it:
+
+| Mastery | The answer looked like… | What you say (blunt, specific) |
+|---|---|---|
+| **1 Fragile** | recognized it, couldn't reconstruct it; vague, hand-wavy | "That's recognition, not understanding — you named _what_ but not _why_. To reach Working: explain, from the Pod up, why a bare container can't be scheduled." |
+| **2 Working** | correct mechanics, needed a nudge, the _why_ is thin or borrowed | "Right mechanically, but you leaned on my words for the why. To reach Solid: rebuild it from first principles with no hint." |
+| **3 Solid** | clean reconstruction from first principles, unprompted | "Solid — you rebuilt it yourself. To reach Expert: apply it to a case you haven't seen, and tell me where it _breaks_." |
+| **4 Expert** | applies it to novel cases, knows the failure modes, could teach it | "Expert. You can predict it and you know the edges. Nothing to close here." |
+
+Write the level to `mastery` and the one-move delta to `gap` on the chunk (`gap` is
+empty at 4). The map badges the level and shows the gap in the drawer, so the
+learner always sees exactly what stands between them and the next rung — and the
+topic's overall level is just the mastery of its chunks, so "reach expert" stops
+being a vibe and becomes a checklist.
+
+Be the same blunt with yourself: if you can't tell which level an answer is, your
+question was too soft. Ask a sharper one (predict / break / why-not) and re-rate.
+
+## Tiering the map, and naming the models
+
+When you lay the terrain (SKILL.md step 2), two extra moves pay off for the whole
+journey:
+
+**Assign a tier to each region** — `foundation` / `core` / `advanced` / `frontier`.
+The test: could the learner understand this region _without_ the ones below it? If
+not, it sits higher. Foundations are the few regions everything else silently
+assumes; the frontier is where even practitioners argue. Getting the tiers right is
+most of what makes the map feel like a map and not a flat list.
+
+**Name the key models per region** — the two or three canonical theories,
+frameworks, or named results a competent person reaches for here (for an auth
+region: the _confused-deputy problem_, the _OAuth threat model_; for a stats
+region: _Bayes' theorem_, the _central limit theorem_). Store them as `models`
+(name + one line). They aren't chunks to grind — they're landmarks that tell the
+learner the territory is real and hand them the vocabulary to go deeper on their
+own.
 
 ## Finding a grammar (compression)
 
