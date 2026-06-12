@@ -6,9 +6,7 @@ Checks: .svelte-kit/output bundle sizes, code patterns that affect performance
 """
 
 import json
-import os
 import re
-import subprocess
 import sys
 from pathlib import Path
 
