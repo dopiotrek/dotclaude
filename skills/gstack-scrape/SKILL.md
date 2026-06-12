@@ -1,0 +1,1 @@
+/Users/piotrek/repos/dotclaude/skills/gstack/scrape/SKILL.md

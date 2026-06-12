@@ -1,0 +1,147 @@
+# Daily PR Staleness → Linear
+#
+# Runs every morning at 7:00 AM UTC (9 AM Frankfurt / CEST).
+# Checks all watched repos for open PRs with no review activity in 2+ days
+# and creates a Linear issue for each stale one.
+#
+# Drop this file into .github/workflows/ in ONE repo (e.g. your monorepo or swisscrm).
+# It will scan all repos listed in WATCH_REPOS.
+#
+# Required secrets (Settings → Secrets → Actions):
+#   GITHUB_TOKEN      — auto-provided by GitHub Actions (read-only, no config needed)
+#   LINEAR_API_KEY    — Personal API key from linear.app/settings/api
+#   LINEAR_TEAM_ID    — e044df05-f38f-401a-b392-20add0f93d4b  (team "Make now")
+#
+# Optional secrets:
+#   LINEAR_PROJECT_ID — leave empty to skip project association
+
+name: PR Staleness → Linear
+
+on:
+  schedule:
+    - cron: "0 7 * * 1-5"   # Mon–Fri 7:00 UTC
+  workflow_dispatch:          # allow manual trigger
+
+jobs:
+  check-stale-prs:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+      LINEAR_TEAM_ID: ${{ secrets.LINEAR_TEAM_ID }}
+      LINEAR_PROJECT_ID: ${{ secrets.LINEAR_PROJECT_ID }}
+      WATCH_REPOS: "dopiotrek/dronelist dopiotrek/swisscrm dopiotrek/piotrek-cc dopiotrek/that-money-app"
+      STALE_DAYS: "2"
+
+    steps:
+      - name: Check PRs and create Linear issues
+        run: |
+          set -e
+          STALE_THRESHOLD=$(date -u -d "${STALE_DAYS} days ago" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null \
+            || date -u -v-${STALE_DAYS}d +%Y-%m-%dT%H:%M:%SZ)  # GNU/BSD compat
+
+          ISSUES_CREATED=0
+
+          for REPO in $WATCH_REPOS; do
+            echo "Checking $REPO..."
+
+            # Fetch open PRs
+            PRS=$(curl -sf \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/$REPO/pulls?state=open&per_page=50" || echo "[]")
+
+            if [ "$PRS" = "[]" ] || [ -z "$PRS" ]; then
+              echo "  No open PRs or fetch failed"
+              continue
+            fi
+
+            # Process each PR with jq
+            echo "$PRS" | jq -c '.[]' | while read -r PR; do
+              PR_NUMBER=$(echo "$PR" | jq -r '.number')
+              PR_TITLE=$(echo "$PR" | jq -r '.title')
+              PR_URL=$(echo "$PR" | jq -r '.html_url')
+              PR_AUTHOR=$(echo "$PR" | jq -r '.user.login')
+              PR_UPDATED=$(echo "$PR" | jq -r '.updated_at')
+              PR_DRAFT=$(echo "$PR" | jq -r '.draft')
+              BASE_BRANCH=$(echo "$PR" | jq -r '.base.ref')
+
+              # Skip draft PRs
+              if [ "$PR_DRAFT" = "true" ]; then
+                echo "  Skipping draft PR #$PR_NUMBER"
+                continue
+              fi
+
+              # Skip if updated recently
+              if [[ "$PR_UPDATED" > "$STALE_THRESHOLD" ]]; then
+                echo "  PR #$PR_NUMBER is fresh ($PR_UPDATED)"
+                continue
+              fi
+
+              # Check for any reviews
+              REVIEWS=$(curl -sf \
+                -H "Authorization: Bearer $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                "https://api.github.com/repos/$REPO/pulls/$PR_NUMBER/reviews?per_page=10" || echo "[]")
+
+              REVIEW_COUNT=$(echo "$REVIEWS" | jq 'length')
+
+              REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
+              STALE_MSG="stale ${STALE_DAYS}d"
+              if [ "$REVIEW_COUNT" -eq 0 ]; then
+                STALE_MSG="no reviews, stale ${STALE_DAYS}d"
+              fi
+
+              LINEAR_TITLE="[PR] ${REPO_NAME}#${PR_NUMBER} needs review — ${PR_TITLE}"
+              # Truncate title to 60 chars
+              LINEAR_TITLE="${LINEAR_TITLE:0:80}"
+
+              DATE=$(date -u +"%Y-%m-%d %H:%M UTC")
+              LINEAR_DESC=$(cat <<EOF
+          **Repo**: ${REPO}
+          **PR**: [#${PR_NUMBER} — ${PR_TITLE}](${PR_URL})
+          **Author**: @${PR_AUTHOR}
+          **Target branch**: ${BASE_BRANCH}
+          **Last activity**: ${PR_UPDATED}
+          **Status**: ${STALE_MSG}
+
+          ---
+          *Auto-created by gh-pr-staleness.yml on ${DATE}. Close once reviewed or merged.*
+          EOF
+              )
+
+              echo "  Creating Linear issue for stale PR #$PR_NUMBER ($STALE_MSG)"
+
+              PAYLOAD=$(jq -n \
+                --arg title "$LINEAR_TITLE" \
+                --arg description "$LINEAR_DESC" \
+                --arg teamId "$LINEAR_TEAM_ID" \
+                --arg projectId "${LINEAR_PROJECT_ID:-}" \
+                '{
+                  query: "mutation CreateIssue($input: IssueCreateInput!) { issueCreate(input: $input) { success issue { identifier url } } }",
+                  variables: {
+                    input: {
+                      title: $title,
+                      description: $description,
+                      teamId: $teamId,
+                      priority: 3
+                    } | if $projectId != "" then . + {projectId: $projectId} else . end
+                  }
+                }')
+
+              RESPONSE=$(curl -sf -X POST https://api.linear.app/graphql \
+                -H "Content-Type: application/json" \
+                -H "Authorization: $LINEAR_API_KEY" \
+                -d "$PAYLOAD")
+
+              SUCCESS=$(echo "$RESPONSE" | jq -r '.data.issueCreate.success')
+              if [ "$SUCCESS" = "true" ]; then
+                ISSUE_ID=$(echo "$RESPONSE" | jq -r '.data.issueCreate.issue.identifier')
+                echo "  ✅ Created $ISSUE_ID for PR #$PR_NUMBER"
+              else
+                echo "  ⚠️ Failed to create issue: $RESPONSE"
+              fi
+            done
+          done
+
+          echo "Done."
