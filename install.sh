@@ -16,7 +16,6 @@ CLAUDE_DIR="$HOME/.claude"
 BACKUP_DIR="$CLAUDE_DIR/backup-$(date +%Y%m%d-%H%M%S)"
 
 # Colors for output
-RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
@@ -38,10 +37,6 @@ print_warning() {
     echo -e "${YELLOW}⚠${NC}  $1"
 }
 
-print_error() {
-    echo -e "${RED}✖${NC}  $1"
-}
-
 print_success() {
     echo -e "${GREEN}✔${NC}  $1"
 }
@@ -56,7 +51,7 @@ if [[ "$1" == "--uninstall" ]]; then
     LATEST_BACKUP=$(ls -td "$CLAUDE_DIR"/backup-* 2>/dev/null | head -1)
 
     # Remove symlinks
-    for item in CLAUDE.md hooks agents skills scripts; do
+    for item in CLAUDE.md hooks agents skills scripts mining; do
         if [ -L "$CLAUDE_DIR/$item" ]; then
             rm "$CLAUDE_DIR/$item"
             print_success "Removed symlink: $item"
@@ -69,7 +64,7 @@ if [[ "$1" == "--uninstall" ]]; then
         read -p "Restore from backup ($LATEST_BACKUP)? [y/N] " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
-            for item in CLAUDE.md hooks agents skills scripts; do
+            for item in CLAUDE.md hooks agents skills scripts mining; do
                 if [ -e "$LATEST_BACKUP/$item" ]; then
                     cp -r "$LATEST_BACKUP/$item" "$CLAUDE_DIR/"
                     print_success "Restored: $item"
@@ -100,7 +95,7 @@ fi
 
 # 2. Backup existing config (only real files, not symlinks)
 has_existing=false
-for item in CLAUDE.md settings.json hooks agents skills scripts; do
+for item in CLAUDE.md settings.json hooks agents skills scripts mining; do
     if [ -e "$CLAUDE_DIR/$item" ] && [ ! -L "$CLAUDE_DIR/$item" ]; then
         has_existing=true
         break
@@ -110,7 +105,7 @@ done
 if [ "$has_existing" = true ]; then
     print_step "Backing up existing config to $BACKUP_DIR"
     mkdir -p "$BACKUP_DIR"
-    for item in CLAUDE.md settings.json hooks agents skills scripts; do
+    for item in CLAUDE.md settings.json hooks agents skills scripts mining; do
         if [ -e "$CLAUDE_DIR/$item" ] && [ ! -L "$CLAUDE_DIR/$item" ]; then
             cp -r "$CLAUDE_DIR/$item" "$BACKUP_DIR/" 2>/dev/null || true
             print_success "Backed up: $item"
@@ -143,14 +138,16 @@ else
         print_success "RTK.md    → $SCRIPT_DIR/RTK.md"
     fi
 
-    # Session-mining state files (if present)
+    # Session-mining state directory (if present)
+    # Clean up legacy per-file symlinks from before mining/ existed
     for item in coding-sessions.md content-ideas.md .session-mining-ledger.json; do
-        if [ -f "$SCRIPT_DIR/$item" ]; then
-            rm -f "$CLAUDE_DIR/$item"
-            ln -s "$SCRIPT_DIR/$item" "$CLAUDE_DIR/$item"
-            print_success "$item → $SCRIPT_DIR/$item"
-        fi
+        [ -L "$CLAUDE_DIR/$item" ] && rm -f "$CLAUDE_DIR/$item"
     done
+    if [ -d "$SCRIPT_DIR/mining" ]; then
+        rm -rf "$CLAUDE_DIR/mining"
+        ln -s "$SCRIPT_DIR/mining" "$CLAUDE_DIR/mining"
+        print_success "mining/   → $SCRIPT_DIR/mining/"
+    fi
 
     # Hooks directory
     rm -rf "$CLAUDE_DIR/hooks"

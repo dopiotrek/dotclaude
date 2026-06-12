@@ -9,11 +9,11 @@ Two-stage pipeline. Stage 1 mines the user's last ~50 Claude Code sessions for c
 
 The user may ask for one stage or both. "What do I keep correcting?" → Stage 1 only. "What should I write about?" → Stage 2 (run Stage 1 first if `coding-sessions.md` is missing or older than ~2 weeks). Default when ambiguous: run both.
 
-**Files (both live in `~/.claude/`, which is a git repo — they're meant to be tracked):**
+**Files (all live in `~/.claude/mining/`, which is part of a git repo — they're meant to be tracked):**
 
-- `~/.claude/coding-sessions.md` — recurring corrections, merged across runs
-- `~/.claude/content-ideas.md` — persistent idea bank with statuses
-- `~/.claude/.session-mining-ledger.json` — which session IDs support which pattern (machine state, prevents double-counting)
+- `~/.claude/mining/coding-sessions.md` — recurring corrections, merged across runs
+- `~/.claude/mining/content-ideas.md` — persistent idea bank with statuses
+- `~/.claude/mining/.session-mining-ledger.json` — which session IDs support which pattern (machine state, prevents double-counting)
 
 Never overwrite these wholesale. Read them first, merge new findings in, preserve the user's manual edits and statuses.
 
@@ -41,7 +41,7 @@ Group true corrections into recurring patterns. A pattern is *recurring* when it
 
 ### 3. Write coding-sessions.md (merge by session ID, never sum counts)
 
-Mining windows overlap across runs — the same session must never be counted twice. The ledger (`~/.claude/.session-mining-ledger.json`) makes merging idempotent:
+Mining windows overlap across runs — the same session must never be counted twice. The ledger (`~/.claude/mining/.session-mining-ledger.json`) makes merging idempotent:
 
 ```json
 {"last_mined": "<date>", "patterns": {"<pattern name>": ["<session-id>", "..."]}}
