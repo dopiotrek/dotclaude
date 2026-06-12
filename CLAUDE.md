@@ -8,6 +8,9 @@
 
 ## Communication Style
 
+- Use plain, simple English. I'm not a native speaker: prefer short sentences and common words. Avoid idioms, slang, wordplay, and rare vocabulary
+- Technical terms are fine, but explain an uncommon one in a short plain clause the first time it appears
+- Don't overcomplicate explanations — one clear idea per sentence beats a dense paragraph
 - Be concise but thorough
 - Explain "why" not just "what"
 - Don't apologize for mistakes, just fix them
@@ -61,6 +64,10 @@ All agents write documentation to `.docs/` in the project root. Two directories:
 - `.docs/reviews/` — what was found. Code reviews, SEO audits, security checks. Written after coding.
 
 Name files descriptively: `auth-flow.md`, `homepage-seo-audit.md`. No metadata files, no progress tracking.
+
+## Deferred Work (`TODO.md`)
+
+Every project keeps a `TODO.md` in the root. When you defer, skip, or cannot finish something, append it there as a checkbox item with a short tag (`[DB]`, `[HOOKS]`, `[TEST]`...), what to do, and why it was deferred. Check items off only after verifying the fix in this session. Never delete or rewrite items from other sessions.
 
 ## Token Optimization
 
