@@ -1,7 +1,6 @@
 ---
 name: superforms-reference
-description: "Reference patterns for sveltekit-superforms + Zod: schemas, server actions, client components, file uploads, multi-step wizards, shadcn-svelte integration."
-paths: "src/**/*.svelte, src/**/*.ts, src/**/+page.server.ts"
+description: "Reference patterns for sveltekit-superforms + Zod: schemas, server actions, client components, file uploads, multi-step wizards, shadcn-svelte integration. Applies to src/**/*.svelte, src/**/*.ts, src/**/+page.server.ts."
 user-invocable: false
 ---
 

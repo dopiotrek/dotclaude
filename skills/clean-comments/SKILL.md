@@ -1,7 +1,6 @@
 ---
 name: clean-comments
-description: Remove unnecessary, redundant, or obvious code comments while preserving valuable explanations. Use when cleaning up comments, removing verbose documentation, simplifying inline comments, or preparing code for review.
-paths: "src/**/*.ts, src/**/*.svelte, src/**/*.js"
+description: Remove unnecessary, redundant, or obvious code comments while preserving valuable explanations. Use when cleaning up comments, removing verbose documentation, simplifying inline comments, or preparing code for review. Applies to src/**/*.ts, src/**/*.svelte, src/**/*.js.
 ---
 
 # Comment Cleanup

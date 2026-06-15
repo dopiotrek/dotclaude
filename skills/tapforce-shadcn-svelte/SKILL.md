@@ -1,7 +1,6 @@
 ---
 name: tapforce-shadcn-svelte
-description: Best practices for setup and use of shadcn-svelte library to develop UX/UI in Svelte projects. Use this skill when project is using Svelte/SvelteKit framework as main app framework, when user attempts to setup new project or when user is developing on existing project using shadcn-svelte components.
-paths: "src/lib/components/ui/**, src/**/*.svelte"
+description: Best practices for setup and use of shadcn-svelte library to develop UX/UI in Svelte projects. Use this skill when project is using Svelte/SvelteKit framework as main app framework, when user attempts to setup new project or when user is developing on existing project using shadcn-svelte components. Applies to src/lib/components/ui/**, src/**/*.svelte.
 license: Apache-2.0
 metadata:
   author: tapforce

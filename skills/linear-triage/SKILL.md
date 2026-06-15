@@ -5,7 +5,7 @@ description: >
   push them to Linear as triaged issues. Use when you want to run a repo health sweep, when
   prompted by a schedule, or when asked to "triage this repo" / "push issues to Linear". Requires
   the Linear MCP to be connected. Team: "Make now".
-paths: "src/**/*.ts, src/**/*.svelte, src/**/*.js, .github/workflows/*.yml"
+  Scans src/**/*.ts, src/**/*.svelte, src/**/*.js, and .github/workflows/*.yml.
 ---
 
 # Linear Triage Skill
