@@ -58,12 +58,24 @@
 
 ## Project Docs (`.docs/`)
 
-All agents write documentation to `.docs/` in the project root. Two directories:
+All agents write documentation to `.docs/` in the project root, organized by **knowledge domain** — not project phase. Where a fact lives depends on what _kind_ of knowledge it is, so its location stays stable as a project matures (MVP or mature product, the database spec and the business rules are always in the same place). Not every repo needs every folder; this is the superset, create what the project uses. Start a project's docs with `ai/context-map.md`.
 
-- `.docs/specs/` — what to build. Feature specs, implementation plans. Written before coding.
-- `.docs/reviews/` — what was found. Code reviews, SEO audits, security checks. Written after coding.
+- `.docs/ai/` — agent context: `context-map.md` (read first, routes a task to the right doc) + reusable prompts. **Coding rules live in `.claude/rules/` (auto-loaded by Claude Code), NOT here — do not duplicate them.**
+- `.docs/decisions/` — **WHY**: Architecture Decision Records, `NNNN-short-desc.md`, one decision per file (context → decision → consequences → source). **Write an ADR for every non-obvious technical choice** so it isn't silently reverted later.
+- `.docs/engineering/` — **HOW**: technical & operational reality. The architecture map (`architecture.json` / `.html`), feature specs/implementation plans, and ops runbooks (deployment, env strategy, local setup). **Write new specs here.**
+- `.docs/business/` — **WHAT**: product, requirements, domain context. `concept.md` is the canonical "what is this app"; discovery lives in `requirements.md` + `discovery.json`; `_input/` = raw client source. Internal commercial (pricing, strategy) lives here too — not for client eyes.
+- `.docs/reviews/` — post-coding audits, code reviews, SEO/security checks. **Write new reviews here.**
+- `.docs/archive/` — superseded artifacts kept for the record; never write new work here.
+- `.docs/mining/` — session-mining bank (`coding-sessions.md`, `content-ideas.md`); gitignored, private working state.
+- `.docs/handoff.md` — session handoff notes (current state and decisions); stays at the root.
 
-Name files descriptively: `auth-flow.md`, `homepage-seo-audit.md`. No metadata files, no progress tracking.
+**Frontmatter.** Current/long-lived docs carry YAML frontmatter: `title`, `status` (`draft | accepted | living | superseded`), `last_updated`, and `context_for_ai` (one line on when an agent should read it). Agents parse this well; it routes context cheaply.
+
+**Per-domain current-state JSON.** A domain may keep a machine-readable snapshot mirroring `engineering/architecture.json`'s `meta` block — e.g. `engineering/architecture.json` (the system) and `business/discovery.json` (requirements). Keep them current alongside the prose.
+
+**File naming.** Lowercase kebab-case. **The date goes in front only in `reviews/`** — point-in-time audits are `YYYY-MM-DD-descriptive-name.md` (ISO date first, so repeat audits of an area sort chronologically and never collide). Everywhere else, plain descriptive names with no date. ADRs are `decisions/NNNN-short-desc.md`. No progress-tracking files.
+
+A project may document its own extensions in its repo `CLAUDE.md`, but the knowledge-domain folders, frontmatter, and date-in-front-only-for-reviews rule are the shared baseline.
 
 ## Deferred Work (`TODO.md`)
 

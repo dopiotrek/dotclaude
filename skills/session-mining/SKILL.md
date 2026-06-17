@@ -3,19 +3,23 @@ name: session-mining
 description: Mine Claude Code session history for recurring corrections and turn the friction into a persistent bank of content claim cards about AI-assisted software development. Use whenever the user wants to analyze their coding sessions ("what do I keep correcting", "mine my sessions", "update coding-sessions.md"), asks for content ideas, post topics, or what to write about on X/Twitter or Substack based on their work, wants to refresh or review their idea bank (content-ideas.md), or asks what their sessions reveal about how they work with AI agents — even if they only say "idea machine", "find me something to write about", or "what patterns are in my sessions".
 ---
 
-# Session Mining: corrections → coding-sessions.md → claim cards
+# Session Mining: corrections → coding-sessions.md → claim cards → drafts
 
-Two-stage pipeline. Stage 1 mines the user's last ~50 Claude Code sessions for corrections they keep making and maintains `coding-sessions.md`. Stage 2 elevates that friction into *claim cards* — arguable, evidence-backed content ideas about AI-assisted software development — and maintains `content-ideas.md`.
+Three-stage pipeline. Stage 1 mines the user's last ~50 Claude Code sessions for corrections they keep making and maintains `coding-sessions.md`. Stage 2 elevates that friction into *claim cards* — arguable, evidence-backed content ideas about AI-assisted software development — and maintains `content-ideas.md`. Stage 3 drafts a tweet from a chosen card using the friction-first structure.
 
-The user may ask for one stage or both. "What do I keep correcting?" → Stage 1 only. "What should I write about?" → Stage 2 (run Stage 1 first if `coding-sessions.md` is missing or older than ~2 weeks). Default when ambiguous: run both.
+The user may ask for one stage or several. "What do I keep correcting?" → Stage 1 only. "What should I write about?" → Stage 2 (run Stage 1 first if `coding-sessions.md` is missing or older than ~2 weeks). "Draft this / turn this card into a tweet" → Stage 3. Default when ambiguous: run Stage 1 + Stage 2.
 
-**Files (all live in `~/.claude/mining/`, which is part of a git repo — they're meant to be tracked):**
+**Where the files live — the current repo, not a central one.**
 
-- `~/.claude/mining/coding-sessions.md` — recurring corrections, merged across runs
-- `~/.claude/mining/content-ideas.md` — persistent idea bank with statuses
-- `~/.claude/mining/.session-mining-ledger.json` — which session IDs support which pattern (machine state, prevents double-counting)
+Write to `.docs/mining/` inside the **git root of the current working directory** — the repo the user is actually working in. Resolve it once at the start: `git -C "$PWD" rev-parse --show-toplevel`; the output is `<repo-root>`, and the mining dir is `<repo-root>/.docs/mining/`. Create it if missing. If the cwd is not inside a git repo, fall back to `~/.claude/mining/` and say so in the report. Never assume the path resolves from your shell cwd — always derive `<repo-root>` first.
 
-Never overwrite these wholesale. Read them first, merge new findings in, preserve the user's manual edits and statuses.
+- `<repo-root>/.docs/mining/coding-sessions.md` — recurring corrections, merged across runs
+- `<repo-root>/.docs/mining/content-ideas.md` — persistent idea bank with statuses
+- `<repo-root>/.docs/mining/.session-mining-ledger.json` — which session IDs support which pattern (machine state, prevents double-counting)
+
+**Keep the dir out of git.** The extractor scans *all* projects' sessions, so these files can contain verbatim corrections and receipts from other clients and repos. Landing that in a project repo (especially client work) is a cross-client leak. Before writing, make sure `.docs/mining/` is gitignored: if the repo's `.gitignore` doesn't already cover it, append a `.docs/mining/` line. Treat the bank as private working state, not tracked docs.
+
+Each repo keeps its own bank and its own ledger — merging and counts are per-repo, scoped to that location. Never overwrite these wholesale. Read them first, merge new findings in, preserve the user's manual edits and statuses.
 
 ## Stage 1 — Mine corrections
 
@@ -41,7 +45,7 @@ Group true corrections into recurring patterns. A pattern is *recurring* when it
 
 ### 3. Write coding-sessions.md (merge by session ID, never sum counts)
 
-Mining windows overlap across runs — the same session must never be counted twice. The ledger (`~/.claude/mining/.session-mining-ledger.json`) makes merging idempotent:
+Mining windows overlap across runs — the same session must never be counted twice. The ledger (`<repo-root>/.docs/mining/.session-mining-ledger.json`) makes merging idempotent:
 
 ```json
 {"last_mined": "<date>", "patterns": {"<pattern name>": ["<session-id>", "..."]}}
@@ -125,6 +129,31 @@ Order: `new` cards first (newest at top), then `drafted`, `posted`, `killed` at 
 
 End with a compact summary in chat: top 3 recurring corrections (with counts), how many claim cards were added or strengthened, and the single card you'd lead with — one sentence on why. No full file dumps; the user can open the files.
 
+## Stage 3 — Draft (friction-first)
+
+On request only ("draft this", "turn this card into a tweet"). You write here — this skill drafts. But the pain has to be real: only the user knows which friction actually hurt, so draft from the chosen card's receipts and confirm the felt pain rather than inventing it.
+
+**Why the card isn't a tweet yet.** A claim card's Claim line is a statement of fact — true, sharp, and inert. It states the conclusion without the struggle that earned it. On X that dies: nobody reposts a verdict they didn't watch you reach. The fix is to show the pain of the problem before you reveal the cleverness of the solution.
+
+**The four beats** — the spine, not a template to pad:
+
+1. **Hook — the pain.** What was the agent doing wrong *before*? Name the concrete failure the receipts show: the hallucination loop, regressing to npm, inventing a DB schema, claiming "done" on a blank screen. Specific friction, not "AI is unreliable."
+2. **The aha.** The reframe that flipped it — e.g. "you don't prompt better, you constrain better." This is the card's L2/L3 claim, finally earned by the pain above it.
+3. **The fix — the minuscule task.** How you actually did it, named tools (linter rules, a stop hook, a lockfile). The smaller and more boring the action, the stronger the contrast with the strategic point.
+4. **The result.** The payoff in one line — the agent reads its own error and fixes itself before you step in.
+
+**On the altitude bar.** Stage 2 strips tool nouns out of the Claim on purpose. The tweet puts them back — but only in beats 1 and 3 (the pain and the fix). The aha and the result stay at claim altitude. Tools are the texture; the claim is still the point. A draft that's *all* tool mechanics regressed to L0 — pull it back up.
+
+**Pick one angle, don't list all three.** Choose by what the receipts actually support, draft that one, and name your second choice in a single line so the user can swap:
+
+- **Show the friction** — lead with the universal pain every agent user knows (the loop). Best when the receipt is a failure mode lots of people share.
+- **Stack-specific** — anchor in the real stack (Svelte 5, Drizzle, Supabase) so it reads as lived, not generic AI-thinkfluencing. Best when the friction is stack-shaped (the model falling back to legacy syntax).
+- **Short & punchy** — a contrarian one-liner hook, then 3–4 short lines. Best for a single sharp claim that needs no setup.
+
+**Close by checking the pain, not the polish.** End with the one question only the user can answer: which friction actually happened when you built this? The receipts prove a pattern; they don't tell you which moment stung. Fix the hook to the real one before anything ships. If the user wants reach tuning after the structure is right, hand off to `twitter-algorithm-optimizer` — keep this stage about narrative, not signals.
+
 ## Privacy
 
-Transcripts contain client and employer specifics. Verbatim examples in `coding-sessions.md` are fine (the file is private). In `content-ideas.md` receipts, generalize anything identifying a client, employer, or unreleased product — "an enterprise RFP tool" not the client's name.
+Transcripts contain client and employer specifics, and the bank now lives inside whatever project repo the user runs from — possibly a client's repo. So the gitignore step above is not optional: `.docs/mining/` must be ignored before you write anything into it.
+
+Verbatim examples in `coding-sessions.md` are fine as long as the dir stays gitignored (the file is local-only). In `content-ideas.md` receipts, still generalize anything identifying a client, employer, or unreleased product — "an enterprise RFP tool" not the client's name — because a card might get copied into a draft or another repo. The cross-project nature of the scan is the risk: receipts mined from khira or swissCRM sessions can surface in a bank stored under dronelist. Never let one client's specifics travel into another client's repo.

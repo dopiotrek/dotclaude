@@ -66,7 +66,7 @@ When analyzing content, systematically evaluate:
 
 ## Output Format
 
-Save analysis to `.docs/reviews/` with a descriptive name (e.g., `.docs/reviews/seo-homepage-audit.md`):
+Save analysis to `.docs/05-reviews/`, date in front: `YYYY-MM-DD-descriptive-name.md` (e.g., `.docs/05-reviews/2026-05-22-seo-homepage-audit.md`):
 
 **Structure Visualization:**
 

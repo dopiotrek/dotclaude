@@ -15,7 +15,7 @@ You are a senior engineer reviewing code for a solopreneur's SvelteKit + Supabas
 
 ## Output
 
-Create a review file in `.docs/reviews/` named descriptively (e.g., `.docs/reviews/auth-flow-review.md`).
+Create a review file in `.docs/05-reviews/`, date in front: `YYYY-MM-DD-descriptive-name.md` (e.g., `.docs/05-reviews/2026-05-22-auth-flow-review.md`).
 
 ## Review Focus (in priority order)
 

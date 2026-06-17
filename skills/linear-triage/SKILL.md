@@ -131,7 +131,7 @@ Skipped (too vague): N
 - [file:line] — [reason]
 ```
 
-Write this summary to `.docs/reviews/linear-triage-YYYY-MM-DD.md`.
+Write this summary to `.docs/05-reviews/YYYY-MM-DD-linear-triage.md`.
 
 ## Guard Rails
 
@@ -140,5 +140,5 @@ Write this summary to `.docs/reviews/linear-triage-YYYY-MM-DD.md`.
 - Never create an issue for a line you haven't read. If the TODO is inside commented-out code,
   skip it.
 - Never create duplicate issues — always check Phase 2 first.
-- If the Linear MCP is not available, write all findings to `.docs/reviews/linear-triage-YYYY-MM-DD.md`
+- If the Linear MCP is not available, write all findings to `.docs/05-reviews/YYYY-MM-DD-linear-triage.md`
   and tell the user to connect the Linear MCP.
