@@ -34,6 +34,8 @@ Grouped for orientation; run `/` in Claude Code for the live list.
 
 **Stack & dev**
 
+- `supabase` — any Supabase task: Database, Auth, Edge Functions, Realtime, Storage, RLS, CLI/MCP, `supabase-js` / `@supabase/ssr`. (official, from supabase/agent-skills)
+- `supabase-postgres-best-practices` — Postgres performance & schema optimization rules from Supabase. (official)
 - `ai-sdk` — Vercel AI SDK questions and building AI features (generateText, streamText, tools, useChat).
 - `superforms-reference` — sveltekit-superforms + Zod patterns (scoped to Svelte/TS files).
 - `svelte-component-architecture` — component decomposition for SvelteKit / Svelte 5.
