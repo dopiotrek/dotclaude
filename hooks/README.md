@@ -23,9 +23,9 @@ Hooks are scripts that run before/after Claude Code tool invocations. They provi
 
 Hooks spawn a process on every matching event. To minimize overhead:
 
-- **Use `if` conditionals** in settings to skip hooks when the file path doesn't match (e.g., only run drizzle-migration-guard on `.sql` files)
-- **Use pipe matchers** like `Write|Edit|MultiEdit` instead of duplicating hooks per tool
-- **Dangerous pattern blocking** is handled by `permissions.deny` in settings (native, zero overhead) — don't duplicate it in hooks
+- **Every path-sensitive hook self-checks the file path** (extension + directory) and exits early on irrelevant files, so it is safe to register them under a broad `matcher` without an `if` filter. This is the approach in `settings.template.json`.
+- **Use pipe matchers** like `Write|Edit|MultiEdit` instead of duplicating hooks per tool. Note: the pipe (`|`) is only valid in `matcher` (tool names). The `if` field holds **exactly one** permission rule — no `|`, `&&`, or list syntax. If you need to narrow to several path patterns, use one matcher group per rule, or let the hook self-check (preferred).
+- **Dangerous pattern blocking** is handled by the `permissions.deny` block in settings (native, zero overhead) — don't duplicate it in hooks.
 
 ## Included Hooks
 
@@ -189,12 +189,19 @@ if __name__ == "__main__":
 
 ### Using `if` Conditionals (v2.1.85+)
 
-In settings.json, use `if` to skip hooks when irrelevant:
+`if` skips a hook when the call doesn't match, avoiding the process spawn. It holds **exactly one** permission rule — there is no `|`, `&&`, or list syntax (that is `matcher`-only). To cover several patterns, register one matcher group per rule:
 
 ```json
 {
-  "matcher": "Write|Edit|MultiEdit",
-  "if": "Write(*.sql)|Edit(*.sql)|MultiEdit(*.sql)",
+  "matcher": "Write|Edit",
+  "if": "Edit(**/*.sql)",
+  "hooks": [{ "type": "command", "command": "python3 $HOME/.claude/hooks/drizzle-migration-guard.py" }]
+},
+{
+  "matcher": "Write|Edit",
+  "if": "Edit(**/migrations/**)",
   "hooks": [{ "type": "command", "command": "python3 $HOME/.claude/hooks/drizzle-migration-guard.py" }]
 }
 ```
+
+Because `if` is best-effort and can't express OR in one field, the hooks in this repo skip it and self-check the path instead (see Performance Notes). Use `permissions.deny` — not a hook — to enforce a hard block.

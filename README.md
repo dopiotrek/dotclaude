@@ -1,236 +1,168 @@
 # dotclaude
 
-> Claude Code agentic framework - hooks, agents, skills, and configuration
+> Claude Code configuration framework — hooks, agents, skills, settings.
 
-A comprehensive, shareable configuration framework for [Claude Code](https://claude.ai/download) that provides automated guardrails, specialized agents, reusable skills, and sensible defaults for productive AI-assisted development.
+My personal, shareable [Claude Code](https://claude.ai/download) setup: automated guardrails for a SvelteKit / Svelte 5 / Supabase / Drizzle / Turborepo stack, specialized subagents, a library of skills, and sensible defaults. The repo is the single source of truth; `install.sh` symlinks it into `~/.claude`.
 
-## What's Included
+> Component counts below are intentionally approximate — run `./install.sh` and read its summary for the exact numbers on your checkout, so this README can't drift out of date.
 
-| Component     | Count | Description                                                    |
-| ------------- | ----- | -------------------------------------------------------------- |
-| **Hooks**     | 13    | Automated guardrails for security, formatting, and validation  |
-| **Agents**    | 9     | Specialized task handlers (frontend, backend, debugging, etc.) |
-| **Skills**    | 4     | Reusable skill definitions with reference materials            |
-| **Settings**  | 1     | Comprehensive permission rules and hook configuration          |
-| **CLAUDE.md** | 1     | Global preferences and instructions                            |
+## What's included
 
-## Quick Start
+| Component     | Roughly | What it is                                                       |
+| ------------- | ------- | ---------------------------------------------------------------- |
+| **Hooks**     | ~10     | PreToolUse / PostToolUse / Stop guardrails (security, format, DB) |
+| **Agents**    | ~9      | Specialized subagents (frontend, backend, debug, review, …)      |
+| **Skills**    | ~20 + vendored | Reusable procedures; plus a vendored `gstack/` skill set    |
+| **Settings**  | 1       | `settings/settings.template.json` (`$HOME` is expanded on install) |
+| **CLAUDE.md** | 1       | Global preferences and instructions                              |
+
+## Quick start
 
 ```bash
-# Clone the repository
 git clone https://github.com/dopiotrek/dotclaude.git ~/repos/dotclaude
-
-# Run the installer (creates symlinks)
 cd ~/repos/dotclaude
-./install.sh
-
-# Start a new Claude Code session
-claude
+./install.sh        # symlinks ~/.claude → this repo, generates settings.json
+claude              # start a new session
 ```
 
-The installer creates symlinks from `~/.claude` to this repository, making it the single source of truth. Any changes you make here automatically apply to Claude Code.
-
-### Installation Options
+### Install options
 
 ```bash
-./install.sh            # Default: symlink mode (recommended)
-./install.sh --copy     # Copy files instead of symlinks
-./install.sh --uninstall  # Remove symlinks and optionally restore backup
+./install.sh             # symlink mode (recommended): edits here apply live
+./install.sh --copy      # copy instead of symlink
+./install.sh --uninstall # remove symlinks, optionally restore backup
 ```
+
+The installer symlinks `CLAUDE.md`, `RTK.md`, `hooks/`, `agents/`, `skills/`, `scripts/`, and `mining/` into `~/.claude`, generates `~/.claude/settings.json` from the template (expanding `$HOME`), marks hook scripts executable, and adds `~/.claude/scripts` to your shell `PATH`.
 
 ## Hooks
 
-Hooks are Python scripts that run before/after Claude Code tool invocations, providing automated guardrails:
+Python (and one shell) scripts that run around tool calls. Each path-sensitive hook self-checks the file path and exits early when irrelevant, so they're registered under a broad `matcher` with no `if` filter. Exit codes: `0` allow, `1` warn (stderr to you), `2` block (stderr to Claude).
 
-### Security & Safety
+**Security**
 
-- **no-secrets.py** - Blocks hardcoded API keys, tokens, and passwords
-- **permission-auto-approve.py** - Auto-approves safe read-only operations
-- **bash-command-validator.py** - Enforces use of modern CLI tools (rg over grep)
+- `no-secrets.py` — blocks hardcoded keys/tokens/passwords on write (`sk_live_*`, `sk-*`, Supabase service-role keys, JWTs).
 
-### Code Quality
+**Code quality**
 
-- **auto-format.py** - Auto-formats code after edits (Prettier, Black, etc.)
-- **import-path-validator.py** - Enforces import conventions ($lib, package imports)
-- **sveltekit-route-validator.py** - Validates SvelteKit routing conventions
-- **sveltekit-perf-guard.py** - Monitors bundle size and performance anti-patterns
+- `auto-format.py` — formats after edits (Prettier, Black, gofmt, rustfmt, php-cs-fixer).
+- `import-path-validator.py` — enforces monorepo import conventions (`@pkg/*`, `$lib/`, `$app/state` over `$app/stores`).
+- `sveltekit-route-validator.py` — checks SvelteKit route file naming (`+page.svelte`, `+server.ts`, …).
+- `sveltekit-perf-guard.py` — after a build command, checks bundle/chunk budgets and import anti-patterns.
 
-### Database & Migrations
+**Database & migrations**
 
-- **drizzle-migration-guard.py** - Warns about destructive schema changes
-- **supabase-rls-reminder.py** - Reminds to add Row Level Security policies
+- `drizzle-migration-guard.py` — blocks destructive schema changes (DROP/TRUNCATE/DELETE-without-WHERE), warns on risky ones.
+- `supabase-rls-reminder.py` — reminds you to add Row Level Security on new tables.
 
-### Utilities
+**Tooling**
 
-- **command-logger.py** - Logs all Claude Code operations for audit
-- **dependency-audit.py** - Runs security audits when dependencies change
-- **stop-verification.py** - Runs type checks when Claude completes work
-- **web-search-enhancer.py** - Adds current year to tech documentation searches
+- `rtk-rewrite.sh` — transparently rewrites Bash commands to `rtk` equivalents for token savings (no-op if `rtk`/`jq` absent).
+- `dependency-audit.py` — runs a security audit when a manifest (`package.json`, `requirements.txt`, `Cargo.toml`, …) changes.
+- `stop-verify-and-log.py` — on Stop, runs type checks in the background (`tsc`, `svelte-check`, `mypy`, `cargo check`).
 
-See [hooks/README.md](hooks/README.md) for detailed documentation.
+See [hooks/README.md](hooks/README.md) for the full reference and how to write your own.
 
 ## Agents
 
-Specialized agents handle complex, domain-specific tasks:
+Subagents in `agents/`, each a markdown file with YAML frontmatter. Tools are scoped with the `tools:` field (comma-separated), so a subagent only gets what it needs.
 
 | Agent                        | Model  | Purpose                                               |
 | ---------------------------- | ------ | ----------------------------------------------------- |
-| **frontend-engineer**        | sonnet | Svelte 5 components, shadcn-svelte, responsive design |
-| **backend-engineer**         | sonnet | SvelteKit server-side, load functions, form actions   |
-| **superforms-expert**        | sonnet | sveltekit-superforms + Zod validation                 |
-| **debug-specialist**         | sonnet | Error diagnosis, test failures, performance issues    |
-| **code-reviewer**            | opus   | Comprehensive security and quality review             |
-| **discovery-agent**          | sonnet | Requirements gathering and feature specification      |
-| **vercel-deployment-expert** | sonnet | Vercel deployment and configuration                   |
-| **seo-expert**               | sonnet | Content structure and SEO optimization                |
-| **mobile-ui-designer**       | sonnet | Mobile-first UI design with TailwindCSS               |
+| **frontend-engineer**        | sonnet | Svelte 5 runes, shadcn-svelte, responsive UI          |
+| **backend-engineer**         | sonnet | SvelteKit server: load functions, actions, hooks      |
+| **superforms-expert**        | sonnet | sveltekit-superforms + Zod                            |
+| **mobile-ui-designer**       | sonnet | Mobile-first UI with TailwindCSS                      |
+| **debug-expert**             | opus   | Error diagnosis, test failures, perf issues (worktree)|
+| **code-reviewer**            | opus   | Security & quality review (worktree)                  |
+| **discovery-agent**          | sonnet | Lightweight feature specs in `.docs/`                 |
+| **vercel-deployment-expert** | sonnet | Vercel deploys and configuration                      |
+| **seo-expert**               | sonnet | Content structure and on-page SEO                     |
 
-See [agents/README.md](agents/README.md) for detailed documentation.
+> Filenames may differ from the agent `name` (e.g. `debug-specialist.md` defines `debug-expert`). See [agents/README.md](agents/README.md).
 
 ## Skills
 
-Skills are reusable task definitions with supporting reference materials:
+Reusable procedures in `skills/`, each `skill-name/SKILL.md`. Invoke with `/skill-name` (the **directory** name) or let Claude load one when its `description` matches. Roughly grouped:
 
-- **clean-comments** - Remove unnecessary code comments
-- **code-reviewer** - Code review with checklists and analysis scripts
-- **frontend-design** - UI constraints for consistent design
-- **svelte-component-architecture** - Component decomposition guidelines
+- **Stack / dev** — `ai-sdk`, `superforms-reference`, `svelte-component-architecture`, `tapforce-shadcn-svelte`, `tdd-workflow`, `turborepo`, `frontend-design`, `clean-comments`, `playwright-cli`
+- **SEO / growth** — `ai-seo`, `seo-audit`, `programmatic-seo`, `find-keywords`, `free-tool-strategy`, `google-search-console`, `web-design-guidelines`
+- **Writing / content** — `deep-dive-burst`, `humanizer`, `writing-linkedin-posts`, `twitter-algorithm-optimizer`, `session-mining`
+- **Workflow** — `agent-handoff`, `tutor`
 
-See [skills/README.md](skills/README.md) for detailed documentation.
+A vendored `gstack/` skill set (the `gstack-*` directories) ships alongside these; treat it as third-party and prune what you don't use.
 
 ## Configuration
 
-### CLAUDE.md
+### settings/settings.template.json
 
-Global preferences and instructions that apply to all Claude Code sessions:
+`install.sh` expands `$HOME` and writes the result to `~/.claude/settings.json`. The template sets:
 
-```markdown
-# Global Claude Preferences
+- **`hooks`** — the PreToolUse / PostToolUse / Stop wiring above.
+- **`permissions.deny`** — native blocks for `.env` / `secrets/` reads and `rm -rf` of root/home.
+- **`statusLine`** — a command status line (`scripts/statusline.sh`).
+- **`skillListingBudgetFraction`** — caps how much context the skill listing consumes.
+- **`skipDangerousModePermissionPrompt`** — skips the confirmation before bypass-permissions mode. Lands in your **user** settings, so it's honored. Remove it if you don't want that default (especially before sharing).
 
-## About Me
+### Adding a hook
 
-- Primary stack: SvelteKit, TypeScript, Supabase
-- All projects use pnpm (never npm or yarn)
-
-## Things to Always Do
-
-- Run type checks before considering work complete
-- Preserve existing code style in files being edited
-- Use existing patterns from the codebase
-  ...
-```
-
-### Settings
-
-The `settings/settings.template.json` contains:
-
-- **Permissions** - Fine-grained allow/deny/ask rules
-- **Hooks** - Hook configuration for each event type
-- **Model** - Default model preference
-- **Plugins** - Enabled marketplace plugins
-
-## Customization
-
-### Adding Your Own Hooks
-
-1. Create a Python script in `hooks/`:
+1. Drop a script in `hooks/` (template below).
+2. Register it under the right event in `settings/settings.template.json`.
+3. Re-run `./install.sh`.
 
 ```python
 #!/usr/bin/env python3
-import json
-import sys
+import json, sys
 
 def main():
-    input_data = json.load(sys.stdin)
-    tool_name = input_data.get("tool_name", "")
-
-    # Your logic here
-
+    try:
+        data = json.load(sys.stdin)
+    except json.JSONDecodeError:
+        sys.exit(0)
+    tool_name = data.get("tool_name", "")
+    tool_input = data.get("tool_input", {})
+    # Self-check the path here and return early if irrelevant.
     sys.exit(0)  # 0=allow, 1=warn, 2=block
 
 if __name__ == "__main__":
     main()
 ```
 
-2. Add the hook to `settings/settings.template.json`
-3. Re-run `./install.sh` to regenerate settings
+### Adding an agent
 
-### Adding Your Own Agents
-
-Create a markdown file in `agents/` with YAML frontmatter:
+Create `agents/<name>.md`:
 
 ```markdown
 ---
 name: my-agent
-description: When and how to use this agent
+description: When Claude should delegate to this agent.
 model: sonnet
 color: blue
+tools: Read, Glob, Grep, Edit, Write, Bash
 ---
 
-You are an expert in...
+You are an expert in…
 ```
 
-### Modifying Skills
+Use `tools:` (comma-separated) to scope tools — not `allowed-tools` (that's a **skills** field and is ignored on subagents, which silently grants all tools).
 
-Skills in `skills/` follow the structure:
-
-```
-skill-name/
-├── SKILL.md           # Main skill definition
-├── references/        # Supporting documentation
-└── scripts/           # Automation scripts (optional)
-```
-
-## Project Structure
+### Adding a skill
 
 ```
-dotclaude/
-├── README.md                    # This file
-├── CLAUDE.md                    # Global preferences
-├── install.sh                   # Installation script
-├── settings/
-│   └── settings.template.json   # Settings with $HOME placeholders
-├── hooks/
-│   ├── README.md
-│   └── *.py                     # 13 hook scripts
-├── agents/
-│   ├── README.md
-│   └── *.md                     # 9 agent definitions
-├── skills/
-│   ├── README.md
-│   └── */                       # 4 skill directories
-└── docs/
-    └── *.md                     # Additional documentation
+skills/<skill-name>/
+├── SKILL.md          # frontmatter (name, description, optional paths/allowed-tools) + body
+├── references/       # optional supporting docs
+└── scripts/          # optional helper scripts
 ```
 
 ## Requirements
 
 - [Claude Code CLI](https://claude.ai/download)
-- Python 3.8+ (for hooks)
-- Bash (for installation)
+- Python 3.10+ (hooks)
+- Bash (install)
 
-### Optional Dependencies
-
-Some hooks have optional dependencies for full functionality:
-
-- `prettier` - For auto-formatting JS/TS/Svelte
-- `black` - For auto-formatting Python
-- `terminal-notifier` (macOS) - For notifications
+Optional, for full hook functionality: `prettier`, `black`, `rtk`, `jq`, `terminal-notifier` (macOS).
 
 ## License
 
-MIT License - Feel free to use, modify, and share.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-Ideas for contributions:
-
-- New hooks for additional validations
-- Agents for other frameworks/languages
-- Skills for common development tasks
-- Documentation improvements
+MIT. Use, modify, and share. If you fork it, review `skipDangerousModePermissionPrompt` and the `permissions.deny` list before installing.

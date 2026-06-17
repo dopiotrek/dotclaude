@@ -1,5 +1,5 @@
 ---
-name: ui-skills
+name: frontend-design
 description: Opinionated constraints for building better interfaces with agents. Use when working on UI in src/**/*.svelte, src/lib/components/**, or src/routes/**/+page.svelte.
 ---
 

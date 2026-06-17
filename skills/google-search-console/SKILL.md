@@ -80,7 +80,7 @@ Use to compare actual CTR vs expected. Benchmarks vary by SERP features (AI Over
 
 #### Rich Results & CTR
 
-Pages with review stars, FAQ schema, or other rich snippets see 10-20% more clicks. See **schema-markup**.
+Pages with review stars, FAQ schema, or other rich snippets see 10-20% more clicks.
 
 ### 2. Insights Report
 
@@ -178,7 +178,7 @@ Enterprise: Glitches can block new URL crawling, cause hreflang confusion, delay
 | **Needs improvement** | Fix | Monitor |
 | **Poor URLs** | Fix | Monitor |
 
-**Why URLs don't have good score**: Click "Open report" → grouped example URLs by issue type. For threshold values and fixes, see **core-web-vitals**.
+**Why URLs don't have good score**: Click "Open report" → grouped example URLs by issue type.
 
 **Tip**: Historical chart is short; export to spreadsheet for longer trends. Share with dev team regularly; correlate dates with releases.
 
@@ -214,7 +214,7 @@ For GA4 AI traffic tracking, see **ai-traffic-tracking**.
 **Location**: Links (inbound links), Security & Manual Actions
 
 - **Links report**: View links to site and pages; anchor text distribution.
-- **Disavow file**: Submit via GSC when necessary (manual penalty, toxic links). Use sparingly; over-disavowing can harm. See **backlink-analysis** for when to disavow.
+- **Disavow file**: Submit via GSC when necessary (manual penalty, toxic links). Use sparingly; over-disavowing can harm.
 
 ## Search Console API
 
@@ -251,7 +251,7 @@ date, query, page, country, device. Search appearance (AMP, blue link, rich resu
 - [ ] Sitemaps: All "Success"; indexed URL counts stable
 - [ ] Core Web Vitals: Mobile good/needs improvement/poor
 - [ ] Enhancements: No new invalid items (critical issues)
-- [ ] Links: No manual actions; disavow only if needed (see **backlink-analysis**)
+- [ ] Links: No manual actions; disavow only if needed
 - [ ] Data exported to spreadsheet (month-end snapshot)
 - [ ] Charts screenshotted for history
 - [ ] Release notes reviewed for correlation
@@ -265,14 +265,3 @@ date, query, page, country, device. Search appearance (AMP, blue link, rich resu
 - **Action items**: Prioritized fixes (indexing, CWV, sitemaps, enhancements, title/meta)
 - **Correlation**: Suspected causes (releases, config changes)
 - **Next steps**: Monitoring plan, dev handoff
-
-## Related Skills
-
-- **title-tag, meta-description, page-metadata**: Title and meta optimization for low-CTR pages; hreflang
-- **xml-sitemap**: Fix sitemap errors
-- **indexing**: Resolve indexing issues
-- **core-web-vitals**: CWV optimization; fix LCP, INP, CLS
-- **mobile-friendly**: Mobile Usability report; mobile-first indexing
-- **schema-markup**: Fix structured data / rich results
-- **backlink-analysis**: When to disavow; backlink audit
-- **seo-monitoring**: Full SEO data analysis, benchmark

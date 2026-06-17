@@ -1,6 +1,6 @@
 ---
 name: ai-seo
-description: "When the user wants to optimize content for AI search engines, get cited by LLMs, or appear in AI-generated answers. Also use when the user mentions 'AI SEO,' 'AEO,' 'GEO,' 'LLMO,' 'answer engine optimization,' 'generative engine optimization,' 'LLM optimization,' 'AI Overviews,' 'optimize for ChatGPT,' 'optimize for Perplexity,' 'AI citations,' 'AI visibility,' 'zero-click search,' 'how do I show up in AI answers,' 'LLM mentions,' or 'optimize for Claude/Gemini.' Use this whenever someone wants their content to be cited or surfaced by AI assistants and AI search engines. For traditional technical and on-page SEO audits, see seo-audit. For structured data implementation, see schema-markup."
+description: "When the user wants to optimize content for AI search engines, get cited by LLMs, or appear in AI-generated answers. Also use when the user mentions 'AI SEO,' 'AEO,' 'GEO,' 'LLMO,' 'answer engine optimization,' 'generative engine optimization,' 'LLM optimization,' 'AI Overviews,' 'optimize for ChatGPT,' 'optimize for Perplexity,' 'AI citations,' 'AI visibility,' 'zero-click search,' 'how do I show up in AI answers,' 'LLM mentions,' or 'optimize for Claude/Gemini.' Use this whenever someone wants their content to be cited or surfaced by AI assistants and AI search engines. For traditional technical and on-page SEO audits, see seo-audit."
 metadata:
   version: 1.1.0
 ---
@@ -240,7 +240,7 @@ Structured data helps AI systems understand your content. Key schemas:
 | Reviews | `Review`, `AggregateRating` | Trust signals |
 | Organization | `Organization` | Entity recognition |
 
-Content with proper schema shows 30-40% higher AI visibility. For implementation, use the **schema-markup** skill.
+Content with proper schema shows 30-40% higher AI visibility.
 
 ---
 
@@ -391,8 +391,4 @@ For implementation, see the [tools registry](../../tools/REGISTRY.md).
 ## Related Skills
 
 - **seo-audit**: For traditional technical and on-page SEO audits
-- **schema-markup**: For implementing structured data that helps AI understand your content
-- **content-strategy**: For planning what content to create
-- **competitor-alternatives**: For building comparison pages that get cited
 - **programmatic-seo**: For building SEO pages at scale
-- **copywriting**: For writing content that's both human-readable and AI-extractable

@@ -4,7 +4,7 @@ description: >
   Use this agent for creating, implementing, or enhancing forms using sveltekit-superforms and Zod validation. Includes designing schemas, server-side form handling, reactive client components, multi-step forms, nested data, file uploads, and validation UX.
 model: sonnet
 color: cyan
-allowed-tools: ["Read", "Glob", "Grep", "Edit", "Write", "Bash"]
+tools: Read, Glob, Grep, Edit, Write, Bash
 ---
 
 # Superforms Expert Agent

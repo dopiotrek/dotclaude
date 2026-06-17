@@ -51,7 +51,7 @@ if [[ "$1" == "--uninstall" ]]; then
     LATEST_BACKUP=$(ls -td "$CLAUDE_DIR"/backup-* 2>/dev/null | head -1)
 
     # Remove symlinks
-    for item in CLAUDE.md hooks agents skills scripts mining; do
+    for item in CLAUDE.md hooks agents skills scripts mining rules; do
         if [ -L "$CLAUDE_DIR/$item" ]; then
             rm "$CLAUDE_DIR/$item"
             print_success "Removed symlink: $item"
@@ -64,7 +64,7 @@ if [[ "$1" == "--uninstall" ]]; then
         read -p "Restore from backup ($LATEST_BACKUP)? [y/N] " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
-            for item in CLAUDE.md hooks agents skills scripts mining; do
+            for item in CLAUDE.md hooks agents skills scripts mining rules; do
                 if [ -e "$LATEST_BACKUP/$item" ]; then
                     cp -r "$LATEST_BACKUP/$item" "$CLAUDE_DIR/"
                     print_success "Restored: $item"
@@ -95,7 +95,7 @@ fi
 
 # 2. Backup existing config (only real files, not symlinks)
 has_existing=false
-for item in CLAUDE.md settings.json hooks agents skills scripts mining; do
+for item in CLAUDE.md settings.json hooks agents skills scripts mining rules; do
     if [ -e "$CLAUDE_DIR/$item" ] && [ ! -L "$CLAUDE_DIR/$item" ]; then
         has_existing=true
         break
@@ -105,7 +105,7 @@ done
 if [ "$has_existing" = true ]; then
     print_step "Backing up existing config to $BACKUP_DIR"
     mkdir -p "$BACKUP_DIR"
-    for item in CLAUDE.md settings.json hooks agents skills scripts mining; do
+    for item in CLAUDE.md settings.json hooks agents skills scripts mining rules; do
         if [ -e "$CLAUDE_DIR/$item" ] && [ ! -L "$CLAUDE_DIR/$item" ]; then
             cp -r "$CLAUDE_DIR/$item" "$BACKUP_DIR/" 2>/dev/null || true
             print_success "Backed up: $item"
@@ -123,6 +123,7 @@ if [[ "$1" == "--copy" ]]; then
     cp -r "$SCRIPT_DIR/agents" "$CLAUDE_DIR/agents"
     cp -r "$SCRIPT_DIR/skills" "$CLAUDE_DIR/skills"
     cp -r "$SCRIPT_DIR/scripts" "$CLAUDE_DIR/scripts"
+    [ -d "$SCRIPT_DIR/rules" ] && cp -r "$SCRIPT_DIR/rules" "$CLAUDE_DIR/rules"
 else
     print_step "Creating symlinks..."
 
@@ -168,6 +169,13 @@ else
     rm -rf "$CLAUDE_DIR/scripts"
     ln -s "$SCRIPT_DIR/scripts" "$CLAUDE_DIR/scripts"
     print_success "scripts/  → $SCRIPT_DIR/scripts/"
+
+    # Rules directory (user-level .claude/rules/, auto-loaded by Claude Code)
+    if [ -d "$SCRIPT_DIR/rules" ]; then
+        rm -rf "$CLAUDE_DIR/rules"
+        ln -s "$SCRIPT_DIR/rules" "$CLAUDE_DIR/rules"
+        print_success "rules/    → $SCRIPT_DIR/rules/"
+    fi
 fi
 
 echo ""
@@ -224,12 +232,19 @@ echo -e "${GREEN}═════════════════════
 echo -e "${GREEN}✨ Installation complete!${NC}"
 echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
 echo ""
+# Accurate component counts (exclude READMEs/caches; count hook scripts, agent
+# defs, and skill dirs; report vendored gstack/ separately so totals don't drift).
+HOOK_COUNT=$(find "$SCRIPT_DIR/hooks" -maxdepth 1 -type f \( -name '*.py' -o -name '*.sh' \) | wc -l | tr -d ' ')
+AGENT_COUNT=$(find "$SCRIPT_DIR/agents" -maxdepth 1 -name '*.md' ! -name 'README.md' | wc -l | tr -d ' ')
+GSTACK_COUNT=$(find "$SCRIPT_DIR/skills" -maxdepth 1 -type d -name 'gstack*' | wc -l | tr -d ' ')
+SKILL_COUNT=$(( $(find "$SCRIPT_DIR/skills" -maxdepth 1 -type d ! -path "$SCRIPT_DIR/skills" | wc -l | tr -d ' ') - GSTACK_COUNT ))
+
 echo "Installed components:"
-echo "  • CLAUDE.md    - Global preferences and instructions"
-echo "  • "$(ls -1 $SCRIPT_DIR/hooks | wc -l)" hooks     - Automated guardrails and enhancements"
-echo "  • "$(ls -1 $SCRIPT_DIR/agents | wc -l)" agents     - Specialized task handlers"
-echo "  • "$(ls -1 $SCRIPT_DIR/skills | wc -l)" skills     - Reusable skill definitions"
-echo "  • settings.json - Permissions and hook configuration"
+echo "  • CLAUDE.md     - Global preferences and instructions"
+echo "  • ${HOOK_COUNT} hooks      - Automated guardrails (security, format, DB)"
+echo "  • ${AGENT_COUNT} agents     - Specialized subagents"
+echo "  • ${SKILL_COUNT} skills     - Reusable procedures (+ ${GSTACK_COUNT} vendored gstack/)"
+echo "  • settings.json - permissions.deny + hook configuration"
 echo ""
 
 if [[ "$1" != "--copy" ]]; then

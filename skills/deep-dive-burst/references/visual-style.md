@@ -1,6 +1,6 @@
 # Visual Style — HTML the skill generates
 
-One aesthetic governs everything this skill renders: the burst workspace, learning visuals, and the post visual. These rules derive from the user's own "Technical Swiss" UI skill (ui-skills) — apply them to every HTML output so it all looks made by the same hand. The concrete reference implementation is `references/workspace.html`; copy its tokens and patterns rather than reinventing.
+One aesthetic governs everything this skill renders: the burst workspace, learning visuals, and the post visual. These rules derive from the user's own "Technical Swiss" UI skill (frontend-design) — apply them to every HTML output so it all looks made by the same hand. The concrete reference implementation is `references/workspace.html`; copy its tokens and patterns rather than reinventing.
 
 ## Core principles
 

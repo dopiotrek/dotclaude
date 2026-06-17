@@ -2,9 +2,9 @@
 
 ## About Me
 
-- Primary stack: SvelteKit, Svelte 5 (runes), TypeScript, Supabase, Drizzle ORM
+- Primary stack: SvelteKit, Svelte 5 (runes only), TypeScript, Supabase, Drizzle ORM, Turborepo
 - All projects use pnpm (never npm or yarn)
-- Always use Svelte 5 runes syntax ($state, $derived, $effect) — never Svelte 4 stores or reactive declarations ($:, writable, derived)
+- Svelte 5 runes only — never Svelte 4 stores or `$:` reactive declarations. (This always-on guard covers new files; the full Svelte and Drizzle/Supabase code rules are path-scoped in `rules/` and load when you touch matching files.)
 
 ## Communication Style
 
@@ -22,7 +22,6 @@
 - Run type checks before considering work complete
 - Preserve existing code style in files being edited
 - Use existing patterns from the codebase, don't invent new ones
-- Consider mobile-first for any UI work
 - After reading a file, reference it from context. Only re-read if the file was modified since last read.
 - Use Glob instead of find/ls commands. Use Grep instead of grep/rg. Use Read instead of cat.
 - For "apply X everywhere" tasks (layout, padding, token, weight, component pattern), grep/glob for ALL occurrences first, list them, change each, then re-grep to prove zero of the old pattern remain. Never claim full coverage based only on the cases you happened to edit.
