@@ -7,6 +7,7 @@ Results are written to .claude/logs/last-verify.txt.
 """
 
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -116,6 +117,10 @@ def format_results(results: list[dict]) -> str:
             lines.append(f"  ✅ {r['name']}: passed")
             continue
 
+        if r.get("pre_existing"):
+            lines.append(f"  ⏭️  {r['name']}: pre-existing errors ignored (not in this turn's changes)")
+            continue
+
         all_passed = False
         lines.append(f"  ❌ {r['name']}: failed (exit {r.get('returncode', '?')})")
         detail = check_detail(r)
@@ -141,7 +146,12 @@ def format_log(results: list[dict]) -> str:
 
     blocks = [format_results(results), "", "─" * 60, "FULL OUTPUT", "─" * 60]
     for r in results:
-        status = "passed" if r["success"] else f"FAILED (exit {r.get('returncode', '?')})"
+        if r["success"]:
+            status = "passed"
+        elif r.get("pre_existing"):
+            status = f"FAILED (exit {r.get('returncode', '?')}) — pre-existing, ignored"
+        else:
+            status = f"FAILED (exit {r.get('returncode', '?')})"
         blocks.append(f"\n## {r['name']} — {status}")
         if r.get("error"):
             blocks.append(r["error"].strip())
@@ -191,13 +201,11 @@ def write_log(project_root: Path, output: str) -> Path | None:
 CHECK_EXTENSIONS = (".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".svelte", ".py", ".rs")
 
 
-def changed_files_need_checks(project_root: Path) -> bool:
-    """True if uncommitted changes touch a checkable file.
+def get_changed_files(project_root: Path) -> set[str] | None:
+    """Return staged/unstaged/untracked file paths, relative to project_root.
 
-    Avoids running a full monorepo typecheck after turns that changed nothing
-    relevant (a Q&A turn, a markdown edit). Considers staged, unstaged, and
-    untracked files. Fails open: if git is unavailable or errors, run the
-    checks rather than silently skip them.
+    None means git is unavailable or this isn't a repo — callers should fail
+    open (don't suppress or filter checks) in that case.
     """
     try:
         result = subprocess.run(
@@ -205,20 +213,54 @@ def changed_files_need_checks(project_root: Path) -> bool:
             cwd=project_root, capture_output=True, text=True, timeout=5,
         )
     except (subprocess.TimeoutExpired, FileNotFoundError):
-        return True
+        return None
     if result.returncode != 0:
-        return True  # not a git repo — don't suppress checks
+        return None  # not a git repo
 
-    changed = result.stdout.strip()
-    if not changed:
-        return False  # nothing changed — nothing to verify
-    for line in changed.splitlines():
+    changed = set()
+    for line in result.stdout.strip().splitlines():
         path = line[3:]  # strip the "XY " porcelain status prefix
         if " -> " in path:  # rename: "old -> new"
             path = path.split(" -> ", 1)[1]
-        if path.strip().rstrip('"').endswith(CHECK_EXTENSIONS):
-            return True
-    return False
+        changed.add(path.strip().strip('"'))
+    return changed
+
+
+def changed_files_need_checks(project_root: Path) -> bool:
+    """True if uncommitted changes touch a checkable file.
+
+    Avoids running a full monorepo typecheck after turns that changed nothing
+    relevant (a Q&A turn, a markdown edit). Fails open: if git is unavailable,
+    run the checks rather than silently skip them.
+    """
+    changed = get_changed_files(project_root)
+    if changed is None:
+        return True
+    return any(path.endswith(CHECK_EXTENSIONS) for path in changed)
+
+
+# Pull the offending file out of a compiler error line, per toolchain format:
+#   tsc/svelte-check: "path/to/file.ts(12,34): error TS2305: ..."
+#   mypy:              "path/to/file.py:12: error: ..."
+#   cargo:             "  --> src/main.rs:12:34"
+_ERROR_FILE_PATTERNS = (
+    re.compile(r"^([\w./\\-]+\.(?:ts|tsx|js|jsx|mjs|cjs|svelte))\(\d+,\d+\):"),
+    re.compile(r"^([\w./\\-]+\.py):\d+:"),
+    re.compile(r"-->\s+([\w./\\-]+\.rs):\d+:\d+"),
+)
+
+
+def extract_error_files(output: str) -> set[str]:
+    """Best-effort set of file paths mentioned in a check's error output."""
+    files = set()
+    for line in output.splitlines():
+        line = line.strip()
+        for pattern in _ERROR_FILE_PATTERNS:
+            match = pattern.search(line)
+            if match:
+                files.add(match.group(1))
+                break
+    return files
 
 
 def do_work():
@@ -241,11 +283,24 @@ def do_work():
 
     results = [run_check(name, cmd, project_root, timeout) for name, cmd, timeout in checks]
 
+    # Demote failures that live entirely in files this turn never touched —
+    # a monorepo-wide check otherwise cries wolf on every turn once any file,
+    # anywhere, has a pre-existing error. Fails open: only demote when we can
+    # confidently attribute every reported error to an untouched file.
+    changed_files = get_changed_files(project_root)
+    if changed_files:
+        for r in results:
+            if r["success"]:
+                continue
+            error_files = extract_error_files(check_detail(r))
+            if error_files and not (error_files & changed_files):
+                r["pre_existing"] = True
+
     # The log file gets the FULL output; the printed summary is the short form.
     log_path = write_log(project_root, format_log(results))
 
     # Notification reflects the actual check status, not just "stopped".
-    failed = [r for r in results if not r["success"]]
+    failed = [r for r in results if not r["success"] and not r.get("pre_existing")]
     if failed:
         names = ", ".join(r["name"] for r in failed)
         where = f" — see {log_path}" if log_path else ""
