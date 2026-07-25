@@ -1,3 +1,10 @@
+---
+paths:
+  - "**/.claude/rules/*.md"
+  - "**/rules/*.md"
+  - "**/CLAUDE.md"
+---
+
 # rules/
 
 User-level Claude Code rules. `install.sh` symlinks this directory to
@@ -25,15 +32,16 @@ paths:
 ---
 
 # Svelte 5 rules
+
 - Use runes ($state, $derived, $effect) — never Svelte 4 stores or `$:`.
 ```
 
-| Pattern                 | Matches                                  |
-| ----------------------- | ---------------------------------------- |
-| `**/*.svelte`           | all Svelte files, any directory          |
-| `**/schema/**`          | anything under a `schema/` directory     |
-| `**/package.json`       | every package manifest                   |
-| `src/**/*.{ts,tsx}`     | TS/TSX under `src/`                       |
+| Pattern             | Matches                              |
+| ------------------- | ------------------------------------ |
+| `**/*.svelte`       | all Svelte files, any directory      |
+| `**/schema/**`      | anything under a `schema/` directory |
+| `**/package.json`   | every package manifest               |
+| `src/**/*.{ts,tsx}` | TS/TSX under `src/`                  |
 
 ## Convention here
 
