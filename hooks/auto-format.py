@@ -64,6 +64,20 @@ def should_skip(file_path: str) -> bool:
     return False
 
 
+def resolve_local_bin(path: Path, binary: str):
+    """Find node_modules/.bin/<binary> by walking up from the edited file.
+
+    Calling the binary directly avoids npx's package-resolution step, which
+    costs ~300ms per invocation. Returns None when there is no local install,
+    so the caller can fall back to npx.
+    """
+    for parent in [path.parent, *path.parents]:
+        candidate = parent / "node_modules" / ".bin" / binary
+        if candidate.is_file():
+            return candidate
+    return None
+
+
 def format_file(file_path: str) -> None:
     """Format a file using the appropriate formatter."""
     path = Path(file_path)
@@ -83,6 +97,12 @@ def format_file(file_path: str) -> None:
     # Check if formatter is available
     if not shutil.which(check_cmd) and check_cmd != "prettier":
         return
+
+    # Prefer the locally installed binary over npx (saves ~300ms per file)
+    if cmd_parts[:2] == ["npx", "prettier"]:
+        local_bin = resolve_local_bin(path, "prettier")
+        if local_bin:
+            cmd_parts = [str(local_bin)] + cmd_parts[2:]
 
     # Build full command
     cmd = cmd_parts + [str(path)]

@@ -26,6 +26,14 @@
 - Never assert "the page is stale" or "should be empty" without confirming it in the live app first
 - When a reported error can't be reproduced, suspect a stale dev server, build cache, or stale HMR state before deep-diving the code — restart/hard-reload first
 
+## Browser Automation
+
+Default to the **claude-in-chrome** MCP server for anything touching a browser. It drives my real Chrome, so I stay logged in to the apps under test.
+
+- Start with `tabs_context_mcp({ createIfEmpty: true })` — that opens a **new window** with its own tab group. Keep the work inside that group.
+- Do NOT reach for `gstack-browse`, `agent-browser`, `playwright-cli`, or the `playwright` / `chrome-devtools` MCP servers for normal browsing, QA, or dogfooding. Each launches a separate browser with a blank profile, so I am logged out and the run is useless for authenticated pages.
+- Use a headless or standalone browser only when I ask for it by name, or when the task genuinely needs a clean unauthenticated session (e.g. checking a logged-out landing page).
+
 ## Hard Limits
 
 - Never read or display the contents of `.env` files

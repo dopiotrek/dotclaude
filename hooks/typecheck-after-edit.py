@@ -36,6 +36,7 @@ Never crashes the turn: any unexpected error exits 0.
 
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -57,9 +58,17 @@ TIMEOUT_SECONDS = int(os.environ.get("CLAUDE_TYPECHECK_TIMEOUT", "60"))
 STATE_DIR = Path.home() / ".claude" / ".cache"
 STATE_FILE = STATE_DIR / "typecheck-debounce.json"
 
-# How many lines of diagnostics to surface. tsc/svelte-check print the most
-# relevant errors first, then a "Found N errors" trailer — so we keep the HEAD.
+# How many diagnostics to surface. Beyond this the output stops being read.
 MAX_LINES = 40
+MAX_ERRORS = 15
+
+# svelte-check's machine format, one diagnostic per line:
+#   1784983425872 WARNING "src/lib/x.svelte" 34:4 "message text"
+# Diagnostics come in FILE order, not severity order, so a naive head-of-output
+# window is mostly warnings while the real errors sit past the cut.
+MACHINE_LINE = re.compile(
+    r'^\d+\s+(ERROR|WARNING)\s+"(?P<file>[^"]*)"\s+(?P<line>\d+):(?P<col>\d+)\s+"(?P<msg>.*)"\s*$'
+)
 
 
 def in_skipped_path(path: Path) -> bool:
@@ -97,8 +106,14 @@ def choose_command(pkg_dir: Path) -> tuple[list[str], str] | None:
         pkg = {}
 
     scripts = pkg.get("scripts", {})
-    if isinstance(scripts, dict) and "check" in scripts:
-        return ["pnpm", "-C", str(pkg_dir), "run", "check"], "check"
+    if isinstance(scripts, dict):
+        # Prefer an error-only variant when the package defines one. A per-edit
+        # hook only cares about things that break the build; warnings are the
+        # Stop hook's business. `check:light` in this repo is
+        # `svelte-check --threshold error`, which drops warnings at the source.
+        for name in ("check:light", "check"):
+            if name in scripts:
+                return ["pnpm", "-C", str(pkg_dir), "run", name], name
 
     if (pkg_dir / "tsconfig.json").exists():
         return ["pnpm", "-C", str(pkg_dir), "exec", "tsc", "--noEmit"], "tsc --noEmit"
@@ -192,13 +207,38 @@ def main() -> None:
     # tsc / svelte-check write diagnostics to stdout; the pnpm wrapper to stderr.
     detail = (result.stdout or "").strip() or (result.stderr or "").strip()
     lines = detail.splitlines()
-    head = "\n".join(lines[:MAX_LINES])
-    more = f"\n… ({len(lines) - MAX_LINES} more lines)" if len(lines) > MAX_LINES else ""
+
+    errors, saw_machine_format = [], False
+    for line in lines:
+        match = MACHINE_LINE.match(line.strip())
+        if not match:
+            continue
+        saw_machine_format = True
+        if match.group(1) != "ERROR":
+            continue  # warnings are the Stop hook's business, not this one's
+        # Messages embed literal "\n" escapes; keep only the first sentence.
+        msg = match.group("msg").replace("\\n", " ").split("  ")[0].strip()
+        errors.append(
+            f"{match.group('file')}:{match.group('line')}:{match.group('col')} — {msg}"
+        )
+
+    if saw_machine_format:
+        if not errors:
+            # Non-zero exit but zero errors means warnings only — never block.
+            sys.exit(0)
+        shown = errors[:MAX_ERRORS]
+        more = f"\n… and {len(errors) - MAX_ERRORS} more" if len(errors) > MAX_ERRORS else ""
+        body = "\n".join(shown) + more
+        count = f"{len(errors)} type error{'s' if len(errors) != 1 else ''}"
+    else:
+        # tsc and friends: no machine format to parse, fall back to head-of-output.
+        body = "\n".join(lines[:MAX_LINES])
+        body += f"\n… ({len(lines) - MAX_LINES} more lines)" if len(lines) > MAX_LINES else ""
+        count = "Type-check failed"
 
     print(
-        f"Type-check failed in package '{pkg_dir.name}' ({label}). "
-        f"Fix these before continuing — do not declare the task done:\n\n"
-        f"{head}{more}",
+        f"{count} in package '{pkg_dir.name}' ({label}). "
+        f"Fix these before continuing — do not declare the task done:\n\n{body}",
         file=sys.stderr,
     )
     sys.exit(2)  # exit 2 → stderr is fed back to Claude
