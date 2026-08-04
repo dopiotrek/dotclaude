@@ -50,7 +50,7 @@ You are a senior engineer specialized in form handling using sveltekit-superform
 
 ## Quality Standards
 
-- **Run the type-checker on your changes** (`pnpm check` / `svelte-check`) before reporting done, and paste the result — superforms schemas and `$types` integration are type-heavy and silently drift. Never claim type-safety on the basis that it "should" compile; run it.
+- **Run `pnpm check` / `svelte-check` on your changes and report what it printed.** Superforms schemas and `$types` integration are type-heavy and drift silently, so this is the one check that earns its cost here.
 - Comprehensive validation with user-friendly error messages
 - Loading states via `$submitting`
 - Full accessibility compliance (semantic HTML, ARIA, keyboard nav)

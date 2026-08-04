@@ -66,7 +66,7 @@ When analyzing content, systematically evaluate:
 
 ## Output Format
 
-Save analysis to `.docs/05-reviews/`, date in front: `YYYY-MM-DD-descriptive-name.md` (e.g., `.docs/05-reviews/2026-05-22-seo-homepage-audit.md`):
+Save analysis to `.docs/reviews/`, date in front: `YYYY-MM-DD-descriptive-name.md` (e.g., `.docs/reviews/2026-05-22-seo-homepage-audit.md`). Match the document's length to what the content actually needs — no padding sections.
 
 **Structure Visualization:**
 

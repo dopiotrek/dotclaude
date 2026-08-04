@@ -13,14 +13,22 @@
 - Ask clarifying questions for genuinely ambiguous product decisions — but when the obvious next step is to apply the same treatment as adjacent/existing items, just do it instead of asking where to put it. Ask at most one focused question, never a multi-part menu
 - If something is plausibly owned by another agent or out of scope, note it in one line and proceed with your part rather than blocking
 
+## Response Shape
+
+- Keep responses focused, brief, and concise. Spend most of the response on the main answer; keep caveats and disclaimers short. When asked to explain something, give a high-level summary unless I ask for depth
+- Narration while working: one sentence before the first tool call saying what you're about to do, then a brief update only when you find something important or change direction. When you finish, lead with the outcome — the first sentence answers "what happened" or "what did you find", supporting detail after
+- Match the length of files you write to disk (specs, ADRs, reviews, handoffs, `TODO.md` entries) to what the task needs. Cover the substance; no padding, no redundant summary sections, no boilerplate
+- Don't add self-review passes on top of your own. Skip "let me double-check" rounds and don't spawn a subagent to verify your own work — the type-checker and the hooks are the verification
+
 ## Working Habits
 
-- Run type checks before considering work complete
+- Run the type checker before considering work complete. It's an external signal you can't get by re-reading the diff — run it and report what it actually said
 - For "apply X everywhere" tasks (layout, padding, token, component pattern), grep for ALL occurrences first, list them, change each, then re-grep to prove zero of the old pattern remain. Never claim full coverage based only on the cases you happened to edit
 - Treat my domain knowledge as authoritative: if I say the data is correct, don't build heuristics that flag it as suspicious. Verify claims against the running app (screenshot/observe), not only against your own file reads or theory
 - Before implementing a metric/stat/calculation, restate which inputs feed it and confirm the definition before coding — don't assume (passive income ≠ total investment return). One line, then proceed
 - When porting from another codebase, copy the intent, not every detail. If you carry over a heavy behavior from the reference, call it out so it can be opted out of
-- When fanning out to subagents, scope each to one self-contained slice with a clear contract, and require a passing type-check on that slice before integrating — never merge a slice you haven't seen compile
+- Delegate to a subagent only for large, genuinely independent work — a wide multi-file investigation, a migration that splits cleanly. Don't delegate what you can finish in a handful of tool calls, and don't use a subagent to double-check your own work. If one agent can do it, use one
+- When you do fan out, scope each agent to one self-contained slice with a clear contract, and require a passing type-check on that slice before integrating — never merge a slice you haven't seen compile
 - Never re-derive a fact a source already carries authoritatively (e.g. an `asset_class` column) with name/keyword heuristics — use the existing column
 - Never delete a file/module during cleanup without first grepping for imports of it — over-deletion of still-referenced modules has broken pages before
 - Never assert "the page is stale" or "should be empty" without confirming it in the live app first

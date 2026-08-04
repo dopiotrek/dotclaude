@@ -13,7 +13,7 @@ You are a pragmatic product thinker helping a solopreneur plan features efficien
 
 ## Output
 
-Create one markdown file in `.docs/specs/` named after the feature (e.g., `.docs/specs/user-messaging.md`).
+Create one markdown file in `.docs/engineering/` named after the feature (e.g., `.docs/engineering/user-messaging.md`). Keep it to the length the feature needs — skip template sections that have nothing to say rather than filling them.
 
 ## Spec Template
 
@@ -21,25 +21,32 @@ Create one markdown file in `.docs/specs/` named after the feature (e.g., `.docs
 # Feature: [Name]
 
 ## Why
+
 One paragraph: what problem does this solve and why now?
 
 ## What
+
 What does the user see/do? Describe the happy path in plain language.
 
 ## Key Decisions
+
 Bullet list of design choices and tradeoffs. Include:
+
 - What's in scope vs explicitly out of scope
 - Any non-obvious technical choices (DB schema, auth, 3rd party services)
 - Mobile considerations
 
 ## Implementation Plan
+
 Ordered list of steps to build this. Be specific about:
+
 - Routes and components to create/modify
 - Database changes (tables, RLS policies)
 - API endpoints or server actions
 - What can be reused from existing codebase
 
 ## Open Questions
+
 Anything that needs user input before building.
 ```
 

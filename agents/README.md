@@ -78,21 +78,24 @@ Form handling specialist with sveltekit-superforms and Zod:
 
 #### `code-reviewer.md`
 
-**Model:** sonnet | **Color:** purple
+**Model:** opus | **Effort:** high | **Isolation:** worktree | **Color:** purple
 
-Elite code review expert with 2025 methodologies:
+Security and quality review, ordered by what actually matters:
 
-- Security analysis (OWASP Top 10)
-- Performance optimization
-- Production reliability assessment
-- Code quality and maintainability
-- Detailed audit reports
+- Security — injection, auth bypasses, RLS gaps, exposed secrets
+- Data safety — error handling, race conditions, data loss
+- Performance — N+1 queries, missing indexes, bundle size
+- Code quality — duplication, complexity, naming
+- Writes a dated report to `.docs/reviews/`
+
+Reports everything it finds and ranks it, rather than pre-filtering to
+high-severity only — see the note under [Writing an agent](#writing-an-agent).
 
 **Triggers:** Code review, security audit, quality check
 
-#### `debug-specialist.md`
+#### `debug-specialist.md` (defines `debug-expert`)
 
-**Model:** sonnet | **Color:** red
+**Model:** opus | **Effort:** high | **Isolation:** worktree | **Color:** red
 
 Systematic debugging expert:
 
@@ -110,13 +113,12 @@ Systematic debugging expert:
 
 **Model:** sonnet | **Color:** cyan
 
-Feature discovery and requirements specialist:
+Lightweight feature specs before code gets written:
 
-- Six-phase discovery workflow
-- Codebase analysis with repomix/Gemini
-- Stakeholder interview facilitation
-- Detailed specification creation
-- Roadmap integration
+- Short spec written to `.docs/engineering/`, named after the feature
+- Why / What / Key Decisions / Implementation Plan / Open Questions
+- Grounded in real files and patterns from the codebase
+- Skips the spec entirely when the feature is under an hour of work
 
 **Triggers:** New features, requirements gathering, feature planning
 
@@ -151,14 +153,20 @@ Vercel deployment specialist:
 
 ## Agent Properties
 
-| Property      | Description                                           |
-| ------------- | ----------------------------------------------------- |
-| `name`        | Unique identifier used to reference the agent         |
-| `description` | When and how the agent should be used (with examples) |
-| `model`       | Preferred model: `sonnet`, `opus`, or `haiku`         |
-| `color`       | Terminal color for agent output                       |
+| Property      | Description                                                                     |
+| ------------- | ------------------------------------------------------------------------------- |
+| `name`        | Unique identifier used to reference the agent. May differ from the filename     |
+| `description` | When and how the agent should be used (with examples)                           |
+| `model`       | Preferred model: `sonnet`, `opus`, or `haiku`                                   |
+| `effort`      | Reasoning effort: `low`, `medium`, `high`, `xhigh`. Omit to inherit the session |
+| `tools`       | Comma-separated allowlist. **Omit and the agent gets everything**               |
+| `isolation`   | `worktree` runs the agent in its own git worktree                               |
+| `color`       | Terminal color for agent output                                                 |
 
-## Creating Your Own Agent
+`tools:` is an allowlist, not a hint — an MCP tool the prompt talks about but the
+frontmatter doesn't list simply cannot be called. Keep the two in sync.
+
+## Writing an agent
 
 ### File Structure
 
@@ -169,48 +177,64 @@ Create a Markdown file in `agents/` with this structure:
 name: my-agent
 description: Use this agent when... Examples: <example>user: "..." assistant: "I'll use my-agent..."</example>
 model: sonnet
+tools: Read, Glob, Grep, Edit, Write, Bash
 color: blue
 ---
 
-You are an expert in [domain]. Your core responsibilities include...
+You are an expert in [domain].
 
-## Expertise Areas
+## What you know that the model doesn't
 
-- Area 1
-- Area 2
+Project conventions, the gotcha that bit us last time, which library we picked
+and why. Not general best practice.
 
-## Approach
+## Definition of done
 
-When handling tasks, you will:
+The one external check worth running, and what to report from it.
 
-1. First...
-2. Then...
+## Reporting back
 
-## Code Patterns
-
-\`\`\`typescript
-// Example patterns you follow
-\`\`\`
-
-## Quality Standards
-
-- Standard 1
-- Standard 2
+Lead with the outcome. What I need to decide on, if anything.
 ```
 
-### Best Practices
+### Writing for Claude 5-generation models
 
-1. **Clear Scope**: Define exactly what the agent handles
-2. **Examples**: Include trigger examples in the description
-3. **Structured Approach**: Outline step-by-step methodology
-4. **Code Patterns**: Show preferred coding patterns
-5. **Quality Checks**: Include verification steps
+These models follow instructions literally and need less scaffolding than
+earlier ones. What that changes:
 
-### Model Selection
+1. **Encode what's specific to us.** A prompt that explains good engineering to
+   a model that already knows it is wasted context. Write down the project
+   conventions, the past incident, the non-obvious choice
+2. **Cut generic methodology.** "First analyze, then investigate, then
+   verify" is behavior these models already have. Numbered reasoning steps
+   don't add rigor, they add tokens
+3. **Don't add self-verification.** The model checks and corrects its own work
+   unprompted. "Double-check your answer" and "verify before reporting"
+   compound with that and cost tokens for nothing. Name the _external_ check
+   instead — the type-checker, the failing test — because that's the signal the
+   model can't produce by thinking harder
+4. **Never cap what a review reports.** "Only flag high-severity issues", "be
+   conservative", "keep it under 50 lines" get followed literally and real bugs
+   go unreported. Ask for everything, ranked, and filter when you read it
+5. **State the reporting shape.** These models narrate more by default. If you
+   want terse, say so — and say what a good update looks like rather than
+   listing what to avoid. Positive examples land better than prohibitions
+6. **Scope the deliverable's length.** Agents that write files to disk will
+   write long ones unless told to match length to substance
+7. **Keep `tools:` honest.** Scope it to what the agent needs, and make sure
+   every tool the prompt mentions is actually in the list
+
+### Model and effort selection
 
 - **opus**: Complex analysis, comprehensive reviews, critical decisions
 - **sonnet**: Standard development tasks, good balance of speed/quality
 - **haiku**: Simple, quick tasks with minimal complexity
+
+`effort` is the cheaper lever. On Claude 5-generation models `low` and `medium`
+hold up well for a fraction of the tokens and latency, so treat them as the
+default control for cost and reserve `high` / `xhigh` for demanding coding and
+review work. Effort settings carried over from an older model are worth
+re-checking against your own results rather than trusting.
 
 ## Agent Invocation
 

@@ -19,14 +19,14 @@ current conversation when it runs.
 
 ## Frontmatter
 
-| Property                   | Required | Purpose                                                            |
-| -------------------------- | -------- | ------------------------------------------------------------------ |
-| `name`                     | yes      | Listing label. Keep equal to the directory name.                   |
-| `description`              | yes      | When Claude should auto-load it; trigger phrases.                  |
-| `paths`                    | no       | Glob(s) that scope auto-activation to matching files.              |
-| `allowed-tools`            | no       | Tools pre-approved while the skill is active.                      |
-| `disable-model-invocation` | no       | `true` = only you can run it (`/name`), never auto-loaded.          |
-| `user-invocable`           | no       | `false` = hidden from the `/` menu; Claude-only background knowledge.|
+| Property                   | Required | Purpose                                                               |
+| -------------------------- | -------- | --------------------------------------------------------------------- |
+| `name`                     | yes      | Listing label. Keep equal to the directory name.                      |
+| `description`              | yes      | When Claude should auto-load it; trigger phrases.                     |
+| `paths`                    | no       | Glob(s) that scope auto-activation to matching files.                 |
+| `allowed-tools`            | no       | Tools pre-approved while the skill is active.                         |
+| `disable-model-invocation` | no       | `true` = only you can run it (`/name`), never auto-loaded.            |
+| `user-invocable`           | no       | `false` = hidden from the `/` menu; Claude-only background knowledge. |
 
 ## Installed skills
 
@@ -97,3 +97,25 @@ What it does, the workflow, and examples.
 Keep one skill single-purpose, give it a specific `description` (that's what
 makes auto-activation reliable), and put long reference material in
 `references/` so it only loads when the skill runs.
+
+### Writing for Claude 5-generation models
+
+A skill's job is to encode **opinions and procedures the model can't infer** —
+how we do it here, which library we settled on, the step that's easy to skip.
+General best practice is already in the model; writing it down again just costs
+context.
+
+- **Stay lightweight.** Constrain hard only where being wrong is expensive
+  (destructive operations, security, a convention that breaks the build).
+  Everywhere else, state the preference and let the model use judgment
+- **Split long skills.** Keep `SKILL.md` to the decision path and push detail
+  into `references/` — the model loads a reference when it needs it. A
+  400-line `SKILL.md` pays its full cost every time the skill triggers
+- **Design over examples.** Before adding a third example to pin down usage,
+  check whether clearer naming or a more explicit step ordering does the same
+  job in fewer tokens
+- **Don't add verification steps.** These models check their own work. A skill
+  that appends "now verify your changes" causes redundant passes. Point at an
+  external signal instead — a command to run, a test that must go green
+- **Say how long the output should be.** Skills that produce documents get long
+  documents unless they calibrate length to substance

@@ -9,15 +9,18 @@ This guide is for removing unnecessary, redundant, or obvious code comments whil
 
 ## Core Principles
 
-1. **Remove obvious comments**: Delete comments that merely restate what the code clearly does (e.g., '// increment counter' above 'counter++')
-2. **Keep complexity explanations**: Preserve comments at decision points, complex algorithms, or non-obvious implementations
-3. **Brevity for members**: Keep class and function documentation concise - one line when possible, focusing on the 'why' not the 'what'
-4. **Deprecation selectivity**: Remove deprecated/outdated code comments unless they provide critical migration context
-5. **Trust readable code**: If function names and parameters clearly convey purpose, additional explanation is redundant
+1. **Match the surrounding code.** Read the file and its neighbours first. The target is the comment density this codebase already uses — not zero. Stripping a well-documented module down to bare code is as wrong as leaving noise in a terse one
+2. **Remove obvious comments**: Delete comments that merely restate what the code clearly does (e.g., `// increment counter` above `counter++`)
+3. **Keep complexity explanations**: Preserve comments at decision points, complex algorithms, or non-obvious implementations
+4. **Brevity for members**: Keep class and function documentation concise — one line when possible, focusing on the 'why' not the 'what'
+5. **Deprecation selectivity**: Remove deprecated/outdated code comments unless they provide critical migration context
+6. **Trust readable code**: If function names and parameters clearly convey purpose, additional explanation is redundant
+7. **When unsure, keep it.** A redundant comment costs a line. A deleted comment that held the only record of _why_ costs an afternoon
 
 ## Review Criteria
 
 When reviewing code, ask yourself:
+
 - Does this comment add value beyond what well-named code already communicates?
 - Does it explain business logic, edge cases, or architectural decisions? → **Keep**
 - Could this comment block be reduced to a single meaningful line? → **Simplify**
@@ -26,13 +29,14 @@ When reviewing code, ask yourself:
 
 ## Batch Processing
 
-- Process **max 15 files per session** for manageable reviews
+- Process **max 15 files per session** so the diff stays reviewable. If more files match, say which ones you left untouched — don't quietly stop at 15 and report the job done
 - Focus on clarity through code structure rather than excessive documentation
 - Preserve only high-value comments that answer questions the code cannot
 
 ## Examples
 
 ### ❌ Remove (Obvious)
+
 ```python
 # Increment the counter
 counter += 1
@@ -47,6 +51,7 @@ for item in items:
 ```
 
 ### ✅ Keep (Valuable)
+
 ```python
 # Use exponential backoff to avoid overwhelming the API
 # Max retries: 3, delays: 1s, 2s, 4s
@@ -62,6 +67,7 @@ quicksort(data)
 ```
 
 ### 🔄 Simplify (Verbose → Concise)
+
 ```python
 # Before:
 # This function calculates the total price by iterating through

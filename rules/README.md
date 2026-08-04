@@ -50,5 +50,12 @@ Keep one topic per file with a descriptive name (`svelte5.md`, `drizzle.md`,
 scope anything stack-specific with `paths` so it stays out of context until it
 matters.
 
+A rule earns its place by carrying something the model can't infer: a
+convention we picked, a gotcha that has bitten us, a constraint the framework
+doesn't enforce. General good practice is already in the model — writing it
+down again costs context in every session and adds nothing. Prefer stating the
+preference and letting the model apply judgment; save hard "never" rules for
+cases where being wrong is expensive.
+
 > Note: `~/.claude/CLAUDE.md` and these rules are both global. Don't duplicate a
 > rule in both places — pick one home for each fact.

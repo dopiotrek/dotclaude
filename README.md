@@ -8,13 +8,13 @@ My personal, shareable [Claude Code](https://claude.ai/download) setup: automate
 
 ## What's included
 
-| Component     | Roughly | What it is                                                       |
-| ------------- | ------- | ---------------------------------------------------------------- |
-| **Hooks**     | ~10     | PreToolUse / PostToolUse / Stop guardrails (security, format, DB) |
-| **Agents**    | ~9      | Specialized subagents (frontend, backend, debug, review, …)      |
-| **Skills**    | ~20 + vendored | Reusable procedures; plus a vendored `gstack/` skill set    |
-| **Settings**  | 1       | `settings/settings.template.json` (`$HOME` is expanded on install) |
-| **CLAUDE.md** | 1       | Global preferences and instructions                              |
+| Component     | Roughly        | What it is                                                         |
+| ------------- | -------------- | ------------------------------------------------------------------ |
+| **Hooks**     | ~10            | PreToolUse / PostToolUse / Stop guardrails (security, format, DB)  |
+| **Agents**    | ~9             | Specialized subagents (frontend, backend, debug, review, …)        |
+| **Skills**    | ~20 + vendored | Reusable procedures; plus a vendored `gstack/` skill set           |
+| **Settings**  | 1              | `settings/settings.template.json` (`$HOME` is expanded on install) |
+| **CLAUDE.md** | 1              | Global preferences and instructions                                |
 
 ## Quick start
 
@@ -67,17 +67,17 @@ See [hooks/README.md](hooks/README.md) for the full reference and how to write y
 
 Subagents in `agents/`, each a markdown file with YAML frontmatter. Tools are scoped with the `tools:` field (comma-separated), so a subagent only gets what it needs.
 
-| Agent                        | Model  | Purpose                                               |
-| ---------------------------- | ------ | ----------------------------------------------------- |
-| **frontend-engineer**        | sonnet | Svelte 5 runes, shadcn-svelte, responsive UI          |
-| **backend-engineer**         | sonnet | SvelteKit server: load functions, actions, hooks      |
-| **superforms-expert**        | sonnet | sveltekit-superforms + Zod                            |
-| **mobile-ui-designer**       | sonnet | Mobile-first UI with TailwindCSS                      |
-| **debug-expert**             | opus   | Error diagnosis, test failures, perf issues (worktree)|
-| **code-reviewer**            | opus   | Security & quality review (worktree)                  |
-| **discovery-agent**          | sonnet | Lightweight feature specs in `.docs/`                 |
-| **vercel-deployment-expert** | sonnet | Vercel deploys and configuration                      |
-| **seo-expert**               | sonnet | Content structure and on-page SEO                     |
+| Agent                        | Model  | Purpose                                                |
+| ---------------------------- | ------ | ------------------------------------------------------ |
+| **frontend-engineer**        | sonnet | Svelte 5 runes, shadcn-svelte, responsive UI           |
+| **backend-engineer**         | sonnet | SvelteKit server: load functions, actions, hooks       |
+| **superforms-expert**        | sonnet | sveltekit-superforms + Zod                             |
+| **mobile-ui-designer**       | sonnet | Mobile-first UI with TailwindCSS                       |
+| **debug-expert**             | opus   | Error diagnosis, test failures, perf issues (worktree) |
+| **code-reviewer**            | opus   | Security & quality review (worktree)                   |
+| **discovery-agent**          | sonnet | Lightweight feature specs in `.docs/`                  |
+| **vercel-deployment-expert** | sonnet | Vercel deploys and configuration                       |
+| **seo-expert**               | sonnet | Content structure and on-page SEO                      |
 
 > Filenames may differ from the agent `name` (e.g. `debug-specialist.md` defines `debug-expert`). See [agents/README.md](agents/README.md).
 
@@ -91,6 +91,35 @@ Reusable procedures in `skills/`, each `skill-name/SKILL.md`. Invoke with `/skil
 - **Workflow** — `agent-handoff`, `tutor`
 
 A vendored `gstack/` skill set (the `gstack-*` directories) ships alongside these; treat it as third-party and prune what you don't use.
+
+## Writing for Claude 5-generation models
+
+Prompts here target Claude 5-generation models (Opus 5 and siblings), which
+follow instructions more literally and need far less scaffolding than earlier
+ones. The house rules, applied across `CLAUDE.md`, `rules/`, `agents/`, and
+`skills/`:
+
+- **Write down what's ours, not what's good.** Project conventions, past
+  incidents, the non-obvious choice. General engineering advice is already in
+  the model
+- **No self-verification instructions.** These models check and correct their
+  own work. "Double-check", "verify before reporting", and verify-by-subagent
+  compound with that and burn tokens for nothing. Point at an external signal
+  instead — the type-checker, a failing test
+- **Never cap what a review reports.** "Only high-severity", "be conservative",
+  "keep it short" get followed literally and real bugs go unreported. Ask for
+  everything, ranked; filter when reading
+- **Say the reporting shape you want.** Default narration runs long. Describe
+  the cadence you want in positive terms rather than listing what to avoid
+- **Calibrate written output.** Anything that writes files to disk needs an
+  explicit "match length to substance", or it pads
+- **Cap delegation.** Subagents get spawned readily; say when delegation is
+  actually warranted
+- **Progressive disclosure.** Path-scoped `rules/`, `references/` inside
+  skills, and detail behind a load rather than in every session's context
+
+Sources: [The new rules of context engineering](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models)
+and [Prompting Claude Opus 5](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-opus-5).
 
 ## Configuration
 

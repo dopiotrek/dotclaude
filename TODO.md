@@ -81,3 +81,29 @@ Items 1–3 of the audit are done (redundant hooks deleted, `os.fork` gone). Sti
       into a skill (audit). Not verified whether already done.
 - [ ] **[SKILLS]** Archive unused `skills/gstack/` skills (audit). Not
       verified whether already done.
+
+## Claude 5-generation model alignment (2026-08-04)
+
+Done this session: `CLAUDE.md` response-shape + delegation caps, `code-reviewer`
+report-everything principles, removed self-verification scaffolding from
+`frontend-engineer` / `debug-expert` / `backend-engineer`, fixed the broken code
+fence in `backend-engineer.md`, aligned `.docs/` paths, fixed
+`vercel-deployment-expert` tool grant, refreshed `agents/README.md`,
+`skills/README.md`, `rules/README.md`, root `README.md`.
+
+Deferred:
+
+- [ ] **[SKILLS]** Apply progressive disclosure to the oversized custom skills:
+      `turborepo` (914 lines), `tdd-workflow` (449), `seo-audit` (408). Each
+      pays its full context cost on every trigger. Split the decision path into
+      `SKILL.md` and push detail into `references/`. Deferred: each is a
+      content restructure that needs a read-through, not a mechanical edit.
+- [ ] **[AGENTS]** Re-check `effort` on the agents against real runs. All the
+      sonnet agents inherit session effort and both opus agents are pinned
+      `high`; Claude 5-generation docs say `low`/`medium` often hold quality at
+      a fraction of the cost. Deferred: needs eval on actual tasks, can't be
+      settled from the repo.
+- [ ] **[AGENTS]** `backend-engineer.md` and `frontend-engineer.md` still carry
+      long inline code examples. Candidates for moving into a skill's
+      `references/` rather than sitting in every spawn's context. Deferred:
+      scope call — the examples do encode real project conventions.
