@@ -62,8 +62,6 @@ elif echo "$FIRST_CMD" | grep -qE '^cargo\s+(test|build|clippy|check)(\s|$)'; th
 # --- File operations ---
 elif echo "$FIRST_CMD" | grep -qE '^cat(\s|$)'; then
   REWRITTEN=$(echo "$CMD" | sed 's/^cat/rtk read/')
-elif echo "$FIRST_CMD" | grep -qE '^(rg|grep)(\s|$)'; then
-  REWRITTEN=$(echo "$CMD" | sed -E 's/^(rg|grep)/rtk grep/')
 elif echo "$FIRST_CMD" | grep -qE '^ls(\s|$)'; then
   REWRITTEN=$(echo "$CMD" | sed 's/^ls/rtk ls/')
 

@@ -43,6 +43,7 @@ Grouped for orientation; run `/` in Claude Code for the live list.
 - `tdd-workflow` — enforces test-driven development on test files.
 - `turborepo` — Turborepo monorepo build/pipeline/caching guidance.
 - `frontend-design` — "Technical Swiss" UI constraints for consistent interfaces.
+- `uiverify` — verify pixel-level UI changes with computed-style measurements instead of screenshot judgment.
 - `clean-comments` — remove redundant/obvious code comments.
 - `playwright-cli` — browser automation for testing, screenshots, scraping.
 

@@ -25,14 +25,17 @@
 - Run the type checker before considering work complete. It's an external signal you can't get by re-reading the diff — run it and report what it actually said
 - For "apply X everywhere" tasks (layout, padding, token, component pattern), grep for ALL occurrences first, list them, change each, then re-grep to prove zero of the old pattern remain. Never claim full coverage based only on the cases you happened to edit
 - Treat my domain knowledge as authoritative: if I say the data is correct, don't build heuristics that flag it as suspicious. Verify claims against the running app (screenshot/observe), not only against your own file reads or theory
+- For pixel-level UI/alignment work, don't rely on screenshot judgment alone — read `getBoundingClientRect()`/`getComputedStyle()` for the changed element (and the reference element, if matching one) and compare actual values. Screenshots miss 1px offsets, dropped borders, and small vertical shifts that measurements catch immediately
 - Before implementing a metric/stat/calculation, restate which inputs feed it and confirm the definition before coding — don't assume (passive income ≠ total investment return). One line, then proceed
+- Before a multi-file refactor or schema change where scope could plausibly expand (adjacent features, extra abstractions, "while I'm here" additions), restate what you'll build and 2-3 things you'll deliberately not build, and wait for a go-ahead. Skip this when the ask and its boundaries are already unambiguous
 - When porting from another codebase, copy the intent, not every detail. If you carry over a heavy behavior from the reference, call it out so it can be opted out of
 - Delegate to a subagent only for large, genuinely independent work — a wide multi-file investigation, a migration that splits cleanly. Don't delegate what you can finish in a handful of tool calls, and don't use a subagent to double-check your own work. If one agent can do it, use one
 - When you do fan out, scope each agent to one self-contained slice with a clear contract, and require a passing type-check on that slice before integrating — never merge a slice you haven't seen compile
 - Never re-derive a fact a source already carries authoritatively (e.g. an `asset_class` column) with name/keyword heuristics — use the existing column
 - Never delete a file/module during cleanup without first grepping for imports of it — over-deletion of still-referenced modules has broken pages before
 - Never assert "the page is stale" or "should be empty" without confirming it in the live app first
-- When a reported error can't be reproduced, suspect a stale dev server, build cache, or stale HMR state before deep-diving the code — restart/hard-reload first
+- When a reported error can't be reproduced, or before declaring a browser-verified UI change done, check for a stale dev server, build cache, stale HMR state, or a pending Drizzle migration — restart/reapply first, before deep-diving the code
+- When multiple related repos exist on this machine, confirm `pwd` resolves inside the intended repo (and use absolute paths in Bash — cwd carries over between calls) before exploring or spawning subagents
 
 ## Browser Automation
 
