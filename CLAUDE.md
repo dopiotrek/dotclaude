@@ -16,9 +16,17 @@
 ## Response Shape
 
 - Keep responses focused, brief, and concise. Spend most of the response on the main answer; keep caveats and disclaimers short. When asked to explain something, give a high-level summary unless I ask for depth
-- Narration while working: one sentence before the first tool call saying what you're about to do, then a brief update only when you find something important or change direction. When you finish, lead with the outcome — the first sentence answers "what happened" or "what did you find", supporting detail after
+- Narration while working: at most one short sentence before the first tool call, then stay quiet until done — no play-by-play of each action, no walls of text. Break the silence only for something important or a change of direction. When you finish, lead with the outcome — the first sentence answers "what happened" or "what did you find", supporting detail after. I want a clean terminal, not a novella
 - Match the length of files you write to disk (specs, ADRs, reviews, handoffs, `TODO.md` entries) to what the task needs. Cover the substance; no padding, no redundant summary sections, no boilerplate
 - Don't add self-review passes on top of your own. Skip "let me double-check" rounds and don't spawn a subagent to verify your own work — the type-checker and the hooks are the verification
+
+## Text in the Product
+
+Text is allowed, but it must earn its place. Every string I add to a screen or a code file has to tell the reader something the surrounding context does not already say.
+
+- UI copy: write the label, not the label plus an explanation of the label. Add helper text, an empty-state sentence, or a tooltip only when a user would otherwise get it wrong or not know what happens next — then keep it to one short line. No reassurance text, no restating the heading in smaller grey type, no descriptions under every field by default
+- Code comments: minimal by default. Explain a non-obvious *why* — a constraint, a workaround, a decision that looks wrong until you know the reason — and nothing else. Never narrate what the next line does, never section-header a short function, never add JSDoc that only repeats the parameter names, never banner the top of a file. When editing, match the file's existing comment density instead of adding your own. (Full rule, path-scoped to code files: `rules/comments.md`.)
+- If I ask for more explanation on a specific screen or function, give it. This is about the default, not a ban
 
 ## Working Habits
 
@@ -39,11 +47,14 @@
 
 ## Browser Automation
 
-Default to the **claude-in-chrome** MCP server for anything touching a browser. It drives my real Chrome, so I stay logged in to the apps under test.
+Drive my already-running Chrome so the logged-in session survives. Never take over the tab I am working in.
 
-- Start with `tabs_context_mcp({ createIfEmpty: true })` — that opens a **new window** with its own tab group. Keep the work inside that group.
-- Do NOT reach for `gstack-browse`, `agent-browser`, `playwright-cli`, or the `playwright` / `chrome-devtools` MCP servers for normal browsing, QA, or dogfooding. Each launches a separate browser with a blank profile, so I am logged out and the run is useless for authenticated pages.
-- Use a headless or standalone browser only when I ask for it by name, or when the task genuinely needs a clean unauthenticated session (e.g. checking a logged-out landing page).
+**Claude Code:** use **claude-in-chrome**. Start with `tabs_context_mcp({ createIfEmpty: true })` — that opens a new window with its own tab group. Keep the work inside that group.
+
+**Grok:** there is no claude-in-chrome. Use **chrome-devtools** MCP with `--autoConnect`. First call is always `new_page` with `background: true`, then `select_page` that id with `bringToFront: false`. Never `list_pages` / `navigate_page` / snapshot / screenshot a tab I already had open. Never `resize_page` (it resizes my window). Close only the tab you created.
+
+- Do NOT use `gstack-browse`, `agent-browser`, `playwright-cli`, or Playwright MCP for normal browsing, QA, or dogfooding. They launch a blank profile, so I am logged out.
+- Use a headless or standalone browser only when I ask for it by name, or when the task needs a clean logged-out session (e.g. a logged-out landing page).
 
 ## Hard Limits
 
