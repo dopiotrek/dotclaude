@@ -7,11 +7,9 @@
   },
   "permissions": {
     "deny": [
-      "Read(./.env)",
-      "Read(./.env.*)",
-      "Read(./**/.env)",
-      "Read(./**/.env.*)",
-      "Read(./secrets/**)",
+      "Read(~/**/.env)",
+        "Read(~/**/.env.*)",
+        "Read(~/**/secrets/**)",
       "Bash(rm -rf /)",
       "Bash(rm -rf /*)",
       "Bash(rm -rf ~)",

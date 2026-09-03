@@ -51,7 +51,7 @@ if [[ "$1" == "--uninstall" ]]; then
     LATEST_BACKUP=$(ls -td "$CLAUDE_DIR"/backup-* 2>/dev/null | head -1)
 
     # Remove symlinks
-    for item in CLAUDE.md hooks agents skills scripts mining rules; do
+    for item in CLAUDE.md AGENTS.md hooks agents skills scripts mining rules; do
         if [ -L "$CLAUDE_DIR/$item" ]; then
             rm "$CLAUDE_DIR/$item"
             print_success "Removed symlink: $item"
@@ -64,7 +64,7 @@ if [[ "$1" == "--uninstall" ]]; then
         read -p "Restore from backup ($LATEST_BACKUP)? [y/N] " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
-            for item in CLAUDE.md hooks agents skills scripts mining rules; do
+            for item in CLAUDE.md AGENTS.md hooks agents skills scripts mining rules; do
                 if [ -e "$LATEST_BACKUP/$item" ]; then
                     cp -r "$LATEST_BACKUP/$item" "$CLAUDE_DIR/"
                     print_success "Restored: $item"
@@ -95,7 +95,7 @@ fi
 
 # 2. Backup existing config (only real files, not symlinks)
 has_existing=false
-for item in CLAUDE.md settings.json hooks agents skills scripts mining rules; do
+for item in CLAUDE.md AGENTS.md settings.json hooks agents skills scripts mining rules; do
     if [ -e "$CLAUDE_DIR/$item" ] && [ ! -L "$CLAUDE_DIR/$item" ]; then
         has_existing=true
         break
@@ -105,7 +105,7 @@ done
 if [ "$has_existing" = true ]; then
     print_step "Backing up existing config to $BACKUP_DIR"
     mkdir -p "$BACKUP_DIR"
-    for item in CLAUDE.md settings.json hooks agents skills scripts mining rules; do
+    for item in CLAUDE.md AGENTS.md settings.json hooks agents skills scripts mining rules; do
         if [ -e "$CLAUDE_DIR/$item" ] && [ ! -L "$CLAUDE_DIR/$item" ]; then
             cp -r "$CLAUDE_DIR/$item" "$BACKUP_DIR/" 2>/dev/null || true
             print_success "Backed up: $item"
@@ -119,6 +119,8 @@ if [[ "$1" == "--copy" ]]; then
     print_step "Installing via copy (no symlinks)..."
 
     cp "$SCRIPT_DIR/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
+    cp "$SCRIPT_DIR/AGENTS.md" "$CLAUDE_DIR/AGENTS.md"
+    mkdir -p "$HOME/.codex" && cp "$SCRIPT_DIR/AGENTS.md" "$HOME/.codex/AGENTS.md"
     cp -r "$SCRIPT_DIR/hooks" "$CLAUDE_DIR/hooks"
     cp -r "$SCRIPT_DIR/agents" "$CLAUDE_DIR/agents"
     cp -r "$SCRIPT_DIR/skills" "$CLAUDE_DIR/skills"
@@ -131,6 +133,15 @@ else
     rm -f "$CLAUDE_DIR/CLAUDE.md"
     ln -s "$SCRIPT_DIR/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
     print_success "CLAUDE.md → $SCRIPT_DIR/CLAUDE.md"
+
+    # AGENTS.md — read by Codex, Cursor, Gemini CLI and other non-Claude agents
+    rm -f "$CLAUDE_DIR/AGENTS.md"
+    ln -s "$SCRIPT_DIR/AGENTS.md" "$CLAUDE_DIR/AGENTS.md"
+    print_success "AGENTS.md → $SCRIPT_DIR/AGENTS.md"
+    mkdir -p "$HOME/.codex"
+    rm -f "$HOME/.codex/AGENTS.md"
+    ln -s "$SCRIPT_DIR/AGENTS.md" "$HOME/.codex/AGENTS.md"
+    print_success "AGENTS.md → $HOME/.codex/AGENTS.md"
 
     # RTK.md (if present)
     if [ -f "$SCRIPT_DIR/RTK.md" ]; then

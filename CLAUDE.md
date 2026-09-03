@@ -20,6 +20,17 @@
 - Match the length of files you write to disk (specs, ADRs, reviews, handoffs, `TODO.md` entries) to what the task needs. Cover the substance; no padding, no redundant summary sections, no boilerplate
 - Don't add self-review passes on top of your own. Skip "let me double-check" rounds and don't spawn a subagent to verify your own work — the type-checker and the hooks are the verification
 
+### Explaining a plan or a choice
+
+This is the shape I want, every time. Confirmed 2026-08-27 after a plan I could not follow.
+
+- Plain words. No file paths, no function names, no internal jargon, unless I ask for them
+- Short sentences. Bold headers of two or three words, a line or two under each
+- The whole explanation fits on one screen. If it does not, I will not read it
+- Say what the problem is, what you would do, what you will not do — then stop
+- When you ask me to decide, give me two options with one line each, say which you prefer, and ask one question. Never a menu of four
+- Save the detail for the code, the docs and `TODO.md`. Those can be as long as they need to be. My terminal cannot
+
 ## Text in the Product
 
 Text is allowed, but it must earn its place. Every string I add to a screen or a code file has to tell the reader something the surrounding context does not already say.
@@ -47,14 +58,29 @@ Text is allowed, but it must earn its place. Every string I add to a screen or a
 
 ## Browser Automation
 
-Drive my already-running Chrome so the logged-in session survives. Never take over the tab I am working in.
+Use the **agent-browser** CLI. It runs its own Chrome with a dedicated profile that stays logged in. It never touches the Chrome window I am working in.
 
-**Claude Code:** use **claude-in-chrome**. Start with `tabs_context_mcp({ createIfEmpty: true })` — that opens a new window with its own tab group. Keep the work inside that group.
+**Headless by default. Do not open a window.** Always pass the profile so my logins are there:
 
-**Grok:** there is no claude-in-chrome. Use **chrome-devtools** MCP with `--autoConnect`. First call is always `new_page` with `background: true`, then `select_page` that id with `bringToFront: false`. Never `list_pages` / `navigate_page` / snapshot / screenshot a tab I already had open. Never `resize_page` (it resizes my window). Close only the tab you created.
+```bash
+agent-browser --profile ~/.agent-browser/profiles/main open <url>
+agent-browser --profile ~/.agent-browser/profiles/main snapshot -i -c
+agent-browser --profile ~/.agent-browser/profiles/main screenshot shot.png
+agent-browser --profile ~/.agent-browser/profiles/main close   # always, when done
+```
 
-- Do NOT use `gstack-browse`, `agent-browser`, `playwright-cli`, or Playwright MCP for normal browsing, QA, or dogfooding. They launch a blank profile, so I am logged out.
-- Use a headless or standalone browser only when I ask for it by name, or when the task needs a clean logged-out session (e.g. a logged-out landing page).
+- Read the page with `snapshot -i -c` and click `@ref` ids. Do not guess CSS selectors.
+- Show me a screenshot instead of describing the page.
+- Run `agent-browser skills get core --full` when you do not know a command.
+- Add `--headed` only when I ask to watch, or when a site needs a first login. Say so before you do it, and close the window straight after — the login stays in the profile.
+
+Exceptions:
+
+- Drop `--profile` when the task needs a clean logged-out session (e.g. a public landing page).
+- Use **claude-in-chrome** (Claude Code) or **chrome-devtools** MCP with `--autoConnect` (Grok) only when I ask for my real Chrome by name. Then: never take over a tab I already had open, and never `resize_page`.
+- With claude-in-chrome, do not spawn a window per check. Call `tabs_context_mcp({})` first; if a group exists, add tabs with `tabs_create_mcp` and reuse them. `createIfEmpty: true` is the only way to start a group and it always opens a new window, so call it at most once per session. Closing the group's last tab auto-removes the group and forces a new window next time, so keep one tab alive while you are still working and close it when the task is done.
+- The extension cannot attach to a window I already have open, so a first check costs one new window. Say so rather than opening several.
+- Do NOT use `gstack-browse`, `playwright-cli`, or Playwright MCP.
 
 ## Hard Limits
 
