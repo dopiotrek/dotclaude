@@ -17,28 +17,6 @@ if [ -z "$CMD" ]; then
   exit 0
 fi
 
-# Refuse a leading `cd` in front of a path-taking command: it makes the target
-# directory unresolvable for the permission check, so any Read() deny rule turns
-# the call into a prompt. These commands all accept an absolute path directly.
-CD_LEAD_REGEX='^cd[[:space:]]+[^;&]+([[:space:]]*&&[[:space:]]*|[[:space:]]*;[[:space:]]*)(.*)$'
-if [[ "$CMD" =~ $CD_LEAD_REGEX ]]; then
-  AFTER_CD="${BASH_REMATCH[2]}"
-  CD_BIN="${AFTER_CD%%[[:space:]]*}"
-  CD_BIN="${CD_BIN##*/}"
-  case "$CD_BIN" in
-    grep|egrep|fgrep|rg|find|fd|ls|cat|bat|head|tail|sed|awk|wc|stat|file|tree|du)
-      jq -n --arg bin "$CD_BIN" '{
-        hookSpecificOutput: {
-          hookEventName: "PreToolUse",
-          permissionDecision: "deny",
-          permissionDecisionReason: ("Blocked: `cd` in front of `" + $bin + "`. A leading `cd` hides the working directory from the permission check, which forces a prompt. Re-run with an absolute path and no `cd` — e.g. `grep -rn \"PATTERN\" /abs/dir` instead of `cd /abs/dir && grep -rn \"PATTERN\" .`")
-        }
-      }'
-      exit 0
-      ;;
-  esac
-fi
-
 # Strip leading "cd ... && " prefix that Claude Code often prepends
 CD_PREFIX=""
 CD_REGEX='^(cd[[:space:]]+[^&]*&&[[:space:]]+)'
