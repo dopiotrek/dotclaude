@@ -43,6 +43,9 @@ Grouped for orientation; run `/` in Claude Code for the live list.
 - `tdd-workflow` — enforces test-driven development on test files.
 - `turborepo` — Turborepo monorepo build/pipeline/caching guidance.
 - `frontend-design` — "Technical Swiss" UI constraints for consistent interfaces.
+- `awwwards-hero` — award-tier hero sections from reference images; hero only.
+- `awwwards-sections` — below-the-fold landing sections (features, pricing, proof, FAQ, footer); companion to `awwwards-hero`.
+- `awwwards-motion` — award-tier animation: easing, scroll choreography, micro-interactions, reduced-motion.
 - `uiverify` — verify pixel-level UI changes with computed-style measurements instead of screenshot judgment.
 - `clean-comments` — remove redundant/obvious code comments.
 - `playwright-cli` — browser automation for testing, screenshots, scraping.
