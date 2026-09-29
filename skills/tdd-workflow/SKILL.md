@@ -1,11 +1,11 @@
 ---
 name: tdd-workflow
-description: Use this skill when writing new features, fixing bugs, or refactoring code — especially when touching test files (src/**/*.test.ts, src/**/*.spec.ts, tests/**, e2e/**). Enforces test-driven development with 80%+ coverage including unit, integration, and E2E tests.
+description: Use this skill when writing new features, fixing bugs, or refactoring code — especially when touching test files (src/**/*.test.ts, src/**/*.spec.ts, tests/**, e2e/**). Enforces test-driven development with unit, integration, and E2E tests. Pairs with test-audit, which decides whether a test is worth adding.
 ---
 
 # Test-Driven Development Workflow
 
-This skill ensures all code development follows TDD principles with comprehensive test coverage.
+This skill ensures all code development follows TDD principles. Every new test must also pass the `test-audit` authoring gate.
 
 ## When to Activate
 
@@ -21,12 +21,12 @@ This skill ensures all code development follows TDD principles with comprehensiv
 
 ALWAYS write tests first, then implement code to make tests pass.
 
-### 2. Coverage Requirements
+### 2. Confidence, Not a Coverage Number
 
-- Minimum 80% coverage (unit + integration + E2E)
-- All edge cases covered
-- Error scenarios tested
-- Boundary conditions verified
+- Each test protects an observable behavior and fails on a credible regression
+- Cover the edge cases, error paths, and boundaries that can actually break
+- Test each contract once, at its strongest boundary
+- Coverage reports find untested behavior; a percentage is never the goal
 
 ### 3. Test Types
 
@@ -121,11 +121,11 @@ Improve code quality while keeping tests green:
 - Optimize performance
 - Enhance readability
 
-### Step 7: Verify Coverage
+### Step 7: Check for Gaps
 
 ```bash
 pnpm test:coverage
-# Verify 80%+ coverage achieved
+# Look for untested behavior, not a target percentage
 ```
 
 ## Testing Patterns
@@ -321,23 +321,6 @@ jest.mock("@/lib/openai", () => ({
 pnpm test:coverage
 ```
 
-### Coverage Thresholds
-
-```json
-{
-  "jest": {
-    "coverageThresholds": {
-      "global": {
-        "branches": 80,
-        "functions": 80,
-        "lines": 80,
-        "statements": 80
-      }
-    }
-  }
-}
-```
-
 ## Common Testing Mistakes to Avoid
 
 ### ❌ WRONG: Testing Implementation Details
@@ -433,11 +416,11 @@ pnpm test && pnpm lint
 7. **Test Error Paths** - Not just happy paths
 8. **Keep Tests Fast** - Unit tests < 50ms each
 9. **Clean Up After Tests** - No side effects
-10. **Review Coverage Reports** - Identify gaps
+10. **Review Coverage Reports** - Find untested behavior, don't chase a number
 
 ## Success Metrics
 
-- 80%+ code coverage achieved
+- Every test passes the `test-audit` authoring gate
 - All tests passing (green)
 - No skipped or disabled tests
 - Fast test execution (< 30s for unit tests)

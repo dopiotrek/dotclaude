@@ -6,6 +6,11 @@
     "command": "$HOME/.claude/scripts/statusline.sh"
   },
   "permissions": {
+    "allow": [
+      "Bash(curl https://workbench.md/*)",
+      "Bash(curl -s https://workbench.md/*)",
+      "Bash(curl -sL https://workbench.md/*)"
+    ],
     "deny": [
       "Read(~/**/.env)",
         "Read(~/**/.env.*)",

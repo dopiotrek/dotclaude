@@ -41,6 +41,7 @@ Grouped for orientation; run `/` in Claude Code for the live list.
 - `svelte-component-architecture` — component decomposition for SvelteKit / Svelte 5.
 - `tapforce-shadcn-svelte` — shadcn-svelte setup and usage.
 - `tdd-workflow` — enforces test-driven development on test files.
+- `test-audit` — value gate for new tests; audit and prune low-value, duplicate, or implementation-coupled tests. (adapted from openclaw)
 - `turborepo` — Turborepo monorepo build/pipeline/caching guidance.
 - `frontend-design` — "Technical Swiss" UI constraints for consistent interfaces.
 - `awwwards-hero` — award-tier hero sections from reference images; hero only.
@@ -72,6 +73,10 @@ Grouped for orientation; run `/` in Claude Code for the live list.
 
 - `agent-handoff` — write a handoff doc so the next agent can continue.
 - `tutor` — rigorous tutor that checks you understand before ending.
+
+**Video**
+
+- `hyperframes` — router for HyperFrames video work (HTML-based compositions rendered to MP4); installs a specialized workflow on demand. Helpers: `hyperframes-*`, `media-use`. (official, from heygen-com/hyperframes; update with `npx hyperframes skills update`)
 
 > A vendored `gstack/` set (the `gstack-*` directories) ships alongside these.
 > Treat it as third-party and prune what you don't use.
