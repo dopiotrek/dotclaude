@@ -135,9 +135,14 @@ Deferred:
       for the same reason (pnpm lives under mise, not on the hook PATH).
       (2026-10-02: both now find pnpm through mise; tested in frontq and
       dronelist.)
-- [ ] **[HOOKS]** `stop-verify-and-log.py` only looks for `tsconfig.json` and
+- [x] **[HOOKS]** `stop-verify-and-log.py` only looks for `tsconfig.json` and
       `svelte.config.*` at the repo root. frontq has neither there, so the Stop
       hook runs no check in that repo. Deferred: outside the pnpm fix.
+      (2026-10-02: in a pnpm workspace it now runs one check per changed
+      package; tested in frontq and dronelist.)
+- [ ] **[DOCS]** `hooks/README.md` still describes the Stop hook as root-only
+      `pnpm tsc` / `svelte-check`. Deferred: another agent had uncommitted
+      edits in that file.
 - [ ] **[HOOKS]** Check that `dependency-audit`, `sveltekit-perf-guard`,
       `import-path-validator` and `sveltekit-route-validator` have each fired at
       least once; cut the silent ones. Deferred: not in the execution brief.

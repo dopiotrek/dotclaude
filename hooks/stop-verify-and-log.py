@@ -40,21 +40,75 @@ def find_project_root() -> Path | None:
     return None
 
 
-def detect_checks(project_root: Path) -> list[tuple[str, list[str], int]]:
-    """Return (name, command, timeout) tuples for applicable checks."""
-    checks: list[tuple[str, list[str], int]] = []
+JS_EXTENSIONS = (".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".svelte")
 
-    if (project_root / "tsconfig.json").exists():
-        checks.append(("TypeScript", ["pnpm", "tsc", "--noEmit"], 90))
+# A turn that touches more packages than this is rare; the cap keeps a sweeping
+# refactor from queueing a dozen 20-90s checks in the background.
+MAX_PACKAGES = 5
 
-    if (project_root / "svelte.config.js").exists() or (project_root / "svelte.config.ts").exists():
-        checks.append(("Svelte", ["pnpm", "svelte-check", "--threshold", "error"], 90))
+Check = tuple[str, list[str], Path, int]
+
+
+def has_svelte_config(directory: Path) -> bool:
+    return (directory / "svelte.config.js").exists() or (directory / "svelte.config.ts").exists()
+
+
+def package_checks(project_root: Path, changed: set[str]) -> list[Check]:
+    """One check per workspace package that has a changed JS/TS/Svelte file.
+
+    In a monorepo the tsconfig and svelte.config live in the packages, so a
+    root-level check either finds nothing to run (frontq) or runs a root tsc
+    that never sees the Svelte files (dronelist). Prefers the package's own
+    `check:light` / `check` script so `svelte-kit sync` and its tsconfig apply.
+    """
+    packages: list[Path] = []
+    for rel in sorted(changed):
+        if not rel.endswith(JS_EXTENSIONS):
+            continue
+        for directory in (project_root / rel).parents:
+            if directory == project_root:
+                break
+            if (directory / "package.json").exists():
+                if directory not in packages:
+                    packages.append(directory)
+                break
+
+    checks: list[Check] = []
+    for pkg in packages[:MAX_PACKAGES]:
+        label = str(pkg.relative_to(project_root))
+        try:
+            scripts = json.loads((pkg / "package.json").read_text()).get("scripts", {})
+        except (json.JSONDecodeError, OSError):
+            scripts = {}
+        script = next((n for n in ("check:light", "check") if n in scripts), None)
+        if script:
+            checks.append((f"{label} ({script})", ["pnpm", "run", script], pkg, 90))
+        elif has_svelte_config(pkg):
+            checks.append((f"{label} (svelte-check)", ["pnpm", "exec", "svelte-check", "--threshold", "error"], pkg, 90))
+        elif (pkg / "tsconfig.json").exists():
+            checks.append((f"{label} (tsc)", ["pnpm", "exec", "tsc", "--noEmit"], pkg, 90))
+    return checks
+
+
+def detect_checks(project_root: Path, changed: set[str] | None = None) -> list[Check]:
+    """Return (name, command, cwd, timeout) tuples for applicable checks."""
+    checks: list[Check] = []
+
+    if changed and (project_root / "pnpm-workspace.yaml").exists():
+        checks.extend(package_checks(project_root, changed))
+
+    if not checks:
+        if (project_root / "tsconfig.json").exists():
+            checks.append(("TypeScript", ["pnpm", "tsc", "--noEmit"], project_root, 90))
+
+        if has_svelte_config(project_root):
+            checks.append(("Svelte", ["pnpm", "svelte-check", "--threshold", "error"], project_root, 90))
 
     if (project_root / "pyproject.toml").exists() or (project_root / "setup.py").exists():
-        checks.append(("Python (mypy)", ["mypy", "."], 60))
+        checks.append(("Python (mypy)", ["mypy", "."], project_root, 60))
 
     if (project_root / "Cargo.toml").exists():
-        checks.append(("Rust", ["cargo", "check"], 120))
+        checks.append(("Rust", ["cargo", "check"], project_root, 120))
 
     return checks
 
@@ -112,6 +166,7 @@ def run_check(name: str, command: list[str], cwd: Path, timeout: int = 60) -> di
         )
         return {
             "name": name,
+            "cwd": cwd,
             "success": result.returncode == 0,
             "returncode": result.returncode,
             # Keep the HEAD of the output: tsc/svelte-check print the first
@@ -319,23 +374,29 @@ def do_work():
         send_notification("Claude", "Done ✓")
         return
 
-    checks = detect_checks(project_root)
+    changed_files = get_changed_files(project_root)
+    checks = detect_checks(project_root, changed_files)
     if not checks:
         send_notification("Claude", "Done ✓")
         return
 
-    results = [run_check(name, cmd, project_root, timeout) for name, cmd, timeout in checks]
+    results = [run_check(name, cmd, cwd, timeout) for name, cmd, cwd, timeout in checks]
 
     # Demote failures that live entirely in files this turn never touched —
     # a monorepo-wide check otherwise cries wolf on every turn once any file,
     # anywhere, has a pre-existing error. Fails open: only demote when we can
     # confidently attribute every reported error to an untouched file.
-    changed_files = get_changed_files(project_root)
     if changed_files:
         for r in results:
             if r["success"]:
                 continue
-            error_files = extract_error_files(check_detail(r))
+            # Compilers report paths relative to the check's cwd; git reports
+            # them relative to the repo root.
+            cwd = r.get("cwd", project_root)
+            error_files = {
+                os.path.relpath(cwd / f, project_root)
+                for f in extract_error_files(check_detail(r))
+            }
             if error_files and not (error_files & changed_files):
                 r["pre_existing"] = True
 
