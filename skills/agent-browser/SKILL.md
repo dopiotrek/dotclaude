@@ -12,6 +12,32 @@ accessibility-tree snapshots and compact `@eN` element refs.
 
 Install: `npm i -g agent-browser && agent-browser install`
 
+## My setup (read first)
+
+Use the **agent-browser** CLI. It runs its own Chrome with a dedicated profile that stays logged in. It never touches the Chrome window I am working in.
+
+**Headless by default. Do not open a window.** Always pass the profile so my logins are there:
+
+```bash
+agent-browser --profile ~/.agent-browser/profiles/main open <url>
+agent-browser --profile ~/.agent-browser/profiles/main snapshot -i -c
+agent-browser --profile ~/.agent-browser/profiles/main screenshot shot.png
+agent-browser --profile ~/.agent-browser/profiles/main close   # always, when done
+```
+
+- Read the page with `snapshot -i -c` and click `@ref` ids. Do not guess CSS selectors.
+- Show me a screenshot instead of describing the page.
+- Run `agent-browser skills get core --full` when you do not know a command.
+- Add `--headed` only when I ask to watch, or when a site needs a first login. Say so before you do it, and close the window straight after — the login stays in the profile.
+
+Exceptions:
+
+- Drop `--profile` when the task needs a clean logged-out session (e.g. a public landing page).
+- Use **claude-in-chrome** (Claude Code) or **chrome-devtools** MCP with `--autoConnect` (Grok) only when I ask for my real Chrome by name. Then: never take over a tab I already had open, and never `resize_page`.
+- With claude-in-chrome, do not spawn a window per check. Call `tabs_context_mcp({})` first; if a group exists, add tabs with `tabs_create_mcp` and reuse them. `createIfEmpty: true` is the only way to start a group and it always opens a new window, so call it at most once per session. Closing the group's last tab auto-removes the group and forces a new window next time, so keep one tab alive while you are still working and close it when the task is done.
+- The extension cannot attach to a window I already have open, so a first check costs one new window. Say so rather than opening several.
+- Do NOT use `playwright-cli` or Playwright MCP.
+
 ## Start here
 
 This file is a discovery stub, not the usage guide. Before running any
