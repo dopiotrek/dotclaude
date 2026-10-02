@@ -1,0 +1,217 @@
+# usage, last 60 days (since 2026-08-03), 597 transcript files
+
+## skills in repo: name | skill-tool | slash | total | projects
+_gstack-command | 0 | 0 | 0 | 
+agent-browser | 0 | 0 | 0 | 
+agent-handoff | 0 | 26 | 26 | apps-frontq(17), apps-swissCRM(5), apps-dronelist(2), apps-fmc(2)
+ai-sdk | 0 | 0 | 0 | 
+ai-seo | 0 | 2 | 2 | apps-dronelist(1), apps-piotrek-cc(1)
+awwwards-hero | 0 | 11 | 11 | apps-piotrek-cc(8), apps-frontq(3)
+awwwards-motion | 0 | 1 | 1 | apps-piotrek-cc(1)
+awwwards-sections | 4 | 18 | 22 | apps-frontq(9), apps-piotrek-cc(7), apps-dronelist(6)
+clean-comments | 0 | 0 | 0 | 
+emil-design-eng | 0 | 5 | 5 | apps-frontq(5)
+find-keywords | 0 | 0 | 0 | 
+free-tool-strategy | 0 | 0 | 0 | 
+frontend-design | 0 | 0 | 0 | 
+general-video | 1 | 0 | 1 | apps-dronelist(1)
+google-search-console | 1 | 0 | 1 | apps-dronelist(1)
+gstack | 0 | 0 | 0 | 
+gstack-autoplan | 0 | 0 | 0 | 
+gstack-benchmark | 0 | 0 | 0 | 
+gstack-benchmark-models | 0 | 0 | 0 | 
+gstack-browse | 0 | 0 | 0 | 
+gstack-canary | 0 | 0 | 0 | 
+gstack-careful | 0 | 0 | 0 | 
+gstack-codex | 0 | 0 | 0 | 
+gstack-connect-chrome | 0 | 0 | 0 | 
+gstack-context-restore | 0 | 0 | 0 | 
+gstack-context-save | 0 | 0 | 0 | 
+gstack-cso | 0 | 0 | 0 | 
+gstack-design-consultation | 0 | 0 | 0 | 
+gstack-design-html | 0 | 0 | 0 | 
+gstack-design-review | 0 | 0 | 0 | 
+gstack-design-shotgun | 0 | 0 | 0 | 
+gstack-devex-review | 0 | 0 | 0 | 
+gstack-diagram | 0 | 0 | 0 | 
+gstack-document-generate | 0 | 0 | 0 | 
+gstack-document-release | 0 | 0 | 0 | 
+gstack-freeze | 0 | 0 | 0 | 
+gstack-guard | 0 | 0 | 0 | 
+gstack-health | 0 | 0 | 0 | 
+gstack-investigate | 0 | 1 | 1 | apps-dronelist(1)
+gstack-ios-clean | 0 | 0 | 0 | 
+gstack-ios-design-review | 0 | 0 | 0 | 
+gstack-ios-fix | 0 | 0 | 0 | 
+gstack-ios-qa | 0 | 0 | 0 | 
+gstack-ios-sync | 0 | 0 | 0 | 
+gstack-land-and-deploy | 0 | 0 | 0 | 
+gstack-landing-report | 0 | 0 | 0 | 
+gstack-learn | 0 | 0 | 0 | 
+gstack-make-pdf | 0 | 0 | 0 | 
+gstack-office-hours | 0 | 0 | 0 | 
+gstack-open-gstack-browser | 0 | 0 | 0 | 
+gstack-pair-agent | 0 | 0 | 0 | 
+gstack-plan-ceo-review | 0 | 0 | 0 | 
+gstack-plan-design-review | 0 | 0 | 0 | 
+gstack-plan-devex-review | 0 | 0 | 0 | 
+gstack-plan-eng-review | 0 | 0 | 0 | 
+gstack-plan-tune | 0 | 0 | 0 | 
+gstack-qa | 0 | 0 | 0 | 
+gstack-qa-only | 0 | 0 | 0 | 
+gstack-retro | 0 | 0 | 0 | 
+gstack-review | 0 | 0 | 0 | 
+gstack-scrape | 0 | 0 | 0 | 
+gstack-setup-browser-cookies | 0 | 0 | 0 | 
+gstack-setup-deploy | 0 | 0 | 0 | 
+gstack-setup-gbrain | 0 | 0 | 0 | 
+gstack-ship | 0 | 2 | 2 | apps-dronelist(2)
+gstack-skillify | 0 | 0 | 0 | 
+gstack-spec | 0 | 1 | 1 | apps-dronelist(1)
+gstack-sync-gbrain | 0 | 0 | 0 | 
+gstack-unfreeze | 0 | 0 | 0 | 
+gstack-upgrade | 0 | 0 | 0 | 
+humanizer | 0 | 6 | 6 | apps-piotrek-cc(4), apps-dronelist(2)
+hyperframes | 0 | 3 | 3 | apps-dronelist(2), dotclaude(1)
+hyperframes-animation | 0 | 0 | 0 | 
+hyperframes-audio | 0 | 0 | 0 | 
+hyperframes-cli | 0 | 0 | 0 | 
+hyperframes-core | 0 | 0 | 0 | 
+hyperframes-creative | 0 | 0 | 0 | 
+hyperframes-keyframes | 0 | 0 | 0 | 
+hyperframes-registry | 0 | 0 | 0 | 
+hyperframes-studio | 0 | 0 | 0 | 
+latent-economy | 0 | 0 | 0 | 
+make-interfaces-feel-better | 0 | 0 | 0 | 
+media-use | 0 | 0 | 0 | 
+motion-graphics | 1 | 0 | 1 | apps-dronelist(1)
+oklch-skill | 0 | 0 | 0 | 
+playwright-cli | 0 | 0 | 0 | 
+programmatic-seo | 0 | 0 | 0 | 
+review-animations | 0 | 0 | 0 | 
+seo-audit | 0 | 1 | 1 | apps-piotrek-cc(1)
+supabase | 0 | 0 | 0 | 
+supabase-postgres-best-practices | 0 | 0 | 0 | 
+superforms-reference | 0 | 0 | 0 | 
+svelte-component-architecture | 0 | 0 | 0 | 
+tdd-workflow | 0 | 0 | 0 | 
+test-audit | 1 | 1 | 2 | apps-frontq(2)
+thermo-nuclear-code-review | 0 | 0 | 0 | 
+turborepo | 0 | 0 | 0 | 
+uiverify | 2 | 0 | 2 | apps-piotrek-cc(2)
+web-design-guidelines | 0 | 0 | 0 | 
+
+## agents in repo: file | name | uses | projects
+backend-engineer | backend-engineer | 3 | apps-frontq(3)
+code-reviewer | code-reviewer | 5 | apps-frontq(5)
+debug-specialist | debug-expert | 0 | 
+discovery-agent | discovery-agent | 0 | 
+frontend-engineer | frontend-engineer | 1 | apps-frontq(1)
+mobile-ui-designer | mobile-ui-designer | 0 | 
+seo-expert | seo-expert | 0 | 
+superforms-expert | superforms-expert | 0 | 
+vercel-deployment-expert | vercel-deployment-expert | 0 | 
+
+## other Skill tool names (not a repo skill folder)
+kumo-design | 19 | apps-frontq(19)
+workflow-authoring | 6 | apps-frontq(6)
+claude-api | 2 | apps-dronelist(2)
+dataviz | 2 | apps-loom(1), apps-frontq(1)
+anthropic-skills:docs | 1 | apps-frontq(1)
+artifact-design | 1 | apps-frontq(1)
+
+## other slash commands
+/clear | 338 | apps-dronelist(101), apps-piotrek-cc(28), apps-swissCRM(9), apps-loom(2), apps-frontq(193), apps-fmc(5)
+/design | 34 | apps-frontq(34)
+/model | 16 | apps-dronelist(4), apps-frontq(12)
+/goal | 9 | apps-dronelist(1), apps-piotrek-cc(1), apps-frontq(7)
+/add-dir | 5 | apps-dronelist(1), apps-piotrek-cc(1), apps-swissCRM(1), apps-frontq(2)
+/mcp | 3 | apps-dronelist(3)
+/plugin | 3 | apps-dronelist(3)
+/insights | 1 | repos(1)
+/reload-plugins | 1 | apps-dronelist(1)
+/data:build-dashboard | 1 | apps-frontq(1)
+/permissions | 1 | apps-frontq(1)
+
+## other subagent types
+Explore | 54 | apps-dronelist(14), apps-frontq(40)
+general-purpose | 26 | apps-dronelist(15), apps-frontq(11)
+Plan | 2 | apps-frontq(2)
+
+## MCP server tool calls: server | calls | projects
+supabase | 67 | apps-dronelist(67)
+posthog | 56 | apps-dronelist(56)
+vercel | 29 | apps-dronelist(27), apps-swissCRM(2)
+plugin_cloudflare_cloudflare | 24 | apps-frontq(21), apps-fmc(3)
+svelte | 15 | apps-piotrek-cc(8), apps-frontq(7)
+supabase-swisscrm | 5 | apps-swissCRM(5)
+claude_ai_Claude_Docs | 2 | apps-frontq(2)
+claude_ai_PostHog | 1 | apps-dronelist(1)
+Claude_Browser | 1 | dotclaude(1)
+
+## plugins (~/.claude/plugins/installed_plugins.json)
+feature-dev@claude-code-plugins | scope=user | version=1.0.0
+code-review@claude-code-plugins | scope=user | version=1.0.0
+security-guidance@claude-code-plugins | scope=user | version=2.0.0
+backend-development@claude-code-workflows | scope=user | version=ddbd034ca35c
+code-simplifier@claude-plugins-official | scope=user | version=1.0.0
+frontend-design@claude-plugins-official | scope=user | version=ab024cdcfa7c
+claude-md-management@claude-plugins-official | scope=user | version=1.0.0
+feature-dev@claude-plugins-official | scope=user | version=ab024cdcfa7c
+claude-code-setup@claude-plugins-official | scope=user | version=1.0.0
+codebase-cleanup@claude-code-workflows | scope=user | version=1.2.0
+comprehensive-review@claude-code-workflows | scope=user | version=1.2.1
+superpowers@claude-plugins-official | scope=user | version=6.4.1
+agent-sdk-dev@claude-plugins-official | scope=user | version=ab024cdcfa7c
+github@claude-plugins-official | scope=user | version=ab024cdcfa7c
+playwright@claude-plugins-official | scope=user | version=ab024cdcfa7c
+vercel@claude-plugins-official | scope=user | version=0.50.0
+pr-review-toolkit@claude-plugins-official | scope=user | version=ab024cdcfa7c
+posthog@claude-plugins-official | scope=user | version=1.1.64
+claude-claw@Claudest | scope=user | version=0.3.2
+claude-coding@Claudest | scope=user | version=0.2.55
+claude-content@Claudest | scope=user | version=0.4.16
+claude-memory@Claudest | scope=user | version=0.8.114
+claude-research@Claudest | scope=user | version=0.2.4
+claude-skills@Claudest | scope=user | version=0.5.28
+claude-thinking@Claudest | scope=user | version=0.3.6
+claude-utilities@Claudest | scope=user | version=0.2.2
+playground@claude-plugins-official | scope=user | version=ab024cdcfa7c
+figma@claude-plugins-official | scope=user | version=2.2.120
+supabase@claude-plugins-official | scope=user | version=0.1.15
+security-guidance@claude-plugins-official | scope=user | version=2.0.8
+cloudflare@cloudflare | scope=user | version=1.0.0
+next-steps@claude-community | scope=user | version=1.0.0
+
+## marketplaces
+claude-code-plugins
+claude-code-workflows
+claude-plugins-official
+Claudest
+cloudflare
+claude-community
+
+## claude mcp list
+Checking MCP server health…
+
+claude.ai Claude Docs: https://api.anthropic.com/v1/pages/mcp - ✔ Connected
+claude.ai dronelist.io: https://api.dronelist.io/mcp - ✔ Connected
+claude.ai Supabase: https://mcp.supabase.com/mcp - ✔ Connected
+claude.ai Google Drive: https://drivemcp.googleapis.com/mcp/v1 - ✔ Connected
+plugin:data:snowflake:  (HTTP) - - Not configured
+plugin:data:databricks:  (HTTP) - - Not configured
+plugin:data:bigquery: https://bigquery.googleapis.com/mcp (HTTP) - ✘ Failed to connect — Incompatible auth server: does not support dynamic client registration
+plugin:data:hex: https://app.hex.tech/mcp (HTTP) - ! Needs authentication
+plugin:data:amplitude: https://mcp.amplitude.com/mcp (HTTP) - ! Needs authentication
+plugin:data:amplitude-eu: https://mcp.eu.amplitude.com/mcp (HTTP) - ! Needs authentication
+plugin:data:atlassian: https://mcp.atlassian.com/v1/mcp (HTTP) - ! Needs authentication
+plugin:data:definite: https://api.definite.app/v3/mcp/http (HTTP) - ✘ Failed to connect — MCP endpoint not found at https://api.definite.app. Check the URL in your MCP config.
+plugin:exa:exa: https://mcp.exa.ai/mcp?client=claude-code-plugin (HTTP) - ! Needs authentication
+supabase: npx -y --prefer-online @supabase/mcp-server-supabase@latest - ✔ Connected
+gemini-cli: npx -y gemini-mcp-tool - ✔ Connected
+playwright: npx @playwright/mcp@latest - ✔ Connected
+vercel: https://mcp.vercel.com (HTTP) - ✔ Connected
+chrome-devtools: npx -y chrome-devtools-mcp@latest --autoConnect - ✔ Connected
+svelte: npx -y @sveltejs/mcp - ✔ Connected
+stripe: https://mcp.stripe.com/ (HTTP) - ! Needs authentication
+posthog: https://mcp.posthog.com/mcp (HTTP) - ✔ Connected

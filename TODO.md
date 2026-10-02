@@ -77,10 +77,12 @@ Items 1–3 of the audit are done (redundant hooks deleted, `os.fork` gone). Sti
 - [ ] **[SETTINGS]** Verify `settings.template.json` matches the live
       `~/.claude/settings.json` (audit item 4). Needs a check on the local
       machine; cannot be verified from the repo.
-- [ ] **[AGENTS]** Trim `agents/superforms-expert.md` — move reference docs
+- [x] **[AGENTS]** Trim `agents/superforms-expert.md` — move reference docs
       into a skill (audit). Not verified whether already done.
-- [ ] **[SKILLS]** Archive unused `skills/gstack/` skills (audit). Not
+      (2026-10-02: agent cut; `superforms-reference` skill covers it.)
+- [x] **[SKILLS]** Archive unused `skills/gstack/` skills (audit). Not
       verified whether already done.
+      (2026-10-02: all gstack skills cut.)
 
 ## Claude 5-generation model alignment (2026-08-04)
 
@@ -107,3 +109,39 @@ Deferred:
       long inline code examples. Candidates for moving into a skill's
       `references/` rather than sitting in every spawn's context. Deferred:
       scope call — the examples do encode real project conventions.
+
+## Hard cut (2026-10-02, .docs/reviews/2026-10-02-config-cleanup.md)
+
+Done on branch `chore/hard-cut`: cut gstack (56 folders), `playwright-cli`,
+`hooks/rtk-rewrite.sh.bak` and six agents; untracked `skills/synced/`; fixed
+`typecheck-after-edit` (it could not find pnpm, so it never fired); moved the
+browser rules into the `agent-browser` skill; added the `ship` skill. Usage
+data is in `.docs/reviews/usage-raw.txt`.
+
+Deferred:
+
+- [ ] **[SETTINGS]** Add `permissions.allow` for `Bash(vercel deploy*)`,
+      `Bash(vercel --prod*)`, `Bash(gh pr merge*)` and the Coolify deploy command
+      to `settings/settings.template.json`. Deferred: auto mode blocks Claude
+      from widening its own permissions, so this needs a manual edit; the
+      Coolify command is not known yet.
+- [ ] **[INSTALL]** `./install.sh` not re-run. It replaces the live
+      `~/.claude/settings.json` with the template, and the template lacks keys
+      the live file has (`model`, `enabledPlugins`, `extraKnownMarketplaces`,
+      `autoMode`). All other items are already symlinked, so nothing else was
+      pending. Sync the template with the live file first.
+- [ ] **[HOOKS]** `stop-verify-and-log.py` and `dependency-audit.py` call bare
+      `pnpm`, same as `typecheck-after-edit` did before the fix. Likely silent
+      for the same reason (pnpm lives under mise, not on the hook PATH).
+      Deferred: not tested this session.
+- [ ] **[HOOKS]** Check that `dependency-audit`, `sveltekit-perf-guard`,
+      `import-path-validator` and `sveltekit-route-validator` have each fired at
+      least once; cut the silent ones. Deferred: not in the execution brief.
+- [ ] **[PLUGINS]** 32 plugins installed, 2 enabled; proposal to remove the
+      unused ones and four MCP servers is waiting for a decision.
+- [ ] **[SKILLS]** `skills/agent-browser/SKILL.md` now holds a "My setup"
+      section. A vendor update of that skill would overwrite it; re-add after
+      updating.
+- [ ] **[DOCS]** `README.md` still lists skills that do not exist
+      (`tapforce-shadcn-svelte`, `tutor`, `deep-dive-burst`, …). Only the cut
+      items were removed this session; the full rewrite is still open.
