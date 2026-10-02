@@ -38,3 +38,6 @@ node_modules/
 
 # Managed by the Claude app, not by this repo
 skills/synced/
+
+# Claude Code moves synced skills here when sync is off
+skills/.trash/

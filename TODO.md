@@ -161,3 +161,18 @@ Deferred:
 - [ ] **[DOCS]** `README.md` still lists skills that do not exist
       (`tapforce-shadcn-svelte`, `tutor`, `deep-dive-burst`, …). Only the cut
       items were removed this session; the full rewrite is still open.
+- [ ] **[SKILLS]** Hard cut is not finished: 45 skill folders remain (target
+      ~8). Still to do from the review: cut the 0-use skills (ai-sdk,
+      clean-comments, find-keywords, free-tool-strategy, frontend-design,
+      latent-economy, make-interfaces-feel-better, oklch-skill,
+      programmatic-seo, review-animations, supabase,
+      supabase-postgres-best-practices, superforms-reference,
+      svelte-component-architecture, tdd-workflow, thermo-nuclear-code-review,
+      turborepo, web-design-guidelines); move the video set (hyperframes*,
+      media-use, motion-graphics, general-video) and google-search-console to
+      dronelist, emil-design-eng to frontq; merge awwwards-motion into
+      awwwards-hero; merge ai-seo + seo-audit. Found missing in the 2026-10-02
+      final check (Cowork session).
+- [ ] **[SETTINGS]** Template still has `skillListingBudgetFraction: 0.02` and
+      no `syncClaudeAiSkills: false`; `.gitignore` lacks `skills/.trash/`. Do
+      together with the template/live sync before `./install.sh`.

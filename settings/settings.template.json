@@ -1,42 +1,59 @@
 {
-  "skipDangerousModePermissionPrompt": true,
-  "skillListingBudgetFraction": 0.02,
-  "statusLine": {
-    "type": "command",
-    "command": "$HOME/.claude/scripts/statusline.sh"
-  },
   "permissions": {
     "allow": [
       "Bash(curl https://workbench.md/*)",
       "Bash(curl -s https://workbench.md/*)",
-      "Bash(curl -sL https://workbench.md/*)"
+      "Bash(curl -sL https://workbench.md/*)",
+      "Bash(vercel deploy *)",
+      "Bash(vercel --prod *)",
+      "Bash(gh pr merge *)"
     ],
     "deny": [
       "Read(~/**/.env)",
-        "Read(~/**/.env.*)",
-        "Read(~/**/secrets/**)",
+      "Read(~/**/.env.*)",
+      "Read(~/**/secrets/**)",
       "Bash(rm -rf /)",
       "Bash(rm -rf /*)",
       "Bash(rm -rf ~)",
       "Bash(rm -rf ~/*)"
-    ]
+    ],
+    "defaultMode": "auto"
   },
+  "model": "opus",
   "hooks": {
     "PreToolUse": [
       {
         "matcher": "Write|Edit|MultiEdit",
         "hooks": [
-          { "type": "command", "command": "python3 $HOME/.claude/hooks/no-secrets.py" },
-          { "type": "command", "command": "python3 $HOME/.claude/hooks/import-path-validator.py" },
-          { "type": "command", "command": "python3 $HOME/.claude/hooks/sveltekit-route-validator.py" },
-          { "type": "command", "command": "python3 $HOME/.claude/hooks/drizzle-migration-guard.py" },
-          { "type": "command", "command": "python3 $HOME/.claude/hooks/supabase-rls-reminder.py" }
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/no-secrets.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/import-path-validator.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/sveltekit-route-validator.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/drizzle-migration-guard.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/supabase-rls-reminder.py"
+          }
         ]
       },
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "command": "$HOME/.claude/hooks/rtk-rewrite.sh" }
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/rtk-rewrite.sh"
+          }
         ]
       }
     ],
@@ -44,24 +61,112 @@
       {
         "matcher": "Write|Edit|MultiEdit",
         "hooks": [
-          { "type": "command", "command": "python3 $HOME/.claude/hooks/auto-format.py" },
-          { "type": "command", "command": "python3 $HOME/.claude/hooks/typecheck-after-edit.py", "asyncRewake": true },
-          { "type": "command", "command": "python3 $HOME/.claude/hooks/dependency-audit.py", "async": true }
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/auto-format.py"
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/typecheck-after-edit.py",
+            "asyncRewake": true
+          },
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/dependency-audit.py",
+            "async": true
+          }
         ]
       },
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "command": "python3 $HOME/.claude/hooks/sveltekit-perf-guard.py" }
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/sveltekit-perf-guard.py"
+          }
         ]
       }
     ],
     "Stop": [
       {
         "hooks": [
-          { "type": "command", "command": "python3 $HOME/.claude/hooks/stop-verify-and-log.py", "asyncRewake": true }
+          {
+            "type": "command",
+            "command": "python3 $HOME/.claude/hooks/stop-verify-and-log.py",
+            "asyncRewake": true
+          }
         ]
       }
     ]
-  }
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "$HOME/.claude/scripts/statusline.sh"
+  },
+  "enabledPlugins": {
+    "cc-plugin-you-should-know@builtin": true,
+    "next-steps@claude-community": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-community": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-community"
+      }
+    }
+  },
+  "skipDangerousModePermissionPrompt": true,
+  "skipWorkflowUsageWarning": true,
+  "inputNeededNotifEnabled": true,
+  "autoMode": {
+    "allow": [
+      "$defaults",
+      "Bash(rtk:*) in $HOME/repos/apps/frontq",
+      "Bash(pnpm check:classes) in $HOME/repos/apps/frontq",
+      "Bash(pnpm dev:status) in $HOME/repos/apps/frontq"
+    ],
+    "soft_deny": [
+      "$defaults",
+      "Bash(pnpm db:dev:destroy) in $HOME/repos/apps/frontq",
+      "Bash(pnpm db:push) against non-local DATABASE_URL in $HOME/repos/apps/frontq"
+    ],
+    "environment": [
+      "### Org-wide",
+      "**Organization**: None configured",
+      "**Cloud provider(s)**: None configured",
+      "**Repository visibility**: Private \u2014 `dopiotrek/frontq` (confirmed via gh)",
+      "**Internal sharing / snippet hosting**: None configured \u2014 treat public paste/gist services as outside the trust boundary",
+      "**Secrets management**: Envelope encryption via `packages/crypto` (ENCRYPTION_MASTER_KEY, per-tenant DEKs); `.env`/`.env.*` and `*.key` are gitignored \u2014 never read or display `.env` contents",
+      "**Default / protected branches**: Default branch `main`; no classic protection rules listed, rulesets not queryable here \u2014 treat `main` as protected by convention regardless",
+      "**CI/CD deploy targets**: None configured",
+      "**Network posture**: None configured",
+      "**Host containment**: None configured \u2014 assume Claude Code runs on an ordinary developer machine with open internet",
+      "**Source control**: The trusted repo (`dopiotrek/frontq` on github.com) and its remote only \u2014 no additional orgs configured",
+      "**Trusted internal domains**: None configured",
+      "**Trusted cloud buckets**: None configured",
+      "**Key internal services**: `frontq-admin.localhost`, `frontq-portal.localhost`, `frontq-web.localhost` (local dev SvelteKit apps, scoped to this project)",
+      "**Internal package registry**: None configured",
+      "**Sensitive data locations & audiences**: `.env`, `.env.example` (secret templates), `packages/connector/src/secrets.ts`, `packages/crypto/src/secret.ts`, `.docs/decisions/classification.md` (data classification policy); tenant `sensitive_answer` rows (bank/tax fields, envelope-encrypted) \u2014 restrict to engineers with a need to access; never commit `.env` or `*.key`, EU-only object storage per data-residency decision",
+      "**Data retention / declassification**: None configured",
+      "**Sensitive remote targets**: any namespace, host, or container whose name carries `prod` or `production` as a whole word or name segment",
+      "**Protected deployment namespaces / environments**: None configured \u2014 fall back to the Sensitive remote targets heuristic",
+      "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
+      "### User-specific",
+      "**Primary use of Claude Code**: software development \u2014 SvelteKit/Svelte 5/TypeScript/Supabase/Drizzle multi-tenant SaaS (FrontQ supplier onboarding)",
+      "**Trusted repo**: `dopiotrek/frontq` (this repo, private) and its `origin` remote (github.com/dopiotrek/frontq)",
+      "**Org-specific CLIs**: `rtk` (frequently used internal/personal CLI, routine in this project), `agent-browser`/`ab` (browser automation CLI per ~/.claude/CLAUDE.md \u2014 headless, uses `~/.agent-browser/profiles/main`)",
+      "**Routine under this project**: routine Bash/tooling actions scoped to `$HOME/repos/apps/frontq` (pnpm scripts, Drizzle migrations against local Postgres, local dev servers on `*.localhost`)"
+    ]
+  },
+  "skillOverrides": {
+    "web-design-guidelines": "off",
+    "superforms-reference": "off",
+    "svelte-component-architecture": "off",
+    "turborepo": "off",
+    "supabase": "off",
+    "free-tool-strategy": "off",
+    "programmatic-seo": "off",
+    "make-interfaces-feel-better": "off"
+  },
+  "syncClaudeAiSkills": false
 }
