@@ -11,7 +11,7 @@ My personal, shareable [Claude Code](https://claude.ai/download) setup: automate
 | Component     | Roughly        | What it is                                                         |
 | ------------- | -------------- | ------------------------------------------------------------------ |
 | **Hooks**     | ~10            | PreToolUse / PostToolUse / Stop guardrails (security, format, DB)  |
-| **Agents**    | ~9             | Specialized subagents (frontend, backend, debug, review, …)        |
+| **Agents**    | 3              | Specialized subagents (frontend, backend, review)                  |
 | **Skills**    | ~40            | Reusable procedures                                                |
 | **Settings**  | 1              | `settings/settings.template.json` (`$HOME` is expanded on install) |
 | **CLAUDE.md** | 1              | Global preferences and instructions                                |
@@ -71,15 +71,9 @@ Subagents in `agents/`, each a markdown file with YAML frontmatter. Tools are sc
 | ---------------------------- | ------ | ------------------------------------------------------ |
 | **frontend-engineer**        | sonnet | Svelte 5 runes, shadcn-svelte, responsive UI           |
 | **backend-engineer**         | sonnet | SvelteKit server: load functions, actions, hooks       |
-| **superforms-expert**        | sonnet | sveltekit-superforms + Zod                             |
-| **mobile-ui-designer**       | sonnet | Mobile-first UI with TailwindCSS                       |
-| **debug-expert**             | opus   | Error diagnosis, test failures, perf issues (worktree) |
 | **code-reviewer**            | opus   | Security & quality review (worktree)                   |
-| **discovery-agent**          | sonnet | Lightweight feature specs in `.docs/`                  |
-| **vercel-deployment-expert** | sonnet | Vercel deploys and configuration                       |
-| **seo-expert**               | sonnet | Content structure and on-page SEO                      |
 
-> Filenames may differ from the agent `name` (e.g. `debug-specialist.md` defines `debug-expert`). See [agents/README.md](agents/README.md).
+See [agents/README.md](agents/README.md).
 
 ## Skills
 

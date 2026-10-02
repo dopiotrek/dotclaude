@@ -31,19 +31,6 @@ Expert in Svelte 5 components with runes mode exclusively:
 
 **Triggers:** Component creation, responsive design, frontend issues
 
-#### `mobile-ui-designer.md`
-
-**Model:** sonnet | **Color:** purple
-
-Mobile-first UI specialist:
-
-- Touch-friendly interfaces (44px+ touch targets)
-- Mobile navigation patterns (drawers, bottom tabs)
-- Responsive TailwindCSS layouts
-- Visual feedback for touch interactions
-
-**Triggers:** Mobile UI design, responsive layouts
-
 ### Backend Development
 
 #### `backend-engineer.md`
@@ -59,20 +46,6 @@ SvelteKit server-side expert:
 - Authentication flows
 
 **Triggers:** Server-side data fetching, form handling, API endpoints
-
-#### `superforms-expert.md`
-
-**Model:** sonnet | **Color:** cyan
-
-Form handling specialist with sveltekit-superforms and Zod:
-
-- Comprehensive Zod schema design
-- Server-side form validation
-- Multi-step forms with state management
-- File uploads and nested data
-- Real-time validation feedback
-
-**Triggers:** Form creation, validation, complex form patterns
 
 ### Quality & Review
 
@@ -92,64 +65,6 @@ Reports everything it finds and ranks it, rather than pre-filtering to
 high-severity only — see the note under [Writing an agent](#writing-an-agent).
 
 **Triggers:** Code review, security audit, quality check
-
-#### `debug-specialist.md` (defines `debug-expert`)
-
-**Model:** opus | **Effort:** high | **Isolation:** worktree | **Color:** red
-
-Systematic debugging expert:
-
-- Runtime errors and exceptions
-- Build and compilation errors
-- Test failures
-- Performance bottlenecks
-- Memory leaks
-
-**Triggers:** Errors, test failures, unexpected behavior
-
-### Planning & Discovery
-
-#### `discovery-agent.md`
-
-**Model:** sonnet | **Color:** cyan
-
-Lightweight feature specs before code gets written:
-
-- Short spec written to `.docs/engineering/`, named after the feature
-- Why / What / Key Decisions / Implementation Plan / Open Questions
-- Grounded in real files and patterns from the codebase
-- Skips the spec entirely when the feature is under an hour of work
-
-**Triggers:** New features, requirements gathering, feature planning
-
-#### `seo-expert.md`
-
-**Model:** sonnet | **Color:** cyan
-
-Content structure and SEO specialist:
-
-- Header hierarchy analysis (H1-H6)
-- Schema markup (JSON-LD)
-- Internal linking optimization
-- Featured snippet optimization
-
-**Triggers:** SEO optimization, content structure
-
-### DevOps
-
-#### `vercel-deployment-expert.md`
-
-**Model:** sonnet | **Color:** green
-
-Vercel deployment specialist:
-
-- Deployment configuration
-- Environment variable management
-- Build troubleshooting
-- Domain configuration
-- Performance optimization
-
-**Triggers:** Vercel deployment, build failures, domain setup
 
 ## Agent Properties
 
@@ -241,14 +156,13 @@ re-checking against your own results rather than trusting.
 Agents are automatically invoked by Claude Code based on:
 
 1. Task description matching the agent's expertise
-2. Explicit user request ("use the debug agent")
+2. Explicit user request ("use the code-reviewer agent")
 3. Proactive detection of relevant scenarios
 
 Example triggers:
 
 ```
-"Create a form with validation" → superforms-expert
-"Deploy to Vercel" → vercel-deployment-expert
-"I'm getting a TypeError" → debug-specialist
+"Build a profile card component" → frontend-engineer
+"Add a form action for this endpoint" → backend-engineer
 "Review this code for security" → code-reviewer
 ```
