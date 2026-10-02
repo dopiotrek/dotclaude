@@ -35,3 +35,6 @@ __pycache__/
 
 # Node (if any scripts use it)
 node_modules/
+
+# Managed by the Claude app, not by this repo
+skills/synced/
