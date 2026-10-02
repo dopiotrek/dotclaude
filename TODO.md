@@ -137,8 +137,9 @@ Deferred:
 - [ ] **[HOOKS]** Check that `dependency-audit`, `sveltekit-perf-guard`,
       `import-path-validator` and `sveltekit-route-validator` have each fired at
       least once; cut the silent ones. Deferred: not in the execution brief.
-- [ ] **[PLUGINS]** 32 plugins installed, 2 enabled; proposal to remove the
-      unused ones and four MCP servers is waiting for a decision.
+- [x] **[PLUGINS]** Uninstalled 30 unused plugins (kept `cloudflare` and
+      `next-steps`) and removed the `playwright`, `stripe` and `gemini-cli` MCP
+      servers.
 - [ ] **[SKILLS]** `skills/agent-browser/SKILL.md` now holds a "My setup"
       section. A vendor update of that skill would overwrite it; re-add after
       updating.
