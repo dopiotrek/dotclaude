@@ -37,6 +37,7 @@ Never crashes the turn: any unexpected error exits 0.
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -121,6 +122,38 @@ def choose_command(pkg_dir: Path) -> tuple[list[str], str] | None:
     return None
 
 
+def resolve_pnpm(pkg_dir: Path) -> str | None:
+    """Find pnpm even when it isn't on the PATH this hook inherits.
+
+    Version managers like mise only activate in interactive shells, so a pnpm
+    installed under a mise-managed node is invisible here. Without this the hook
+    exited quietly on every edit and never reported a single type error.
+    """
+    found = shutil.which("pnpm")
+    if found:
+        return found
+
+    mise = shutil.which("mise")
+    if mise:
+        try:
+            result = subprocess.run(
+                [mise, "which", "pnpm"], cwd=pkg_dir,
+                capture_output=True, text=True, timeout=5,
+            )
+            candidate = result.stdout.strip()
+            if result.returncode == 0 and candidate and Path(candidate).exists():
+                return candidate
+        except (subprocess.TimeoutExpired, OSError):
+            pass
+
+    installs = Path.home() / ".local" / "share" / "mise" / "installs" / "node"
+    for name in ("latest", "lts"):
+        candidate = installs / name / "bin" / "pnpm"
+        if candidate.exists():
+            return str(candidate)
+    return None
+
+
 def should_debounce(pkg_dir: str) -> bool:
     """True if we ran this package within the debounce window. Records now if not.
 
@@ -189,16 +222,22 @@ def main() -> None:
         sys.exit(0)
 
     cmd, label = command
+    pnpm = resolve_pnpm(pkg_dir)
+    if pnpm is None:
+        sys.exit(0)
+    cmd = [pnpm, *cmd[1:]]
+    # pnpm's launcher runs `node` from PATH; put its own bin dir first so it
+    # gets the node it was installed with.
+    env = {**os.environ, "PATH": f"{Path(pnpm).parent}{os.pathsep}{os.environ.get('PATH', '')}"}
     try:
         result = subprocess.run(
-            cmd, cwd=pkg_dir,
+            cmd, cwd=pkg_dir, env=env,
             capture_output=True, text=True, timeout=TIMEOUT_SECONDS,
         )
     except subprocess.TimeoutExpired:
         # Don't punish Claude for a slow check — the Stop hook will still run.
         sys.exit(0)
     except FileNotFoundError:
-        # pnpm not on PATH in this context — nothing we can do, stay quiet.
         sys.exit(0)
 
     if result.returncode == 0:
