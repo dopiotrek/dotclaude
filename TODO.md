@@ -130,10 +130,14 @@ Deferred:
       the live file has (`model`, `enabledPlugins`, `extraKnownMarketplaces`,
       `autoMode`). All other items are already symlinked, so nothing else was
       pending. Sync the template with the live file first.
-- [ ] **[HOOKS]** `stop-verify-and-log.py` and `dependency-audit.py` call bare
+- [x] **[HOOKS]** `stop-verify-and-log.py` and `dependency-audit.py` call bare
       `pnpm`, same as `typecheck-after-edit` did before the fix. Likely silent
       for the same reason (pnpm lives under mise, not on the hook PATH).
-      Deferred: not tested this session.
+      (2026-10-02: both now find pnpm through mise; tested in frontq and
+      dronelist.)
+- [ ] **[HOOKS]** `stop-verify-and-log.py` only looks for `tsconfig.json` and
+      `svelte.config.*` at the repo root. frontq has neither there, so the Stop
+      hook runs no check in that repo. Deferred: outside the pnpm fix.
 - [ ] **[HOOKS]** Check that `dependency-audit`, `sveltekit-perf-guard`,
       `import-path-validator` and `sveltekit-route-validator` have each fired at
       least once; cut the silent ones. Deferred: not in the execution brief.

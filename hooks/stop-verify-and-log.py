@@ -7,7 +7,9 @@ Results are written to .claude/logs/last-verify.txt.
 """
 
 import json
+import os
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -60,11 +62,52 @@ def detect_checks(project_root: Path) -> list[tuple[str, list[str], int]]:
 # ── Running checks ───────────────────────────────────────────────────
 
 
+def resolve_pnpm(cwd: Path) -> str | None:
+    """Find pnpm even when it isn't on the PATH this hook inherits.
+
+    mise only activates in interactive shells, so a pnpm installed under a
+    mise-managed node is invisible here and every TS/Svelte check ended as
+    "Command not found".
+    """
+    found = shutil.which("pnpm")
+    if found:
+        return found
+
+    mise = shutil.which("mise")
+    if mise:
+        try:
+            result = subprocess.run(
+                [mise, "which", "pnpm"], cwd=cwd,
+                capture_output=True, text=True, timeout=5,
+            )
+            candidate = result.stdout.strip()
+            if result.returncode == 0 and candidate and Path(candidate).exists():
+                return candidate
+        except (subprocess.TimeoutExpired, OSError):
+            pass
+
+    installs = Path.home() / ".local" / "share" / "mise" / "installs" / "node"
+    for version in ("latest", "lts"):
+        candidate = installs / version / "bin" / "pnpm"
+        if candidate.exists():
+            return str(candidate)
+    return None
+
+
 def run_check(name: str, command: list[str], cwd: Path, timeout: int = 60) -> dict:
     """Run a single verification check."""
+    env = None
+    if command[0] == "pnpm":
+        pnpm = resolve_pnpm(cwd)
+        if pnpm is None:
+            return {"name": name, "success": False, "error": "Command not found"}
+        command = [pnpm, *command[1:]]
+        # pnpm's launcher runs `node` from PATH; put its own bin dir first so it
+        # gets the node it was installed with.
+        env = {**os.environ, "PATH": f"{Path(pnpm).parent}{os.pathsep}{os.environ.get('PATH', '')}"}
     try:
         result = subprocess.run(
-            command, cwd=cwd,
+            command, cwd=cwd, env=env,
             capture_output=True, text=True, timeout=timeout,
         )
         return {
