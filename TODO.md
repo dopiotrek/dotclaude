@@ -23,6 +23,7 @@ Unfinished or deferred work items from agent sessions in this repo. Agents: appe
 ## From the June 2026 config audit (.docs/reviews/2026-06-17-dotclaude-config-audit.md)
 
 Done 2026-06-17:
+
 - [x] **[AGENTS]** All agents used `allowed-tools` (a skills field subagents
       ignore), so tool restrictions never applied. Renamed to `tools:`
       (comma-string). C1.
@@ -36,6 +37,7 @@ Done 2026-06-17:
       removed linear-triage loop). H3.
 
 Still open (High/Medium from the June audit):
+
 - [ ] **[DOCS]** Rewrite `README.md` — counts wrong (13/9/4 vs 10/9/78), lists
       5 deleted hooks, calls the `code-reviewer` agent a skill, documents
       settings keys that don't exist. H1.
@@ -56,7 +58,7 @@ Still open (High/Medium from the June audit):
 - [x] **[RULES]** Split done 2026-06-17: `rules/svelte5.md` (paths `**/*.svelte`)
       and `rules/drizzle-supabase.md` (paths schema/migrations/sql). Kept an
       always-on runes guard + all security/pnpm rules in CLAUDE.md, because
-      path-scoped rules trigger on *reading* a matching file and would miss
+      path-scoped rules trigger on _reading_ a matching file and would miss
       greenfield file creation / command choice.
 - [x] **[SKILLS]** Removed every dangling cross-ref (description, inline, and
       Related-Skills bullets) to non-installed skills across all custom skills;
@@ -140,9 +142,13 @@ Deferred:
       hook runs no check in that repo. Deferred: outside the pnpm fix.
       (2026-10-02: in a pnpm workspace it now runs one check per changed
       package; tested in frontq and dronelist.)
-- [ ] **[DOCS]** `hooks/README.md` still describes the Stop hook as root-only
+- [x] **[DOCS]** `hooks/README.md` still describes the Stop hook as root-only
       `pnpm tsc` / `svelte-check`. Deferred: another agent had uncommitted
-      edits in that file.
+      edits in that file. (2026-10-02: Stop hook section rewritten.)
+- [ ] **[HOOKS]** `asyncRewake` on `typecheck-after-edit` and
+      `stop-verify-and-log` is tested by hand only (scripts exit 2 with the
+      errors). Confirm in a live session that a type error wakes Claude.
+      Deferred: flags load only in a new session.
 - [ ] **[HOOKS]** Check that `dependency-audit`, `sveltekit-perf-guard`,
       `import-path-validator` and `sveltekit-route-validator` have each fired at
       least once; cut the silent ones. Deferred: not in the execution brief.

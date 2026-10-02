@@ -18,22 +18,23 @@ This hook closes that gap. After each edit to a type-relevant file it:
 
 Speed
 -----
-A full type-check on every keystroke-edit would be unbearable in a monorepo, so:
-  - it is scoped to one package (svelte-check on one package is seconds, not the
-    90s a root `turbo check` takes),
-  - it is debounced per-package: a burst of edits to the same package triggers
-    at most one run per DEBOUNCE_SECONDS window. The Stop hook is the final
-    backstop, so skipping intermediate runs is safe.
+svelte-check on one app package takes ~24s (measured 2026-10-02), so this hook
+is registered with `asyncRewake` in settings.json: it runs in the background and
+only wakes Claude when it exits 2. Edits never wait for it.
+  - it is scoped to one package (not the 90s root `turbo check`),
+  - one check per package at a time: an edit that lands while a check is
+    running only marks the package dirty, and the running hook re-checks once
+    it finishes. So the last reported result always covers the latest edit.
 
 Tuning (env vars)
 -----------------
   CLAUDE_SKIP_TYPECHECK=1   disable this hook entirely
-  CLAUDE_TYPECHECK_DEBOUNCE seconds between runs per package (default 20)
   CLAUDE_TYPECHECK_TIMEOUT  max seconds for one check run (default 60)
 
 Never crashes the turn: any unexpected error exits 0.
 """
 
+import hashlib
 import json
 import os
 import re
@@ -53,11 +54,12 @@ SKIP_PATH_PARTS = (
     ".turbo", "__pycache__", ".git",
 )
 
-DEBOUNCE_SECONDS = int(os.environ.get("CLAUDE_TYPECHECK_DEBOUNCE", "20"))
 TIMEOUT_SECONDS = int(os.environ.get("CLAUDE_TYPECHECK_TIMEOUT", "60"))
 
 STATE_DIR = Path.home() / ".claude" / ".cache"
-STATE_FILE = STATE_DIR / "typecheck-debounce.json"
+
+# Edits that arrive mid-check trigger at most this many back-to-back re-checks.
+MAX_RUNS = 3
 
 # How many diagnostics to surface. Beyond this the output stops being read.
 MAX_LINES = 40
@@ -154,33 +156,30 @@ def resolve_pnpm(pkg_dir: Path) -> str | None:
     return None
 
 
-def should_debounce(pkg_dir: str) -> bool:
-    """True if we ran this package within the debounce window. Records now if not.
+def state_paths(pkg_dir: Path) -> tuple[Path, Path]:
+    key = hashlib.sha1(str(pkg_dir).encode()).hexdigest()[:16]
+    return STATE_DIR / f"typecheck-{key}.lock", STATE_DIR / f"typecheck-{key}.dirty"
 
-    Fails open: on any state-file error we run the check rather than skip it.
+
+def acquire(lock: Path) -> bool:
+    """Take the per-package lock. False if another check is still running.
+
+    A lock older than the check timeout belongs to a hook that died; steal it.
+    Fails open: on any other state-file error we run the check.
     """
-    now = time.time()
-    state: dict[str, float] = {}
-    try:
-        if STATE_FILE.exists():
-            state = json.loads(STATE_FILE.read_text())
-    except (json.JSONDecodeError, OSError):
-        state = {}
-
-    last = state.get(pkg_dir, 0)
-    if now - last < DEBOUNCE_SECONDS:
-        return True
-
-    state[pkg_dir] = now
     try:
         STATE_DIR.mkdir(parents=True, exist_ok=True)
-        # prune stale entries so the file can't grow without bound
-        cutoff = now - 3600
-        state = {k: v for k, v in state.items() if v >= cutoff}
-        STATE_FILE.write_text(json.dumps(state))
+        for _ in range(2):
+            try:
+                os.close(os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY))
+                return True
+            except FileExistsError:
+                if time.time() - lock.stat().st_mtime < TIMEOUT_SECONDS + 10:
+                    return False
+                lock.unlink(missing_ok=True)
     except OSError:
         pass
-    return False
+    return True
 
 
 def main() -> None:
@@ -218,27 +217,39 @@ def main() -> None:
     if command is None:
         sys.exit(0)
 
-    if should_debounce(str(pkg_dir)):
-        sys.exit(0)
-
     cmd, label = command
     pnpm = resolve_pnpm(pkg_dir)
     if pnpm is None:
+        sys.exit(0)
+
+    lock, dirty = state_paths(pkg_dir)
+    if not acquire(lock):
+        try:
+            dirty.touch()
+        except OSError:
+            pass
         sys.exit(0)
     cmd = [pnpm, *cmd[1:]]
     # pnpm's launcher runs `node` from PATH; put its own bin dir first so it
     # gets the node it was installed with.
     env = {**os.environ, "PATH": f"{Path(pnpm).parent}{os.pathsep}{os.environ.get('PATH', '')}"}
     try:
-        result = subprocess.run(
-            cmd, cwd=pkg_dir, env=env,
-            capture_output=True, text=True, timeout=TIMEOUT_SECONDS,
-        )
+        for _ in range(MAX_RUNS):
+            started = time.time()
+            os.utime(lock)
+            result = subprocess.run(
+                cmd, cwd=pkg_dir, env=env,
+                capture_output=True, text=True, timeout=TIMEOUT_SECONDS,
+            )
+            if not (dirty.exists() and dirty.stat().st_mtime >= started):
+                break
     except subprocess.TimeoutExpired:
         # Don't punish Claude for a slow check — the Stop hook will still run.
         sys.exit(0)
-    except FileNotFoundError:
+    except OSError:
         sys.exit(0)
+    finally:
+        lock.unlink(missing_ok=True)
 
     if result.returncode == 0:
         sys.exit(0)  # clean — say nothing

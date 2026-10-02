@@ -45,8 +45,8 @@
         "matcher": "Write|Edit|MultiEdit",
         "hooks": [
           { "type": "command", "command": "python3 $HOME/.claude/hooks/auto-format.py" },
-          { "type": "command", "command": "python3 $HOME/.claude/hooks/typecheck-after-edit.py" },
-          { "type": "command", "command": "python3 $HOME/.claude/hooks/dependency-audit.py" }
+          { "type": "command", "command": "python3 $HOME/.claude/hooks/typecheck-after-edit.py", "asyncRewake": true },
+          { "type": "command", "command": "python3 $HOME/.claude/hooks/dependency-audit.py", "async": true }
         ]
       },
       {
@@ -59,7 +59,7 @@
     "Stop": [
       {
         "hooks": [
-          { "type": "command", "command": "python3 $HOME/.claude/hooks/stop-verify-and-log.py" }
+          { "type": "command", "command": "python3 $HOME/.claude/hooks/stop-verify-and-log.py", "asyncRewake": true }
         ]
       }
     ]

@@ -102,7 +102,11 @@ def format_file(file_path: str) -> None:
     if cmd_parts[:2] == ["npx", "prettier"]:
         local_bin = resolve_local_bin(path, "prettier")
         if local_bin:
-            cmd_parts = [str(local_bin)] + cmd_parts[2:]
+            # The project's own Prettier config loads its plugins. An explicit
+            # --plugin is resolved from the file's folder, which fails under
+            # pnpm when the plugin is not hoisted there (frontq) — and the
+            # failure is silent, so .svelte files were never formatted.
+            cmd_parts = [str(local_bin), "--write"]
 
     # Build full command
     cmd = cmd_parts + [str(path)]

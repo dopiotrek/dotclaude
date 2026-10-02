@@ -67,21 +67,24 @@ Skips: node_modules, .svelte-kit, build, dist, lock files
 Type-checks the **single package** the edited file belongs to, right after the
 edit, and feeds any errors back to Claude (exit 2) so it self-corrects in the
 same turn instead of declaring "done" with broken types. This complements
-`stop-verify-and-log.py`, which runs the full repo check at the *end* of the turn
+`stop-verify-and-log.py`, which runs the full repo check at the _end_ of the turn
 into a log file Claude never reads.
 
 - Walks up to the nearest `package.json` and runs that package's own `check`
   script (so `svelte-kit sync`, tsconfig, and thresholds are respected),
   falling back to `tsc --noEmit` if there's no `check` script. Scoped with
   `pnpm -C <pkg>` so it never triggers the root `turbo check` graph.
-- **Debounced per package**: a burst of edits to one package triggers at most
-  one run per window. The Stop hook is the final backstop.
+- **Runs in the background** (`asyncRewake` in `settings.json`): svelte-check on
+  an app package takes ~24s, so edits do not wait. Exit 2 wakes Claude with the
+  errors.
+- **One check per package at a time**: an edit that lands mid-check marks the
+  package dirty and the running hook re-checks when it finishes. The Stop hook
+  is the final backstop.
 - Silent on success; never crashes the turn (any error → exit 0).
 
 Tuning via env vars:
 
 - `CLAUDE_SKIP_TYPECHECK=1` — disable entirely
-- `CLAUDE_TYPECHECK_DEBOUNCE` — seconds between runs per package (default 20)
 - `CLAUDE_TYPECHECK_TIMEOUT` — max seconds per check run (default 60)
 
 #### `import-path-validator.py`
@@ -159,14 +162,19 @@ Skips silently if `rtk` or `jq` are not installed.
 
 **Event:** Stop
 
-Runs verification checks in background when Claude completes work:
+Runs verification checks after Claude stops. Registered with `asyncRewake`, so
+the Stop event returns at once and a failed check wakes Claude (exit 2) with the
+errors.
 
-- TypeScript: `pnpm tsc --noEmit`
-- Svelte: `pnpm svelte-check --threshold error`
+- pnpm workspace: one check per package with a changed JS/TS/Svelte file, using
+  the package's `check:light` or `check` script (max 5 packages)
+- Single package: `pnpm tsc --noEmit`, `pnpm svelte-check --threshold error`
 - Python: `mypy .`
 - Rust: `cargo check`
 
-Results are printed to stdout so Claude sees them immediately.
+Errors only in files the turn did not touch are ignored. The same failure wakes
+Claude once, not on every stop. A check that could not run (missing tool,
+timeout) never wakes it. Full output goes to `.claude/logs/last-verify.txt`.
 
 ### Dependencies
 
@@ -175,7 +183,8 @@ Results are printed to stdout so Claude sees them immediately.
 **Event:** PostToolUse (Write|Edit|MultiEdit)
 **Conditional:** Only runs when package.json, requirements.txt, Cargo.toml, or Gemfile are modified
 
-Runs security audits on dependency file changes.
+Runs security audits on dependency file changes. Registered with `async`; prints
+one line with the counts per severity.
 
 ## Removed Hooks (April 2026 cleanup)
 

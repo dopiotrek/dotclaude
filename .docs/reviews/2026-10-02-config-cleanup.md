@@ -151,3 +151,21 @@ description: Commit, push and deploy the current project to production, then ver
 7. Check the live site: key pages return 200 and the changed feature renders.
 8. Report: commits shipped, deploy URL, checks passed or failed, anything not done, and the rollback command.
 ```
+
+## Docs check — 2026-10-02 (Claude Code v2.1.285)
+
+Verified on live pages: code.claude.com/docs/en/{skills,sub-agents,hooks,memory,permission-modes,plugins-reference}.md and the GitHub CHANGELOG. These items change the execution brief above; where they conflict, this section wins.
+
+1. **Use the built-in audits first.** `/skill-doctor` shows cost and use per skill (in `/plugin` → Stats). `/doctor prompt-audit` (v2.1.283+) checks CLAUDE.md, rules, skills, agents and commands for stale or conflicting text and proposes edits. Run both before step 2 and add their findings to the table.
+2. **Skill listing budget.** The default is 1% of the context window. On overflow, Claude Code drops descriptions of the least-used skills first. Description + `when_to_use` are cut at 1,536 chars. Our `skillListingBudgetFraction: 0.02` doubles the default; after the cut, remove the key and use the default.
+3. **`skillOverrides`** (settings): `"off"` / `"name-only"` / `"user-invocable-only"` per skill name. Use it to switch off the unused skills inside the plugins we keep (we cannot delete those files).
+4. **`syncClaudeAiSkills: false`** (user settings) stops the claude.ai skill sync. This is why `skills/synced/` is in git: `~/.claude/skills` links to this repo. When turned off, Claude Code moves synced skills to `~/.claude/skills/.trash/`, so add `skills/.trash/` to `.gitignore` too.
+5. **Auto mode is now the default start mode** (v2.1.283+), and its classifier **blocks production deploys and migrations by default**. This explains the deploy blocks in the insights report. Allow rules resolve before the classifier, so step 5 (exact `permissions.allow` rules for the deploy commands) is the fix. Alternative: `autoMode.allow` / `autoMode.environment`. Keep the rules narrow.
+6. **Hooks.** PostToolUse exit 2 does not block; it only shows stderr to Claude (our type-check hook works this way). New: `async: true` and `asyncRewake: true` (runs in the background, wakes Claude on exit 2). Use `asyncRewake` for the Stop-hook verify, so its result reaches Claude instead of a log file. Check if the new `PostToolBatch` event can replace the 20 s debounce of the type-check hook (not yet verified). `if` takes one rule only — our June fix was correct.
+7. **Auto memory is built in and on by default** (`~/.claude/projects/<repo>/memory/`). The `claude-memory` plugin and `mining/` overlap with it. Uninstalling a plugin deletes its `${CLAUDE_PLUGIN_DATA}` folder unless you pass `--keep-data`: back up first.
+8. **Agent frontmatter** now has `omitClaudeMd`, `effort`, `isolation` (worktree), `background`, `memory`, `skills`, `mcpServers`, `hooks`, `maxTurns`. For the agents that move to frontq, consider `model`/`effort` and `omitClaudeMd: true` when the prompt carries all context.
+9. **CLAUDE.md size**: target under 200 lines; imports still load at launch. Ours (~120 lines) is fine after the planned trims.
+10. **AGENTS.md** is read only when no CLAUDE.md exists on the path (v2.1.277+). No double load with our setup.
+11. **Models**: Opus 5.5 and Sonnet 5.5 are the defaults, both 1M context. Sonnet 5.5 costs half of Opus 5.5 per token — consider it for the code-reviewer agent.
+
+Not verified, do not act on: an `/agent <name>` command; a "Not used recently" filter in `/plugin`; using `claude plugin eval` to measure plugin cost (it tests plugin behavior, it does not measure cost — use `/skill-doctor`).

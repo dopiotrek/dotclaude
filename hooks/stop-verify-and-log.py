@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 """
-Stop hook: runs type/lint verification checks in the background.
+Stop hook: runs type/lint verification checks after Claude stops.
 
-Launches a background subprocess so the Stop event returns immediately.
-Results are written to .claude/logs/last-verify.txt.
+Registered with `asyncRewake` in settings.json: Claude Code runs it in the
+background, so the Stop event returns immediately, and exit 2 wakes Claude with
+the errors. Before, the result only went to a log file and a notification, so
+Claude never saw a failed check.
+
+Full output is still written to .claude/logs/last-verify.txt.
 """
 
+import hashlib
 import json
 import os
 import re
@@ -307,7 +312,9 @@ def get_changed_files(project_root: Path) -> set[str] | None:
     """
     try:
         result = subprocess.run(
-            ["git", "status", "--porcelain"],
+            # -uall: without it a new folder shows as one "dir/" line and its
+            # files are never seen as changed.
+            ["git", "status", "--porcelain", "-uall"],
             cwd=project_root, capture_output=True, text=True, timeout=5,
         )
     except (subprocess.TimeoutExpired, FileNotFoundError):
@@ -361,8 +368,39 @@ def extract_error_files(output: str) -> set[str]:
     return files
 
 
-def do_work():
-    """Run checks, persist results, and notify with pass/fail status."""
+STATE_DIR = Path.home() / ".claude" / ".cache"
+
+
+def already_reported(project_root: Path, failed: list[dict]) -> bool:
+    """True if these exact failures already woke Claude once. Records them if not.
+
+    Waking Claude makes it stop again, which runs this hook again. Without this
+    an error Claude cannot fix would wake it forever.
+    """
+    key = hashlib.sha1(str(project_root).encode()).hexdigest()[:16]
+    state = STATE_DIR / f"stop-verify-{key}.sig"
+    signature = hashlib.sha1(
+        "\n".join(r["name"] + check_detail(r) for r in failed).encode()
+    ).hexdigest()
+    try:
+        if not failed:
+            state.unlink(missing_ok=True)
+            return False
+        if state.exists() and state.read_text() == signature:
+            return True
+        STATE_DIR.mkdir(parents=True, exist_ok=True)
+        state.write_text(signature)
+    except OSError:
+        pass
+    return False
+
+
+def do_work() -> str | None:
+    """Run checks, persist results, and notify with pass/fail status.
+
+    Returns the failure summary Claude should see, or None when there is
+    nothing for it to fix.
+    """
     project_root = find_project_root()
 
     # No project, no relevant edits, or no applicable checks — just confirm Claude stopped.
@@ -405,44 +443,49 @@ def do_work():
 
     # Notification reflects the actual check status, not just "stopped".
     failed = [r for r in results if not r["success"] and not r.get("pre_existing")]
-    if failed:
-        names = ", ".join(r["name"] for r in failed)
-        where = f" — see {log_path}" if log_path else ""
-        send_notification("Claude", f"❌ {names} failed{where}")
-    else:
+    if not failed:
+        already_reported(project_root, [])
         send_notification("Claude", "Done ✓ — all checks passed")
+        return None
 
-    summary = format_results(results)
-    if summary:
-        print(summary)
+    names = ", ".join(r["name"] for r in failed)
+    where = f" — see {log_path}" if log_path else ""
+    send_notification("Claude", f"❌ {names} failed{where}")
+
+    # A check that could not run (missing tool, timeout) is not Claude's to fix.
+    ran = [r for r in failed if "returncode" in r]
+    if not ran or already_reported(project_root, ran):
+        return None
+    return format_results(results) + (f"\n\nFull output: {log_path}" if log_path else "")
 
 
 # ── Main ─────────────────────────────────────────────────────────────
 
 
 def main():
-    # Consume stdin (required by hook protocol)
     try:
-        json.load(sys.stdin)
+        data = json.load(sys.stdin)
     except (json.JSONDecodeError, EOFError):
-        pass
+        data = {}
 
-    # Launch background subprocess so Stop event is not blocked
-    subprocess.Popen(
-        [sys.executable, __file__, "--background"],
-        stdin=subprocess.DEVNULL,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        start_new_session=True,
-    )
+    cwd = data.get("cwd") if isinstance(data, dict) else None
+    if cwd and Path(cwd).is_dir():
+        os.chdir(cwd)
+
+    try:
+        failure = do_work()
+    except Exception:
+        sys.exit(0)  # A hook must never crash the turn.
+
+    if failure:
+        print(
+            "Checks failed after you stopped. Fix the errors in files you "
+            "changed, or say why they are not yours:\n" + failure,
+            file=sys.stderr,
+        )
+        sys.exit(2)  # exit 2 → asyncRewake wakes Claude with stderr
     sys.exit(0)
 
 
 if __name__ == "__main__":
-    if "--background" in sys.argv:
-        try:
-            do_work()
-        except Exception:
-            pass  # Background — don't crash noisily
-    else:
-        main()
+    main()
