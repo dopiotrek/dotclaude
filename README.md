@@ -82,7 +82,7 @@ Reusable procedures in `skills/`, each `skill-name/SKILL.md`. Invoke with `/skil
 - **Stack / dev** — `ai-sdk`, `superforms-reference`, `svelte-component-architecture`, `tapforce-shadcn-svelte`, `tdd-workflow`, `turborepo`, `frontend-design`, `clean-comments`
 - **SEO / growth** — `ai-seo`, `seo-audit`, `programmatic-seo`, `find-keywords`, `free-tool-strategy`, `google-search-console`, `web-design-guidelines`
 - **Writing / content** — `deep-dive-burst`, `humanizer`, `writing-linkedin-posts`, `twitter-algorithm-optimizer`, `session-mining`
-- **Workflow** — `agent-handoff`, `tutor`
+- **Workflow** — `agent-handoff`, `ship`, `tutor`
 
 ## Writing for Claude 5-generation models
 

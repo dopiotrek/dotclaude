@@ -71,6 +71,7 @@ Grouped for orientation; run `/` in Claude Code for the live list.
 **Workflow**
 
 - `agent-handoff` — write a handoff doc so the next agent can continue.
+- `ship` — commit, push, deploy with the project's own command, then check the live site.
 - `tutor` — rigorous tutor that checks you understand before ending.
 
 **Video**
