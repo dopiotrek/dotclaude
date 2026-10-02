@@ -244,17 +244,16 @@ echo -e "${GREEN}✨ Installation complete!${NC}"
 echo -e "${GREEN}════════════════════════════════════════════════════════════${NC}"
 echo ""
 # Accurate component counts (exclude READMEs/caches; count hook scripts, agent
-# defs, and skill dirs; report vendored gstack/ separately so totals don't drift).
+# defs, and skill dirs).
 HOOK_COUNT=$(find "$SCRIPT_DIR/hooks" -maxdepth 1 -type f \( -name '*.py' -o -name '*.sh' \) | wc -l | tr -d ' ')
 AGENT_COUNT=$(find "$SCRIPT_DIR/agents" -maxdepth 1 -name '*.md' ! -name 'README.md' | wc -l | tr -d ' ')
-GSTACK_COUNT=$(find "$SCRIPT_DIR/skills" -maxdepth 1 -type d -name 'gstack*' | wc -l | tr -d ' ')
-SKILL_COUNT=$(( $(find "$SCRIPT_DIR/skills" -maxdepth 1 -type d ! -path "$SCRIPT_DIR/skills" | wc -l | tr -d ' ') - GSTACK_COUNT ))
+SKILL_COUNT=$(find "$SCRIPT_DIR/skills" -maxdepth 1 -type d ! -path "$SCRIPT_DIR/skills" ! -name synced | wc -l | tr -d ' ')
 
 echo "Installed components:"
 echo "  • CLAUDE.md     - Global preferences and instructions"
 echo "  • ${HOOK_COUNT} hooks      - Automated guardrails (security, format, DB)"
 echo "  • ${AGENT_COUNT} agents     - Specialized subagents"
-echo "  • ${SKILL_COUNT} skills     - Reusable procedures (+ ${GSTACK_COUNT} vendored gstack/)"
+echo "  • ${SKILL_COUNT} skills     - Reusable procedures"
 echo "  • settings.json - permissions.deny + hook configuration"
 echo ""
 

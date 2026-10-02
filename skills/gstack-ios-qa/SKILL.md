@@ -1,1 +1,0 @@
-/Users/piotrek/repos/dotclaude/skills/gstack/ios-qa/SKILL.md

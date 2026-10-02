@@ -1,1 +1,0 @@
-/Users/piotrek/repos/dotclaude/skills/gstack/skillify/SKILL.md

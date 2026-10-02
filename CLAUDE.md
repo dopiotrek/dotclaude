@@ -80,7 +80,7 @@ Exceptions:
 - Use **claude-in-chrome** (Claude Code) or **chrome-devtools** MCP with `--autoConnect` (Grok) only when I ask for my real Chrome by name. Then: never take over a tab I already had open, and never `resize_page`.
 - With claude-in-chrome, do not spawn a window per check. Call `tabs_context_mcp({})` first; if a group exists, add tabs with `tabs_create_mcp` and reuse them. `createIfEmpty: true` is the only way to start a group and it always opens a new window, so call it at most once per session. Closing the group's last tab auto-removes the group and forces a new window next time, so keep one tab alive while you are still working and close it when the task is done.
 - The extension cannot attach to a window I already have open, so a first check costs one new window. Say so rather than opening several.
-- Do NOT use `gstack-browse`, `playwright-cli`, or Playwright MCP.
+- Do NOT use `playwright-cli` or Playwright MCP.
 
 ## Hard Limits
 

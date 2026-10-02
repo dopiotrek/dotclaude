@@ -12,7 +12,7 @@ My personal, shareable [Claude Code](https://claude.ai/download) setup: automate
 | ------------- | -------------- | ------------------------------------------------------------------ |
 | **Hooks**     | ~10            | PreToolUse / PostToolUse / Stop guardrails (security, format, DB)  |
 | **Agents**    | ~9             | Specialized subagents (frontend, backend, debug, review, …)        |
-| **Skills**    | ~20 + vendored | Reusable procedures; plus a vendored `gstack/` skill set           |
+| **Skills**    | ~40            | Reusable procedures                                                |
 | **Settings**  | 1              | `settings/settings.template.json` (`$HOME` is expanded on install) |
 | **CLAUDE.md** | 1              | Global preferences and instructions                                |
 
@@ -85,12 +85,10 @@ Subagents in `agents/`, each a markdown file with YAML frontmatter. Tools are sc
 
 Reusable procedures in `skills/`, each `skill-name/SKILL.md`. Invoke with `/skill-name` (the **directory** name) or let Claude load one when its `description` matches. Roughly grouped:
 
-- **Stack / dev** — `ai-sdk`, `superforms-reference`, `svelte-component-architecture`, `tapforce-shadcn-svelte`, `tdd-workflow`, `turborepo`, `frontend-design`, `clean-comments`, `playwright-cli`
+- **Stack / dev** — `ai-sdk`, `superforms-reference`, `svelte-component-architecture`, `tapforce-shadcn-svelte`, `tdd-workflow`, `turborepo`, `frontend-design`, `clean-comments`
 - **SEO / growth** — `ai-seo`, `seo-audit`, `programmatic-seo`, `find-keywords`, `free-tool-strategy`, `google-search-console`, `web-design-guidelines`
 - **Writing / content** — `deep-dive-burst`, `humanizer`, `writing-linkedin-posts`, `twitter-algorithm-optimizer`, `session-mining`
 - **Workflow** — `agent-handoff`, `tutor`
-
-A vendored `gstack/` skill set (the `gstack-*` directories) ships alongside these; treat it as third-party and prune what you don't use.
 
 ## Writing for Claude 5-generation models
 

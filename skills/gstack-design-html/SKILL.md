@@ -1,1 +1,0 @@
-/Users/piotrek/repos/dotclaude/skills/gstack/design-html/SKILL.md

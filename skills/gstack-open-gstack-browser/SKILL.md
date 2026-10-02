@@ -1,1 +1,0 @@
-/Users/piotrek/repos/dotclaude/skills/gstack/open-gstack-browser/SKILL.md

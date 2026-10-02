@@ -49,7 +49,6 @@ Grouped for orientation; run `/` in Claude Code for the live list.
 - `awwwards-motion` — award-tier animation: easing, scroll choreography, micro-interactions, reduced-motion.
 - `uiverify` — verify pixel-level UI changes with computed-style measurements instead of screenshot judgment.
 - `clean-comments` — remove redundant/obvious code comments.
-- `playwright-cli` — browser automation for testing, screenshots, scraping.
 
 **SEO & growth**
 
@@ -77,9 +76,6 @@ Grouped for orientation; run `/` in Claude Code for the live list.
 **Video**
 
 - `hyperframes` — router for HyperFrames video work (HTML-based compositions rendered to MP4); installs a specialized workflow on demand. Helpers: `hyperframes-*`, `media-use`. (official, from heygen-com/hyperframes; update with `npx hyperframes skills update`)
-
-> A vendored `gstack/` set (the `gstack-*` directories) ships alongside these.
-> Treat it as third-party and prune what you don't use.
 
 ## Create your own
 

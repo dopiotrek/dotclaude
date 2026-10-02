@@ -24,7 +24,7 @@ agent-browser --profile ~/.agent-browser/profiles/main close   # always, when do
 - Run `agent-browser skills get core --full` when you do not know a command.
 - Add `--headed` only when I ask to watch, or when a site needs a first login. Say so before you do it, and close the window straight after — the login stays in the profile.
 - Drop `--profile` when the task needs a clean logged-out session (e.g. a public landing page).
-- Do NOT use `gstack-browse`, `playwright-cli`, or Playwright MCP. They start a blank profile, so I am logged out.
+- Do NOT use `playwright-cli` or Playwright MCP. They start a blank profile, so I am logged out.
 
 ## Tooling
 
