@@ -31,7 +31,7 @@ This skill is a **router and process engine, not a source of truth**. All
 rules, voice, cadence, and data live in the repo at:
 
 ```
-/Users/piotrek/repos/latent-economy
+/Users/piotrek/repos/projects/latent-economy
 ```
 
 Never restate that content here or from memory — read the files live, every

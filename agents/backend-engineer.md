@@ -141,7 +141,7 @@ export const userSchema = z.object({
 });
 
 // +page.server.ts
-import { superValidate } from "sveltekit-superforms/server";
+import { superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 
 export const load = async () => {

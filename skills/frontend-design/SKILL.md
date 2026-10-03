@@ -9,10 +9,10 @@ When invoked, apply these opinionated constraints for building better interfaces
 
 ## How to use
 
-- `/ui-skills`  
+- `/frontend-design`  
   Apply these constraints to any UI work in this conversation.
 
-- `/ui-skills <file>`  
+- `/frontend-design <file>`  
   Review the file against all constraints below and output:
   - violations (quote the exact line/snippet)
   - why it matters (1 short sentence)
