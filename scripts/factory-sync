@@ -67,8 +67,12 @@ def wanted(repo: Path):
         files[MANIFEST] = "# Skills managed by dotclaude/scripts/factory-sync. Do not edit them here.\n" + "".join(f"{s}\n" for s in skills)
     sp = repo / ".claude" / "settings.json"
     s = json.loads(sp.read_text()) if sp.exists() else {}
-    ours = [f"**/.claude/rules/{r}.md" for r in RULES]
-    ex = [e for e in s.get("claudeMdExcludes", []) if e not in ours] + ours
+    # Absolute paths to the global copies only. A "**/.claude/rules/<name>.md"
+    # glob also matched the repo's own rule of that name and hid it.
+    # ~/.claude/rules is a symlink to dotclaude/rules, so exclude both spellings.
+    ours = [str(base / f"{r}.md") for base in (Path.home() / ".claude" / "rules", DOT / "rules") for r in RULES]
+    legacy = {f"**/.claude/rules/{r}.md" for r in RULES}
+    ex = [e for e in s.get("claudeMdExcludes", []) if e not in ours and e not in legacy] + ours
     s["claudeMdExcludes"] = ex
     hooks = s.setdefault("hooks", {})
     for ev in list(hooks):  # drop old generated entries, keep the repo's own
