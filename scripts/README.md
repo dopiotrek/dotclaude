@@ -56,3 +56,9 @@ Copies the shared rules (`rules/`), `factory/core.md` and the guard hooks into
 each factory repo's `.claude/` folder, so cloud and dispatched agents get them
 too. Run it after you change a shared rule or hook, then commit in each repo.
 `factory-sync --check` exits 1 when a repo is out of date.
+
+## factory-prs
+
+Lists open PRs in every repo under `~/repos/apps` with their CI state
+(green / running / red) and offers to merge the green ones (squash, delete
+branch; `d` shows the diff first). Agents never merge; this is how you do.

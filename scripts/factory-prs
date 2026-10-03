@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# List open PRs in every repo under ~/repos/apps with their CI state, and offer
+# to merge the green ones (squash, delete branch). You merge; agents never do.
+#   factory-prs          all repos
+#   factory-prs frontq   one repo
+set -uo pipefail
+APPS=~/repos/apps
+dirs=("$@"); [ ${#dirs[@]} -eq 0 ] && dirs=($(cd "$APPS" && for d in */; do [ -d "$d/.git" ] && echo "${d%/}"; done))
+for dir in "${dirs[@]}"; do
+  cd "$APPS/$dir" 2>/dev/null || continue
+  git remote get-url origin >/dev/null 2>&1 || continue
+  prs=$(gh pr list --state open --json number,title,headRefName,statusCheckRollup,isDraft 2>/dev/null) || continue
+  [ "$(jq length <<<"$prs")" = 0 ] && continue
+  printf '\n\033[1m== %s\033[0m\n' "$dir"
+  jq -r '.[] | [.number, .title, .headRefName, .isDraft,
+      ( [.statusCheckRollup[]? | (.conclusion // .state // "PENDING")] as $c
+        | if ($c|length)==0 then "no-checks"
+          elif any($c[]; . == "FAILURE" or . == "ERROR" or . == "CANCELLED" or . == "TIMED_OUT") then "red"
+          elif all($c[]; . == "SUCCESS" or . == "NEUTRAL" or . == "SKIPPED") then "green"
+          else "running" end )] | @tsv' <<<"$prs" |
+  while IFS=$'\t' read -r num title head draft state; do
+    case $state in green) c=32;; red) c=31;; *) c=33;; esac
+    printf '  #%-4s \033[%sm%-9s\033[0m %s  (%s)\n' "$num" "$c" "$state" "$title" "$head"
+    if [ "$state" = green ] && [ "$draft" = false ]; then
+      read -r -p "     merge #$num? [y/N/d=diff] " a </dev/tty
+      [ "$a" = d ] && { gh pr diff "$num" | ${PAGER:-less}; read -r -p "     merge #$num? [y/N] " a </dev/tty; }
+      [[ ${a:-n} == y* ]] && gh pr merge "$num" --squash --delete-branch
+    fi
+  done
+done
+echo

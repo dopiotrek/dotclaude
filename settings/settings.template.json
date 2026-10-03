@@ -192,7 +192,7 @@
       "**CI/CD deploy targets**: frontq and swissCRM \u2014 Docker image on a Hetzner box via Coolify; compass \u2014 Vercel; piotrek-cc \u2014 Cloudflare (wrangler); dronelist \u2014 see its `.github/workflows/deploy.yml`. Every production deploy needs my approval",
       "**Network posture**: None configured",
       "**Host containment**: None configured \u2014 assume Claude Code runs on an ordinary developer machine with open internet",
-      "**Source control**: `github.com/dopiotrek` and every repo under it \u2014 mine, private. Agent work goes to a branch and lands through a PR; GitHub auto-merge (`gh pr merge --auto`) merges it only after required CI checks pass",
+      "**Source control**: `github.com/dopiotrek` and every repo under it \u2014 mine, private, free plan (no branch protection). Agent work goes to a branch and lands through a PR that I merge myself after CI is green; agents never merge",
       "**Trusted internal domains**: None configured",
       "**Trusted cloud buckets**: None configured",
       "**Key internal services**: local dev servers on `*.localhost` (portless) for every repo in `~/repos/apps`, e.g. `frontq-admin.localhost`, `dronelist.localhost`",

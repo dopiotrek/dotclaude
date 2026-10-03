@@ -226,5 +226,10 @@ Deferred:
 - [ ] **[QUEUE]** After the factory PRs merge and CI is green: tag 1–2 small
       `TODO.md` items `[agent]` in one repo, run `/next-task` by hand once, then
       schedule it (`/schedule` in Claude Code, a cloud routine, e.g. weekdays
-      03:00, prompt `/next-task`). Add the repo's env vars to the cloud
+      03:00, prompt `/next-task`). Merge its PRs with `factory-prs`. Add the repo's env vars to the cloud
       environment first.
+- [ ] **[GIT]** Free GitHub plan (decided 2026-10-03): no branch protection, no
+      auto-merge on private repos. Agents open PRs; Piotrek merges green ones with
+      `factory-prs`. piotrek-cc#3 was merged before CI by `gh pr merge --auto`.
+- [ ] **[SKILLS]** Check `skills/ship` (changed 2026-10-03 in fa9e7da): it must not
+      run `gh pr merge`. The Cowork bridge cannot read it.
