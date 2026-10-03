@@ -36,7 +36,7 @@ This is the shape I want, every time.
 Text is allowed, but it must earn its place. Every string I add to a screen or a code file has to tell the reader something the surrounding context does not already say.
 
 - UI copy: write the label, not the label plus an explanation of the label. Add helper text, an empty-state sentence, or a tooltip only when a user would otherwise get it wrong or not know what happens next — then keep it to one short line. No reassurance text, no restating the heading in smaller grey type, no descriptions under every field by default
-- Code comments: minimal by default. Explain a non-obvious *why* — a constraint, a workaround, a decision that looks wrong until you know the reason — and nothing else. Never narrate what the next line does, never section-header a short function, never add JSDoc that only repeats the parameter names, never banner the top of a file. When editing, match the file's existing comment density instead of adding your own. (Full rule, path-scoped to code files: `rules/comments.md`.)
+- Code comments: minimal by default. Explain a non-obvious _why_ — a constraint, a workaround, a decision that looks wrong until you know the reason — and nothing else. Never narrate what the next line does, never section-header a short function, never add JSDoc that only repeats the parameter names, never banner the top of a file. When editing, match the file's existing comment density instead of adding your own. (Full rule, path-scoped to code files: `rules/comments.md`.)
 - If I ask for more explanation on a specific screen or function, give it. This is about the default, not a ban
 
 ## Working Habits
@@ -95,7 +95,7 @@ Coding rules live in `.claude/rules/`, never in `.docs/`. Names are kebab-case, 
 
 ## Deferred Work (`TODO.md`)
 
-Every project keeps a root `TODO.md`. When you defer or cannot finish something, append a checkbox item with a short tag (`[DB]`, `[TEST]`…), what to do, and why it was deferred. Check items off only after verifying the fix in this session. Never rewrite items from other sessions.
+Every project keeps a root `TODO.md`. If the project already has `TODOS.md`, use that file instead of creating a second one. When you defer or cannot finish something, append a checkbox item with a short tag (`[DB]`, `[TEST]`…), what to do, and why it was deferred. Check items off only after verifying the fix in this session. Never rewrite items from other sessions.
 
 ## Systems
 
