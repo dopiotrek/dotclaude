@@ -3,7 +3,7 @@
 ## About Me
 
 - Primary stack: SvelteKit, Svelte 5 (runes only), TypeScript, Supabase, Drizzle ORM, Turborepo
-- All projects use pnpm (never npm or yarn)
+- All projects use pnpm (never npm or yarn). Exception: HyperFrames video projects, whose generated scripts are pinned `npx hyperframes` calls — run them as their own `CLAUDE.md` says
 - Svelte 5 runes only — never Svelte 4 stores or `$:`. (Always-on guard for new files; full Svelte and Drizzle/Supabase rules are path-scoped in `rules/`.)
 
 ## Communication Style
