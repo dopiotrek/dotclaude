@@ -79,19 +79,7 @@ Text is allowed, but it must earn its place. Every string I add to a screen or a
 
 ## Project Docs (`.docs/`)
 
-Internal docs go in `.docs/`, filed by **knowledge domain** so a fact's location stays stable as the project matures. Read `.docs/README.md` (or `.docs/ai/context-map.md`) in a repo for its full conventions.
-
-| Folder              | Holds                                                                                |
-| ------------------- | ------------------------------------------------------------------------------------ |
-| `ai/` (or `agent/`) | `context-map.md` — read first, routes a task to the right doc                        |
-| `decisions/`        | **WHY** — one ADR per non-obvious technical choice, named by topic, no number prefix |
-| `engineering/`      | **HOW** — architecture map, feature specs, ops runbooks                              |
-| `product/`          | **WHAT** — `concept.md` is canonical; requirements, internal commercial              |
-| `research/`         | Investigations and evidence; conclusions graduate to an ADR or spec                  |
-| `reviews/`          | Point-in-time audits, `YYYY-MM-DD-short-name.md`                                     |
-| `archive/`          | Superseded; never write new work here                                                |
-
-Coding rules live in `.claude/rules/`, never in `.docs/`. Names are kebab-case, two words max — the date goes in front **only** in `reviews/`. Long-lived docs carry frontmatter: `title`, `status`, `last_updated`, `context_for_ai`.
+Internal docs go in `.docs/`. The full layout, front matter and life cycle are in `rules/docs-conventions.md`, which loads when you work in `.docs/`. In short: `README.md` routes a task to the right doc, `handoff.md` holds the last session only, then `product/` (what), `decisions/` (why), `engineering/` (how), `specs/` (plan), `research/` (evidence), `reviews/` (`YYYY-MM-DD-slug.md` audits) and `_archive/`. Coding rules live in `.claude/rules/`, never in `.docs/`.
 
 ## Deferred Work (`TODO.md`)
 
