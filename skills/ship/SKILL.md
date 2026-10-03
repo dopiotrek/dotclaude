@@ -19,8 +19,8 @@ description: Land the current work. In a factory repo (root `package.json` has a
 
 ## Other repos
 
-4. Read the project's CLAUDE.md for its deploy command (Vercel CLI or Coolify). If none is written, ask once and add it there.
-5. Run the type check, lint and tests. Stop on failure and report the output.
+4. Read the project's CLAUDE.md for its deploy command (Vercel CLI or Coolify). If none is written, ask once and add it there. dronelist ships with `pnpm ship` on `main` (`pnpm ship:dry` runs the checks only); a push to `main` deploys nothing there.
+5. Run the type check, lint and tests. Stop on failure and report the output. Skip this when the deploy command runs them itself, as `pnpm ship` does.
 6. Commit and push.
 7. Deploy with the project's direct command. Do not wait on GitHub Actions.
 8. Check the live site: key pages return 200 and the changed feature renders.
