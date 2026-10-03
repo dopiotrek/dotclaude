@@ -11,7 +11,7 @@ paths:
 
 ```
 .docs/
-  README.md      entry point: one line per folder + a "task → file" table. Max ~6 KB. Update it when you add a doc.
+  README.md      entry point: folder tree, rules that apply everywhere, a "task → file" list. Aim for ~6 KB, never over ~20 KB. Update it when you add a doc.
   handoff.md     the LAST session only. Overwrite it; never append. Max ~8 KB.
   product/       WHAT — concept, glossary, user-visible behaviour        status: living
   decisions/     WHY  — ADRs. Never edit once accepted; supersede them   status: proposed | accepted | superseded
@@ -24,7 +24,7 @@ paths:
 
 No other top-level folders and no other files at the root. Inside a folder, add subfolders only past ~15 files.
 
-Frontmatter on every doc in `product/`, `decisions/`, `engineering/`, `specs/`:
+Frontmatter on every doc directly in `product/`, `decisions/`, `engineering/`, `specs/` (a subfolder with its own README may keep its own format):
 
 ```yaml
 ---

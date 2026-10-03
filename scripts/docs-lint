@@ -18,7 +18,7 @@ STATUS = {
     "specs": {"draft", "approved", "built"},
 }
 DEAD = {"superseded", "built", "archived", "done", "deprecated", "obsolete"}
-REVIEW_DAYS, HANDOFF_KB, README_KB = 60, 8, 6
+REVIEW_DAYS, HANDOFF_KB, README_KB = 60, 8, 20
 JUNK = re.compile(r"\.(csv|json|xlsx?|xlsm|pdf|png|jpe?g|gif|mp4|mov|webm|log|py|sh|html)$", re.I)
 
 errors, warns = [], []
@@ -78,7 +78,8 @@ for root, ds, fs in os.walk(D):
             err(f"{rel}: status '{status}' but not in _archive/")
         elif top in STATUS:
             if not status:
-                warn(f"{rel}: no status in frontmatter")
+                if rel.count(os.sep) == 1:  # subfolders may keep their own format
+                    warn(f"{rel}: no status in frontmatter")
             elif status not in STATUS[top]:
                 err(f"{rel}: status '{status}' not allowed in {top}/ ({' | '.join(sorted(STATUS[top]))})")
         if top == "reviews":
