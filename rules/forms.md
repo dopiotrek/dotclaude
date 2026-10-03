@@ -1,0 +1,36 @@
+---
+paths:
+  - "**/+page.server.ts"
+  - "**/*form*.svelte"
+  - "**/*form*.ts"
+  - "**/forms/**"
+---
+
+# Forms
+
+SvelteKit form actions validated with Zod. Which form library a repo uses (plain `request.formData()` or superforms) is set in the repo's own `forms.md` — follow that, and do not mix the two without a reason.
+
+## Validation
+
+- Always validate on the server, even when the client already validated.
+- A Zod message is the sentence the user reads: `"Give the group a name."`, not `"Invalid input"`. When you surface only the first issue, keep a fallback sentence.
+- A schema that encodes a contract with another system (a code compared as text, an external ID format) lives at module scope with a short comment saying what breaks if it changes.
+
+## Partial updates
+
+An absent key is not `null`. When a form posts only some fields (a single cell, a role or note edit), check `formData.has(key)` before you write a field. Treating an absent key as `null` silently clears a field the user never touched.
+
+superforms' `superValidate` fills missing optional fields from the schema, so an absent key arrives as `null`. Do not use it for partial updates — read the raw `formData` instead.
+
+## Small actions
+
+A one-shot post (delete, toggle, a checkbox that saves on change, a row or menu action) has no form UI to bind. Use `request.formData()` + Zod `safeParse`. Do not build a full form for it.
+
+## Client
+
+- `use:enhance` with `reset: false` when the fields mirror server state, so the saved values stay on screen after a save.
+- If the page copies server data into local `$state`, copy it again after the action (see `svelte5.md`).
+
+## Breaking the repo's pattern
+
+When an action deliberately uses the other pattern (superforms in a plain-Zod repo, or raw `formData` in a superforms repo), say why in a one- or two-line comment at the action. The next reader then knows the two patterns exist on purpose.
