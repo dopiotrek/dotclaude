@@ -26,8 +26,8 @@ file lists only the choices we made on top of them, or where we are stricter.
 - `Esc` closes a modal, menu or dropdown and returns focus to the element that
   opened it.
 - Tooltips open on keyboard focus too, not only on hover.
-- Focus ring: `focus-visible:ring-2 focus-visible:outline-none` with the
-  project's focus color token. Never `outline-none` without a visible ring.
+- Focus: use the repo's one focus treatment (its design rule names it). Never
+  remove the outline without a visible replacement.
 - Screen reader target for testing is NVDA.
 
 ## Forms
