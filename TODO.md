@@ -186,7 +186,9 @@ Deferred:
 - [ ] **[SKILLS]** Align `skills/ship` with `rules/factory-workflow.md` (branch,
       PR, `gh pr merge --auto`, never push to `main`). Deferred: the Cowork
       bridge cannot read `skills/`.
-- [ ] **[RULES]** Shared rules are live, but the repo copies of svelte, forms,
+- [x] **[RULES]** (2026-10-03: trimmed on the `chore/agent-factory` branches of frontq,
+      dronelist, swissCRM; lands with factory-land.sh. compass/tma copies untouched.)
+      Shared rules are live, but the repo copies of svelte, forms,
       tailwind, motion, ux-* still load too. Trim each repo copy to its delta
       ("stays in repo" lists in `.docs/reviews/2026-10-03-shared-rules-conflicts.md`).
 - [ ] **[RULES]** `CLAUDE.md` "Project Docs" table (`ai/`, `archive/`, no
