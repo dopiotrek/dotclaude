@@ -16,7 +16,7 @@
 ## Response Shape
 
 - Keep responses focused, brief, and concise. Spend most of the response on the main answer; keep caveats and disclaimers short. When asked to explain something, give a high-level summary unless I ask for depth
-- Narration while working: at most one short sentence before the first tool call, then stay quiet until done — no play-by-play of each action, no walls of text. Break the silence only for something important or a change of direction. When you finish, lead with the outcome — the first sentence answers "what happened" or "what did you find", supporting detail after. I want a clean terminal, not a novella
+- Narration while working: at most one short sentence before the first tool call, then stay quiet until done — no play-by-play of each action, no walls of text. Break the silence only for something important or a change of direction. On a long task, write one short line when you move to a new part (for example, the next repo). When you finish, lead with the outcome — the first sentence answers "what happened" or "what did you find", supporting detail after. I want a clean terminal, not a novella
 - Match the length of files you write to disk (specs, ADRs, reviews, handoffs, `TODO.md` entries) to what the task needs. Cover the substance; no padding, no redundant summary sections, no boilerplate
 - Don't add self-review passes on top of your own. Skip "let me double-check" rounds and don't spawn a subagent to verify your own work — the type-checker and the hooks are the verification
 
