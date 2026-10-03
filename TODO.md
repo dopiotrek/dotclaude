@@ -200,9 +200,11 @@ Deferred:
       the docs rule wins.) `CLAUDE.md` "Project Docs" table (`ai/`, `archive/`, no
       `handoff.md`/`specs/`) contradicts `rules/docs-conventions.md` (`_archive/`,
       `handoff.md`, `specs/`). Pick one.
-- [ ] **[SKILLS]** Move the 5 design skills copied in dronelist + frontq into one
-      private plugin (audit F6).
-- [ ] **[RULES]** swissCRM `design.md` is 932 lines and loads on every `.svelte`
+- [x] **[SKILLS]** (2026-10-03: done as `factory/skills` + factory-sync instead of a
+      plugin, so cloud agents get them too.) Move the 5 design skills copied in
+      dronelist + frontq into one private plugin (audit F6).
+- [x] **[RULES]** (2026-10-03: 169-line rule + `design-system` skill with 7 reference
+      files, on swissCRM's factory branch.) swissCRM `design.md` is 932 lines and loads on every `.svelte`
       edit; split into rule + skill references (audit F5).
 - [x] **[SYNC]** (2026-10-03: a SessionStart hook in the settings template runs
       `factory-sync --check --quiet` and tells the agent when a repo is behind.)
@@ -215,8 +217,14 @@ Deferred:
 - [ ] **[RULES]** `factory/core.md` repeats the stack and hard limits from
       `CLAUDE.md` (cloud agents never see `CLAUDE.md`). Locally both load; keep
       them in step, or move "Hard Limits" out of `CLAUDE.md` into a rule.
-- [ ] **[RULES]** Repo rule copies still disagree with the shared rules in places
+- [x] **[RULES]** (2026-10-03: decided — see the "Resolved" section of the conflicts
+      review.) Repo rule copies still disagree with the shared rules in places
       (each kept its own side): compass + tma import Tabler from the barrel,
       compass forms say "superforms always", compass ux-* carry swissCRM's aviation
       text (copy drift?), `duration-slow-1100` = 1000ms in compass and tma. See
       `.docs/reviews/2026-10-03-shared-rules-conflicts.md`.
+- [ ] **[QUEUE]** After the factory PRs merge and CI is green: tag 1–2 small
+      `TODO.md` items `[agent]` in one repo, run `/next-task` by hand once, then
+      schedule it (`/schedule` in Claude Code, a cloud routine, e.g. weekdays
+      03:00, prompt `/next-task`). Add the repo's env vars to the cloud
+      environment first.
