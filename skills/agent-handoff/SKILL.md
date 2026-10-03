@@ -1,6 +1,6 @@
 ---
 name: agent-handoff
-description: Write or update a handoff document so the next agent with fresh context can continue this work.
+description: Write a fresh handoff document (overwriting the previous one) so the next agent with fresh context can continue this work.
 ---
 
 # Agent Handoff Skill
@@ -9,10 +9,14 @@ Write or update a handoff document so the next agent with fresh context can cont
 
 ## Steps
 
-1. Check if `.docs/handoff.md` already exists
-2. If it exists, read it first to understand prior context before updating
-3. Review recent work: check `git diff`, `git log --oneline -10`, and any open files to capture the full picture
-4. Create or update `.docs/handoff.md` using the template below — skip any sections that don't apply
+1. Read `.docs/handoff.md` if it exists — only to find anything that must outlive this session.
+2. Move that lasting content out before you overwrite, then drop it from the handoff:
+   - product truth → `.docs/product/standing-context.md`
+   - tooling gotchas that keep costing time → `.docs/engineering/working-notes.md`
+   - a decision with reasoning → a new ADR in `.docs/decisions/`
+   - deferred work → root `TODO.md`
+3. Review this session's work: `git diff`, `git log --oneline -10`, and the files you touched.
+4. **Overwrite** `.docs/handoff.md` with the template below. Never append, and never keep older sessions in the file. The previous handoff stays in git history (`git log -p -- .docs/handoff.md`).
 
 ## Template
 
@@ -60,6 +64,8 @@ Ordered action items for the next session. First item should be immediately acti
 
 ## Guidelines
 
+- One session only. If the file holds more than one `## Goal`, it was appended — that is a bug, not history.
+- Max ~8 KB. If it is longer, lasting content belongs in step 2's destinations, not here.
 - Be specific over comprehensive. "Fixed the auth redirect in `+page.server.ts` line 42" beats "Made progress on auth."
 - Length follows the work. A session that touched three files gets a short handoff. Drop template sections that have nothing to say rather than filling them with restatements — a padded handoff buries the parts that matter.
 - If a decision was contentious or non-obvious, explain the reasoning. The next agent will otherwise second-guess it.
