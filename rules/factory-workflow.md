@@ -32,3 +32,9 @@ ignore this file.
 4. Write `.docs/handoff.md` on the branch if the work is not finished.
 
 Production deploys are not part of a task. They happen from `main` after merge.
+
+## Work queue
+
+`TODO.md` items tagged `[agent]` are ready for an unattended agent. The
+`next-task` skill takes them one at a time. Do not tag an item `[agent]` unless
+it says what to change and how to check it is done.
