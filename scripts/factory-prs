@@ -21,7 +21,8 @@ for dir in "${dirs[@]}"; do
   while IFS=$'\t' read -r num title head draft state; do
     case $state in green) c=32;; red) c=31;; *) c=33;; esac
     printf '  #%-4s \033[%sm%-9s\033[0m %s  (%s)\n' "$num" "$c" "$state" "$title" "$head"
-    if [ "$state" = green ] && [ "$draft" = false ]; then
+    if { [ "$state" = green ] || [ "$state" = no-checks ]; } && [ "$draft" = false ]; then
+      [ "$state" = no-checks ] && echo "     no CI ran on this PR — merge only if the repo has no CI (e.g. loom)"
       read -r -p "     merge #$num? [y/N/d=diff] " a </dev/tty
       [ "$a" = d ] && { gh pr diff "$num" | ${PAGER:-less}; read -r -p "     merge #$num? [y/N] " a </dev/tty; }
       [[ ${a:-n} == y* ]] && gh pr merge "$num" --squash --delete-branch
