@@ -151,7 +151,8 @@
   },
   "enabledPlugins": {
     "cc-plugin-you-should-know@builtin": true,
-    "next-steps@claude-community": true
+    "next-steps@claude-community": true,
+    "typescript-lsp@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
     "claude-community": {
