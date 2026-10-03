@@ -49,3 +49,10 @@ echo '{"query": "component"}' | ./file-suggest.sh
 2. Make it executable: `chmod +x scripts/my-script.sh`
 3. Configure in `settings/settings.template.json` if needed
 4. Re-run `./install.sh` to regenerate settings
+
+## factory-sync
+
+Copies the shared rules (`rules/`), `factory/core.md` and the guard hooks into
+each factory repo's `.claude/` folder, so cloud and dispatched agents get them
+too. Run it after you change a shared rule or hook, then commit in each repo.
+`factory-sync --check` exits 1 when a repo is out of date.

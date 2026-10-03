@@ -9,6 +9,8 @@ ignore this file.
   never on `main`. Other sessions may be running in the main checkout. If the
   session did not start in a worktree (`claude -w <slug>`), create one with
   the worktree tool before the first edit.
+- In a cloud session (a fresh clone, `CLAUDE_CODE_REMOTE=true`) the clone is
+  already isolated: work on its branch, no worktree needed.
 - In a new worktree, run `pnpm install` first. `.worktreeinclude` copies the
   `.env` files.
 - Commit in small steps on the branch. Conventional commit messages.

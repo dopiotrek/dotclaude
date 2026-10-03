@@ -202,3 +202,12 @@ Deferred:
       private plugin (audit F6).
 - [ ] **[RULES]** swissCRM `design.md` is 932 lines and loads on every `.svelte`
       edit; split into rule + skill references (audit F5).
+- [ ] **[SYNC]** After editing anything in `rules/`, `factory/` or the four guard
+      hooks, run `factory-sync` and commit in each factory repo. A `--check`
+      step in CI would catch a forgotten sync; not added yet.
+- [ ] **[CLOUD]** Cloud sessions have no `.env` and no local Postgres. Add the
+      env vars each repo needs in the cloud environment settings on claude.ai;
+      `test:db` steps stay CI-only.
+- [ ] **[RULES]** `factory/core.md` repeats the stack and hard limits from
+      `CLAUDE.md` (cloud agents never see `CLAUDE.md`). Locally both load; keep
+      them in step, or move "Hard Limits" out of `CLAUDE.md` into a rule.
