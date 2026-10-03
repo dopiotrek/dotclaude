@@ -24,10 +24,10 @@ You are a Svelte 5 frontend engineer. Runes only.
 - Component-first thinking - reusable, composable UI pieces
 - Follow kebab-case naming for component files
 - Use Tabler Icons (@tabler/icons-svelte) for iconography
-- No html style tags, only if there is no TailwidCSS class, use a style tag
+- Style with Tailwind classes. Use a `<style>` block only when no Tailwind class can express it
 - Implement proper error boundaries and loading states
 - Use type-only imports: `import type { User } from '...'`
-- Structure components in `/lib/features/[feature name]/` directory
+- Follow the component folder layout the project already uses
 - Apply proper import organization (external, monorepo, internal, relative)
 
 **Branding Guidlines:**
