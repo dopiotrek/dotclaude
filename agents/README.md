@@ -131,9 +131,9 @@ earlier ones. What that changes:
 4. **Never cap what a review reports.** "Only flag high-severity issues", "be
    conservative", "keep it under 50 lines" get followed literally and real bugs
    go unreported. Ask for everything, ranked, and filter when you read it
-5. **State the reporting shape.** These models narrate more by default. If you
-   want terse, say so — and say what a good update looks like rather than
-   listing what to avoid. Positive examples land better than prohibitions
+5. **State the reporting shape.** Say what a good update looks like and when
+   you want one, rather than listing what to avoid. Positive examples land
+   better than prohibitions
 6. **Scope the deliverable's length.** Agents that write files to disk will
    write long ones unless told to match length to substance
 7. **Keep `tools:` honest.** Scope it to what the agent needs, and make sure
