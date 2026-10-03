@@ -1,5 +1,23 @@
 # Shared rules — conflicts to decide (2026-10-03)
 
+## Resolved 2026-10-03 (Piotrek)
+
+- **Design system is repo-owned.** Icon set, icon sizing, button API and
+  default variant, colour aliases, grey ramp, elevation, radius, durations,
+  easing, when to animate: each product keeps its own. The shared rules stay
+  neutral; the rows below on these topics are closed.
+- **Forms: the repo decides.** Each repo's `forms.md` names its library. A new
+  repo starts with plain `formData` + Zod. Closed: library, error return,
+  showing the result, field components, pending state, Zod adapters.
+- **Action order: permission first, everywhere.** Now in the shared
+  `forms.md`; the swissCRM and compass examples were changed.
+- **Icon imports: deep imports everywhere.** The shared rule stands; the
+  compass and tma rule copies now say so too. Code moves when touched.
+
+Still open: nothing that needs a decision. Leftovers to fix when touched:
+`duration-slow-1100` = 1000ms in compass and tma; compass ux-* text copied
+from swissCRM (aviation).
+
 The shared core in `rules/` holds only what frontq, dronelist and swissCRM agree on. Every disagreement below was left OUT of the shared rule. Decide each one; then the winning position goes into the shared rule or stays as a repo delta. The "stays in repo" lists say what each repo copy keeps after the old copies are trimmed.
 
 ---

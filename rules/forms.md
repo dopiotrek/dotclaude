@@ -34,3 +34,15 @@ A one-shot post (delete, toggle, a checkbox that saves on change, a row or menu 
 ## Breaking the repo's pattern
 
 When an action deliberately uses the other pattern (superforms in a plain-Zod repo, or raw `formData` in a superforms repo), say why in a one- or two-line comment at the action. The next reader then knows the two patterns exist on purpose.
+
+## Order inside an action
+
+Check auth and permission first, then parse the input, then scope to the
+tenant, then write. A request the user may not make is refused before its
+body is read. (Decided 2026-10-03 for every repo; older actions that parse
+first get fixed when you touch them.)
+
+## Which form library
+
+The repo's own `forms.md` names it; follow the repo. A new repo starts with
+plain `formData` + Zod.
