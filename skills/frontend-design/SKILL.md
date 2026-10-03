@@ -101,7 +101,7 @@ The aesthetic connection to drones comes not from imagery, but from the values w
 
 - Don't animate large `blur()` or `backdrop-filter` surfaces
 - Don't apply `will-change` outside an active animation
-- NEVER use `useEffect` for anything that can be expressed as render logic
+- Don't use `$effect` for anything `$derived` can express
 
 ## Design
 
