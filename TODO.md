@@ -179,6 +179,10 @@ Deferred:
 
 ## Agent factory (2026-10-03, .docs/reviews/2026-10-03-software-factory-audit.md)
 
+- [ ] **[CI]** Run `Claude outputs/factory-runner.sh` on the Mac first: GitHub-hosted
+      minutes are used up, so all jobs in the four factory repos now run on a
+      self-hosted runner in an OrbStack VM (`runs-on: [self-hosted, linux]`).
+      compass and tma still use GitHub-hosted runners.
 - [ ] **[GIT]** Run `Claude outputs/factory-land.sh` on the Mac: settings sync +
       `install.sh`, push dotclaude, push the four `chore/agent-factory` branches,
       protect `main`, auto-merge. Deferred: the Cowork session has no GitHub
