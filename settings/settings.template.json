@@ -5,8 +5,7 @@
       "Bash(curl -s https://workbench.md/*)",
       "Bash(curl -sL https://workbench.md/*)",
       "Bash(vercel deploy *)",
-      "Bash(vercel --prod *)",
-      "Bash(gh pr merge *)"
+      "Bash(gh pr merge --auto *)"
     ],
     "deny": [
       "Read(~/**/.env)",
@@ -15,9 +14,16 @@
       "Bash(rm -rf /)",
       "Bash(rm -rf /*)",
       "Bash(rm -rf ~)",
-      "Bash(rm -rf ~/*)"
+      "Bash(rm -rf ~/*)",
+      "Bash(gh pr merge --admin*)",
+      "Bash(gh pr merge * --admin*)"
     ],
-    "defaultMode": "auto"
+    "defaultMode": "auto",
+    "ask": [
+      "Bash(vercel --prod*)",
+      "Bash(vercel deploy --prod*)",
+      "Bash(vercel deploy * --prod*)"
+    ]
   },
   "model": "opus",
   "hooks": {
@@ -174,28 +180,28 @@
       "### Org-wide",
       "**Organization**: None configured",
       "**Cloud provider(s)**: None configured",
-      "**Repository visibility**: Private \u2014 `dopiotrek/frontq` (confirmed via gh)",
+      "**Repository visibility**: Private \u2014 treat every repo under `github.com/dopiotrek` as private unless I say a repo is public",
       "**Internal sharing / snippet hosting**: None configured \u2014 treat public paste/gist services as outside the trust boundary",
-      "**Secrets management**: Envelope encryption via `packages/crypto` (ENCRYPTION_MASTER_KEY, per-tenant DEKs); `.env`/`.env.*` and `*.key` are gitignored \u2014 never read or display `.env` contents",
-      "**Default / protected branches**: Default branch `main`; no classic protection rules listed, rulesets not queryable here \u2014 treat `main` as protected by convention regardless",
-      "**CI/CD deploy targets**: None configured",
+      "**Secrets management**: `.env`/`.env.*`/`*.key` are gitignored in every repo \u2014 never read or display `.env` contents. In frontq: envelope encryption via `packages/crypto` (ENCRYPTION_MASTER_KEY, per-tenant DEKs)",
+      "**Default / protected branches**: `main` in every repo. Treat `main` as protected: agents push branches and open PRs, they do not push to `main`",
+      "**CI/CD deploy targets**: frontq and swissCRM \u2014 Docker image on a Hetzner box via Coolify; compass \u2014 Vercel; piotrek-cc \u2014 Cloudflare (wrangler); dronelist \u2014 see its `.github/workflows/deploy.yml`. Every production deploy needs my approval",
       "**Network posture**: None configured",
       "**Host containment**: None configured \u2014 assume Claude Code runs on an ordinary developer machine with open internet",
-      "**Source control**: The trusted repo (`dopiotrek/frontq` on github.com) and its remote only \u2014 no additional orgs configured",
+      "**Source control**: `github.com/dopiotrek` and every repo under it \u2014 mine, private. Agent work goes to a branch and lands through a PR; GitHub auto-merge (`gh pr merge --auto`) merges it only after required CI checks pass",
       "**Trusted internal domains**: None configured",
       "**Trusted cloud buckets**: None configured",
-      "**Key internal services**: `frontq-admin.localhost`, `frontq-portal.localhost`, `frontq-web.localhost` (local dev SvelteKit apps, scoped to this project)",
+      "**Key internal services**: local dev servers on `*.localhost` (portless) for every repo in `~/repos/apps`, e.g. `frontq-admin.localhost`, `dronelist.localhost`",
       "**Internal package registry**: None configured",
-      "**Sensitive data locations & audiences**: `.env`, `.env.example` (secret templates), `packages/connector/src/secrets.ts`, `packages/crypto/src/secret.ts`, `.docs/decisions/classification.md` (data classification policy); tenant `sensitive_answer` rows (bank/tax fields, envelope-encrypted) \u2014 restrict to engineers with a need to access; never commit `.env` or `*.key`, EU-only object storage per data-residency decision",
+      "**Sensitive data locations & audiences**: `.env*` and `*.key` in every repo; `.private/` folders (client files, never committed). In frontq: `packages/connector/src/secrets.ts`, `packages/crypto/src/secret.ts`, `.docs/decisions/classification.md`, tenant `sensitive_answer` rows (bank/tax fields, envelope-encrypted), EU-only object storage",
       "**Data retention / declassification**: None configured",
       "**Sensitive remote targets**: any namespace, host, or container whose name carries `prod` or `production` as a whole word or name segment",
       "**Protected deployment namespaces / environments**: None configured \u2014 fall back to the Sensitive remote targets heuristic",
       "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
       "### User-specific",
-      "**Primary use of Claude Code**: software development \u2014 SvelteKit/Svelte 5/TypeScript/Supabase/Drizzle multi-tenant SaaS (FrontQ supplier onboarding)",
-      "**Trusted repo**: `dopiotrek/frontq` (this repo, private) and its `origin` remote (github.com/dopiotrek/frontq)",
-      "**Org-specific CLIs**: `rtk` (frequently used internal/personal CLI, routine in this project), `agent-browser`/`ab` (browser automation CLI per ~/.claude/CLAUDE.md \u2014 headless, uses `~/.agent-browser/profiles/main`)",
-      "**Routine under this project**: routine Bash/tooling actions scoped to `$HOME/repos/apps/frontq` (pnpm scripts, Drizzle migrations against local Postgres, local dev servers on `*.localhost`)"
+      "**Primary use of Claude Code**: software development \u2014 I am a solo builder of several SvelteKit/Svelte 5/TypeScript/Postgres/Drizzle multi-tenant SaaS products in `~/repos/apps` (frontq, dronelist, swissCRM, compass, tma, piotrek-cc)",
+      "**Trusted repo**: the repo the session started in and its `origin` remote. All my repos live under `github.com/dopiotrek`",
+      "**Org-specific CLIs**: `rtk` (personal token-saving CLI wrapper), `agent-browser`/`ab` (browser automation, headless, profile `~/.agent-browser/profiles/main`), `portless` (local HTTPS dev proxy), `gh`, `turbo`, `drizzle-kit`",
+      "**Routine in every repo under `~/repos/apps`**: pnpm/turbo scripts, Drizzle migrations against local Postgres, local dev servers on `*.localhost`, git worktrees under `.claude/worktrees/`, pushing `worktree-*`/feature branches and opening PRs"
     ]
   },
   "skillOverrides": {

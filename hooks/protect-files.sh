@@ -15,7 +15,7 @@ case "$name" in
 esac
 
 if [[ "$f" == */migrations/*.sql && -e "$f" ]]; then
-  echo "Blocked: $f is an existing migration that may already be applied. Create a new one with 'supabase migration new <name>' instead." >&2
+  echo "Blocked: $f is an existing migration that may already be applied. Never edit an applied migration. Change the Drizzle schema and generate a new migration with the repo's own command (usually 'pnpm db:generate'; see the repo's CLAUDE.md/AGENTS.md)." >&2
   exit 2
 fi
 exit 0
