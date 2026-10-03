@@ -90,7 +90,7 @@ Create a Markdown file in `agents/` with this structure:
 ```markdown
 ---
 name: my-agent
-description: Use this agent when... Examples: <example>user: "..." assistant: "I'll use my-agent..."</example>
+description: Use this agent to… (what it does and when to pick it — no sample dialogues)
 model: sonnet
 tools: Read, Glob, Grep, Edit, Write, Bash
 color: blue

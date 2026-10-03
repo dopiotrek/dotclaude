@@ -1,7 +1,7 @@
 ---
 name: code-reviewer
 description: >
-  Use this agent proactively when you need comprehensive code review and quality assurance. Use after writing or modifying code. Examples: <example>Context: User has implemented a new feature. user: "I've just finished implementing JWT authentication" assistant: "I'll use the code-reviewer agent to review your authentication implementation."</example> <example>Context: User wants validation before deploying. user: "Can you review the changes before I ship?" assistant: "Let me use the code-reviewer agent to audit the changes."</example>
+  Use this agent proactively after writing or modifying code, and before shipping, for a ranked security and quality review. It writes a dated report to `.docs/reviews/`.
 model: opus
 effort: high
 color: purple
