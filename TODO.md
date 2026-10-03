@@ -176,3 +176,23 @@ Deferred:
 - [ ] **[SETTINGS]** Template still has `skillListingBudgetFraction: 0.02` and
       no `syncClaudeAiSkills: false`; `.gitignore` lacks `skills/.trash/`. Do
       together with the template/live sync before `./install.sh`.
+
+## Agent factory (2026-10-03, .docs/reviews/2026-10-03-software-factory-audit.md)
+
+- [ ] **[GIT]** Run `Claude outputs/factory-land.sh` on the Mac: settings sync +
+      `install.sh`, push dotclaude, push the four `chore/agent-factory` branches,
+      protect `main`, auto-merge. Deferred: the Cowork session has no GitHub
+      credentials.
+- [ ] **[SKILLS]** Align `skills/ship` with `rules/factory-workflow.md` (branch,
+      PR, `gh pr merge --auto`, never push to `main`). Deferred: the Cowork
+      bridge cannot read `skills/`.
+- [ ] **[RULES]** Shared rules are live, but the repo copies of svelte, forms,
+      tailwind, motion, ux-* still load too. Trim each repo copy to its delta
+      ("stays in repo" lists in `.docs/reviews/2026-10-03-shared-rules-conflicts.md`).
+- [ ] **[RULES]** `CLAUDE.md` "Project Docs" table (`ai/`, `archive/`, no
+      `handoff.md`/`specs/`) contradicts `rules/docs-conventions.md` (`_archive/`,
+      `handoff.md`, `specs/`). Pick one.
+- [ ] **[SKILLS]** Move the 5 design skills copied in dronelist + frontq into one
+      private plugin (audit F6).
+- [ ] **[RULES]** swissCRM `design.md` is 932 lines and loads on every `.svelte`
+      edit; split into rule + skill references (audit F5).
