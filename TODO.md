@@ -196,14 +196,17 @@ Deferred:
       Shared rules are live, but the repo copies of svelte, forms,
       tailwind, motion, ux-* still load too. Trim each repo copy to its delta
       ("stays in repo" lists in `.docs/reviews/2026-10-03-shared-rules-conflicts.md`).
-- [ ] **[RULES]** `CLAUDE.md` "Project Docs" table (`ai/`, `archive/`, no
+- [x] **[RULES]** (2026-10-03: `factory-land.sh` step 1 runs `fix-claude-md-docs.py`;
+      the docs rule wins.) `CLAUDE.md` "Project Docs" table (`ai/`, `archive/`, no
       `handoff.md`/`specs/`) contradicts `rules/docs-conventions.md` (`_archive/`,
       `handoff.md`, `specs/`). Pick one.
 - [ ] **[SKILLS]** Move the 5 design skills copied in dronelist + frontq into one
       private plugin (audit F6).
 - [ ] **[RULES]** swissCRM `design.md` is 932 lines and loads on every `.svelte`
       edit; split into rule + skill references (audit F5).
-- [ ] **[SYNC]** After editing anything in `rules/`, `factory/` or the four guard
+- [x] **[SYNC]** (2026-10-03: a SessionStart hook in the settings template runs
+      `factory-sync --check --quiet` and tells the agent when a repo is behind.)
+      After editing anything in `rules/`, `factory/` or the four guard
       hooks, run `factory-sync` and commit in each factory repo. A `--check`
       step in CI would catch a forgotten sync; not added yet.
 - [ ] **[CLOUD]** Cloud sessions have no `.env` and no local Postgres. Add the

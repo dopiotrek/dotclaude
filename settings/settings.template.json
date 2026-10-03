@@ -130,6 +130,10 @@
           {
             "type": "command",
             "command": "$HOME/.claude/hooks/mise-env.sh"
+          },
+          {
+            "type": "command",
+            "command": "d=\"$CLAUDE_PROJECT_DIR\"; [ -d \"$d/.claude/rules/shared\" ] && python3 \"$HOME/.claude/scripts/factory-sync\" --check --quiet \"$d\"; exit 0"
           }
         ]
       }

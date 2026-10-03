@@ -12,6 +12,7 @@ Writes, inside each repo:
                                local session does not load a rule twice; hook
                                entries that defer to ~/.claude/hooks when present
 --check exits 1 when a repo is out of date (writes nothing).
+--quiet prints only repos that are out of date (used by the SessionStart hook).
 """
 import json, os, shutil, sys
 from pathlib import Path
@@ -99,10 +100,14 @@ def sync(repo: Path, check: bool):
 if __name__ == "__main__":
     args = sys.argv[1:]
     check = "--check" in args
-    targets = [Path(a).resolve() for a in args if a != "--check"] or sorted(p for p in APPS.iterdir() if (p / ".git").exists() and not (p / ".claude" / "factory-sync-skip").exists())
+    quiet = "--quiet" in args
+    targets = [Path(a).resolve() for a in args if a not in ("--check", "--quiet")] or sorted(p for p in APPS.iterdir() if (p / ".git").exists() and not (p / ".claude" / "factory-sync-skip").exists())
     bad = 0
     for repo in targets:
         ch = sync(repo, check)
-        print(f"{repo.name}: {'up to date' if not ch else ('out of date: ' if check else 'updated: ') + ', '.join(ch)}")
+        if quiet and ch:
+            print(f"{repo.name}: shared agent files are behind dotclaude ({len(ch)} files). Tell Piotrek; the fix is `factory-sync {repo}` and a commit.")
+        elif not quiet:
+            print(f"{repo.name}: {'up to date' if not ch else ('out of date: ' if check else 'updated: ') + ', '.join(ch)}")
         bad += bool(ch)
     sys.exit(1 if check and bad else 0)
