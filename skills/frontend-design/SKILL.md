@@ -7,6 +7,8 @@ description: Opinionated constraints for building better interfaces with agents.
 
 When invoked, apply these opinionated constraints for building better interfaces.
 
+These are defaults. Where the project has its own design rules (a design skill, `.claude/rules/`, `DESIGN.md`), those win.
+
 ## How to use
 
 - `/frontend-design`  
@@ -17,37 +19,6 @@ When invoked, apply these opinionated constraints for building better interfaces
   - violations (quote the exact line/snippet)
   - why it matters (1 short sentence)
   - a concrete fix (code-level suggestion)
-
-## Design Philosophy
-
-### Technical Swiss
-
-Rooted in Swiss Style's grid discipline, typographic hierarchy, and functional restraint — but inflected with the precision of professional instrumentation. The interface feels like well-designed equipment: dense but legible, technical but humane, precise but not cold.
-
-The aesthetic connection to drones comes not from imagery, but from the values we share with aerospace: precision, reliability, efficiency, and professional-grade clarity.
-
-### Core Principles
-
-1. **Grid is law** — 4px base unit, everything aligns
-2. **Typography does the work** — hierarchy through size/weight, not color
-3. **One accent, used sparingly** — lime for primary actions only (never text)
-4. **Monospace for data** — numbers, IDs, timestamps get Geist Mono
-5. **Whitespace is intentional** — dense but never cramped
-6. **No decoration** — every element is functional
-7. **Contrast is non-negotiable** — accessibility over aesthetics
-
-### Reference Touchstones
-
-- Attio (direct inspiration)
-- Linear (dense, clean, Swiss)
-- Vercel dashboard (technical precision)
-- Dieter Rams / Braun (industrial design principles)
-
-### What We Don't Do
-
-- No decorative elements that don't serve function
-- No softness or playfulness — everything is purposeful
-- No gradients, heavy shadows, or depth effects
 
 ## Stack
 
