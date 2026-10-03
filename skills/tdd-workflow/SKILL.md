@@ -297,7 +297,3 @@ pnpm test && pnpm lint
 - Fast test execution (< 30s for unit tests)
 - E2E tests cover critical user flows
 - Tests catch bugs before production
-
----
-
-**Remember**: Tests are not optional. They are the safety net that enables confident refactoring, rapid development, and production reliability.
