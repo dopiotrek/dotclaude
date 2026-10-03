@@ -2,7 +2,8 @@
 """Copy the shared agent setup from dotclaude into a repo, so cloud and
 dispatched agents get the same rules and guards as local sessions.
 
-    factory-sync [--check] [repo ...]     default: the factory repos below
+    factory-sync [--check] [repo ...]     default: every git repo in ~/repos/apps
+                                          (skip one with a .claude/factory-sync-skip file)
 
 Writes, inside each repo:
   .claude/rules/shared/*.md    shared rules (generated; edit them in dotclaude)
@@ -17,7 +18,6 @@ from pathlib import Path
 
 DOT = Path(__file__).resolve().parent.parent
 APPS = Path.home() / "repos" / "apps"
-REPOS = ["frontq", "dronelist", "swissCRM", "piotrek-cc"]
 RULES = ["svelte5", "forms", "tailwind", "motion", "ux-accessibility", "ux-content",
          "drizzle-supabase", "comments", "docs-conventions", "factory-workflow"]
 VENDOR_ONLY_RULES = {"core": DOT / "factory" / "core.md"}
@@ -99,7 +99,7 @@ def sync(repo: Path, check: bool):
 if __name__ == "__main__":
     args = sys.argv[1:]
     check = "--check" in args
-    targets = [Path(a).resolve() for a in args if a != "--check"] or [APPS / r for r in REPOS]
+    targets = [Path(a).resolve() for a in args if a != "--check"] or sorted(p for p in APPS.iterdir() if (p / ".git").exists() and not (p / ".claude" / "factory-sync-skip").exists())
     bad = 0
     for repo in targets:
         ch = sync(repo, check)

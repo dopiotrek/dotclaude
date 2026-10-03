@@ -182,7 +182,8 @@ Deferred:
 - [ ] **[CI]** Run `Claude outputs/factory-runner.sh` on the Mac first: GitHub-hosted
       minutes are used up, so all jobs in the four factory repos now run on a
       self-hosted runner in an OrbStack VM (`runs-on: [self-hosted, linux]`).
-      compass and tma still use GitHub-hosted runners.
+      compass and tma are included now; tma's macOS release build stays on
+      GitHub's runner (needs macOS).
 - [ ] **[GIT]** Run `Claude outputs/factory-land.sh` on the Mac: settings sync +
       `install.sh`, push dotclaude, push the four `chore/agent-factory` branches,
       protect `main`, auto-merge. Deferred: the Cowork session has no GitHub
@@ -211,3 +212,8 @@ Deferred:
 - [ ] **[RULES]** `factory/core.md` repeats the stack and hard limits from
       `CLAUDE.md` (cloud agents never see `CLAUDE.md`). Locally both load; keep
       them in step, or move "Hard Limits" out of `CLAUDE.md` into a rule.
+- [ ] **[RULES]** Repo rule copies still disagree with the shared rules in places
+      (each kept its own side): compass + tma import Tabler from the barrel,
+      compass forms say "superforms always", compass ux-* carry swissCRM's aviation
+      text (copy drift?), `duration-slow-1100` = 1000ms in compass and tma. See
+      `.docs/reviews/2026-10-03-shared-rules-conflicts.md`.
