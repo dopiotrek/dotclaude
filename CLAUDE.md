@@ -22,7 +22,7 @@
 
 ### Explaining a plan or a choice
 
-This is the shape I want, every time. Confirmed 2026-08-27 after a plan I could not follow.
+This is the shape I want, every time.
 
 - Plain words. No file paths, no function names, no internal jargon, unless I ask for them
 - Short sentences. Bold headers of two or three words, a line or two under each
