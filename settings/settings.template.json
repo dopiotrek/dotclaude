@@ -4,8 +4,7 @@
       "Bash(curl https://workbench.md/*)",
       "Bash(curl -s https://workbench.md/*)",
       "Bash(curl -sL https://workbench.md/*)",
-      "Bash(vercel deploy *)",
-      "Bash(gh pr merge --auto *)"
+      "Bash(vercel deploy *)"
     ],
     "deny": [
       "Read(~/**/.env)",
@@ -22,7 +21,8 @@
     "ask": [
       "Bash(vercel --prod*)",
       "Bash(vercel deploy --prod*)",
-      "Bash(vercel deploy * --prod*)"
+      "Bash(vercel deploy * --prod*)",
+      "Bash(gh pr merge*)"
     ]
   },
   "model": "opus",

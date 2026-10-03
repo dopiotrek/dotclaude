@@ -1,6 +1,6 @@
 ---
 name: next-task
-description: Take the next agent-ready item from this repo's TODO.md (tagged [agent]), build it on a branch, prove it with `pnpm verify`, and open a PR with auto-merge. Use when asked for "the next task", or when a scheduled run starts with /next-task.
+description: Take the next agent-ready item from this repo's TODO.md (tagged [agent]), build it on a branch, prove it with `pnpm verify`, and open a PR. Use when asked for "the next task", or when a scheduled run starts with /next-task.
 ---
 
 # Next task
@@ -40,7 +40,8 @@ schema change on shared data, or a production action:
   PR (amend the branch with that one-line change).
 - `gh pr create --fill`; the body says: the item, what changed, how it was
   verified, what could not run.
-- `gh pr merge --auto --squash`. CI decides; never merge by hand, never `--admin`.
+- Do not merge. Leave the PR open; Piotrek merges after CI is green. Never run
+  `gh pr merge`.
 
 ## Writing good [agent] items (for Piotrek)
 

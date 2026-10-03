@@ -27,8 +27,9 @@ ignore this file.
 1. `git push -u origin HEAD`
 2. `gh pr create --fill` — the body says what changed, why, how it was
    verified, and lists any new migration or env variable.
-3. `gh pr merge --auto --squash` — GitHub merges only after required CI
-   checks pass. Never use `--admin`, never merge a red PR, never push to `main`.
+3. Do not merge. Leave the PR open; Piotrek merges after CI is green.
+   Never run `gh pr merge` (without branch protection it merges at once,
+   CI or not), never push to `main`.
 4. Write `.docs/handoff.md` on the branch if the work is not finished.
 
 Production deploys are not part of a task. They happen from `main` after merge.
