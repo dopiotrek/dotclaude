@@ -5,7 +5,6 @@ description: >
 model: opus
 effort: high
 color: purple
-isolation: worktree
 tools: Read, Glob, Grep, Write, Bash
 ---
 

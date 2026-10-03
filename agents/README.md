@@ -51,7 +51,7 @@ SvelteKit server-side expert:
 
 #### `code-reviewer.md`
 
-**Model:** opus | **Effort:** high | **Isolation:** worktree | **Color:** purple
+**Model:** opus | **Effort:** high | **Color:** purple
 
 Security and quality review, ordered by what actually matters:
 
