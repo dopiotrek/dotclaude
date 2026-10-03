@@ -15,9 +15,9 @@ Screenshots catch gross layout breaks but miss the details that actually get fla
 ## Steps
 
 1. Confirm the dev server is running and fresh (not stale/crashed) before verifying anything. If unsure, restart it.
-2. Navigate to the affected route(s) with the browser MCP tool (see the root `CLAUDE.md` Browser Automation section for which one to use).
+2. Navigate to the affected route(s) with `agent-browser` (see the Browser Automation section of `~/.claude/CLAUDE.md`).
 3. Take a before/after screenshot for a sanity check — but treat it as a first pass, not the verdict.
-4. Use the JS-eval tool to read `getBoundingClientRect()` and `getComputedStyle()` for the changed element, and for the reference element if matching one. Pull at least: `x`, `y`, `width`, `height`, `padding`, `border`, `font-size`, `font-weight`, `color`.
+4. Evaluate JavaScript in the page to read `getBoundingClientRect()` and `getComputedStyle()` for the changed element, and for the reference element if matching one. Pull at least: `x`, `y`, `width`, `height`, `padding`, `border`, `font-size`, `font-weight`, `color`.
 5. Explicitly check the things that tend to go unnoticed in a screenshot:
    - Borders, especially `border-bottom` on toolbars/tabs
    - Vertical alignment between sibling tabs/panels
