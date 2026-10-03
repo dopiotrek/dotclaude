@@ -1,0 +1,109 @@
+#!/usr/bin/env python3
+"""docs-lint — check a repo's .docs/ against ~/.claude/rules/docs-conventions.md.
+
+Usage: docs-lint [repo-dir]     (default: current directory)
+Read-only. Exit 1 if there are errors, 0 otherwise.
+"""
+import datetime, os, re, sys
+
+ROOT = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else ".")
+D = os.path.join(ROOT, ".docs")
+DIRS = {"product", "decisions", "engineering", "specs", "research", "reviews", "_archive"}
+ROOT_FILES = {"README.md", "handoff.md"}
+HUB = "index.html"  # generated browser hubs are allowed anywhere
+STATUS = {
+    "product": {"living"},
+    "engineering": {"living"},
+    "decisions": {"proposed", "accepted", "superseded"},
+    "specs": {"draft", "approved", "built"},
+}
+DEAD = {"superseded", "built", "archived", "done", "deprecated", "obsolete"}
+REVIEW_DAYS, HANDOFF_KB, README_KB = 60, 8, 6
+JUNK = re.compile(r"\.(csv|json|xlsx?|xlsm|pdf|png|jpe?g|gif|mp4|mov|webm|log|py|sh|html)$", re.I)
+
+errors, warns = [], []
+err = lambda m: errors.append(m)
+warn = lambda m: warns.append(m)
+
+if not os.path.isdir(D):
+    sys.exit(f"no .docs/ in {ROOT}")
+
+# root
+for e in sorted(os.listdir(D)):
+    if e.startswith(".") and e != ".gitkeep":
+        continue
+    p = os.path.join(D, e)
+    if os.path.isdir(p) and e not in DIRS:
+        err(f"root: folder '{e}/' is not in the standard ({', '.join(sorted(DIRS))})")
+    elif os.path.isfile(p) and e not in ROOT_FILES and e != HUB:
+        err(f"root: loose file '{e}'")
+for f, kb in (("handoff.md", HANDOFF_KB), ("README.md", README_KB)):
+    p = os.path.join(D, f)
+    if not os.path.exists(p):
+        warn(f"{f}: missing")
+        continue
+    size = os.path.getsize(p) / 1024
+    if size > kb:
+        err(f"{f}: {size:.0f} KB (max ~{kb} KB)")
+if os.path.exists(os.path.join(D, "handoff.md")):
+    n = len(re.findall(r"^## Goal", open(os.path.join(D, "handoff.md"), errors="ignore").read(), re.M))
+    if n > 1:
+        err(f"handoff.md: {n} '## Goal' sections — it is being appended, not overwritten")
+
+# docs
+today = datetime.date.today()
+mdfiles = []
+for root, ds, fs in os.walk(D):
+    ds[:] = [x for x in ds if not x.startswith(".") and x != "node_modules"]
+    rel_root = os.path.relpath(root, D)
+    top = rel_root.split(os.sep)[0] if rel_root != "." else ""
+    for f in fs:
+        if f.startswith("."):
+            continue
+        rel = os.path.normpath(os.path.join(rel_root, f))
+        if top == "_archive":
+            continue
+        if JUNK.search(f) and top and f != HUB:
+            warn(f"{rel}: not a doc (data/binary/generated) — move out of .docs/")
+        if not f.endswith(".md") or not top:
+            continue
+        mdfiles.append(rel)
+        head = open(os.path.join(root, f), errors="ignore").read(1500)
+        fm = re.match(r"---\n(.*?)\n---", head, re.S)
+        status = None
+        if fm:
+            m = re.search(r"^status:\s*['\"]?([\w-]+)", fm.group(1), re.M)
+            status = m.group(1).lower() if m else None
+        if status in DEAD:
+            err(f"{rel}: status '{status}' but not in _archive/")
+        elif top in STATUS:
+            if not status:
+                warn(f"{rel}: no status in frontmatter")
+            elif status not in STATUS[top]:
+                err(f"{rel}: status '{status}' not allowed in {top}/ ({' | '.join(sorted(STATUS[top]))})")
+        if top == "reviews":
+            m = re.match(r"(\d{4}-\d{2}-\d{2})", f)
+            if not m:
+                err(f"{rel}: review without a YYYY-MM-DD- prefix")
+            else:
+                age = (today - datetime.date.fromisoformat(m.group(1))).days
+                if age > REVIEW_DAYS:
+                    err(f"{rel}: {age} days old — check findings are in TODO, then move to _archive/reviews/")
+
+# links (live docs + README)
+link = re.compile(r"\]\(([^)#\s]+\.md)(?:#[^)]*)?\)")
+for rel in mdfiles + [f for f in ROOT_FILES if os.path.exists(os.path.join(D, f))]:
+    base = os.path.dirname(os.path.join(D, rel))
+    for target in link.findall(open(os.path.join(D, rel), errors="ignore").read()):
+        if "://" in target:
+            continue
+        if not os.path.exists(os.path.normpath(os.path.join(base, target))):
+            err(f"{rel}: broken link → {target}")
+
+for title, items in (("ERRORS", errors), ("WARNINGS", warns)):
+    if items:
+        print(f"\n{title} ({len(items)})")
+        for i in items:
+            print("  " + i)
+print(f"\n{len(mdfiles)} live docs checked in {D}: {len(errors)} errors, {len(warns)} warnings")
+sys.exit(1 if errors else 0)
