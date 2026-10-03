@@ -123,10 +123,12 @@ data is in `.docs/reviews/usage-raw.txt`.
 Deferred:
 
 - [ ] **[SETTINGS]** Add `permissions.allow` for `Bash(vercel deploy*)`,
-      `Bash(vercel --prod*)`, `Bash(gh pr merge*)` and the Coolify deploy command
+      `Bash(vercel --prod*)` and the Coolify deploy command
       to `settings/settings.template.json`. Deferred: auto mode blocks Claude
       from widening its own permissions, so this needs a manual edit; the
-      Coolify command is not known yet.
+      Coolify command is not known yet. (2026-10-03: `Bash(gh pr merge*)`
+      dropped from this item; agents never run `gh pr merge` now, see
+      `rules/factory-workflow.md`.)
 - [ ] **[INSTALL]** `./install.sh` not re-run. It replaces the live
       `~/.claude/settings.json` with the template, and the template lacks keys
       the live file has (`model`, `enabledPlugins`, `extraKnownMarketplaces`,
@@ -186,11 +188,13 @@ Deferred:
       GitHub's runner (needs macOS).
 - [ ] **[GIT]** Run `Claude outputs/factory-land.sh` on the Mac: settings sync +
       `install.sh`, push dotclaude, push the four `chore/agent-factory` branches,
-      protect `main`, auto-merge. Deferred: the Cowork session has no GitHub
-      credentials.
-- [ ] **[SKILLS]** Align `skills/ship` with `rules/factory-workflow.md` (branch,
-      PR, `gh pr merge --auto`, never push to `main`). Deferred: the Cowork
-      bridge cannot read `skills/`.
+      open the PRs and leave them open (free plan: no branch protection, so the
+      script skips the merge; Piotrek merges when CI is green). Deferred: the
+      Cowork session has no GitHub credentials.
+- [x] **[SKILLS]** (2026-10-03: done; the skill leaves the PR open and never runs
+      `gh pr merge`.) Align `skills/ship` with `rules/factory-workflow.md` (branch,
+      PR left open for Piotrek to merge, never push to `main`). Deferred: the
+      Cowork bridge cannot read `skills/`.
 - [x] **[RULES]** (2026-10-03: trimmed on the `chore/agent-factory` branches of frontq,
       dronelist, swissCRM; lands with factory-land.sh. compass/tma copies untouched.)
       Shared rules are live, but the repo copies of svelte, forms,
@@ -231,5 +235,6 @@ Deferred:
 - [ ] **[GIT]** Free GitHub plan (decided 2026-10-03): no branch protection, no
       auto-merge on private repos. Agents open PRs; Piotrek merges green ones with
       `factory-prs`. piotrek-cc#3 was merged before CI by `gh pr merge --auto`.
-- [ ] **[SKILLS]** Check `skills/ship` (changed 2026-10-03 in fa9e7da): it must not
-      run `gh pr merge`. The Cowork bridge cannot read it.
+- [x] **[SKILLS]** (2026-10-03: it did say `gh pr merge --auto --squash`; changed to
+      "leave the PR open".) Check `skills/ship` (changed 2026-10-03 in fa9e7da): it
+      must not run `gh pr merge`. The Cowork bridge cannot read it.
