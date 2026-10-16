@@ -6,6 +6,12 @@ Claude Code reads `CLAUDE.md` in this repo instead. That file is the full set of
 
 Only rules that agents get wrong without being told are repeated here.
 
+## How to aim
+
+Read `~/.claude/rules/ambition.md` before non-trivial work and follow it.
+Short version: aim at the outcome, not the task; work from raw data with the
+field's real tools; run an outside check; never grow the scope on your own.
+
 ## Browser Automation
 
 Use the **agent-browser** CLI (`agent-browser.dev`). It runs its own Chrome with a dedicated profile that stays logged in. It never touches the Chrome window I am working in.

@@ -22,7 +22,8 @@ from pathlib import Path
 DOT = Path(__file__).resolve().parent.parent
 APPS = Path.home() / "repos" / "apps"
 RULES = ["svelte5", "forms", "tailwind", "motion", "ux-accessibility", "ux-content",
-         "drizzle-supabase", "comments", "docs-conventions", "factory-workflow"]
+         "drizzle-supabase", "comments", "docs-conventions", "factory-workflow",
+         "ambition"]
 VENDOR_ONLY_RULES = {"core": DOT / "factory" / "core.md"}
 HOOKS = {  # file -> (event, matcher, runner, extra)
     "no-secrets.py": ("PreToolUse", "Write|Edit|MultiEdit", "python3", {}),
