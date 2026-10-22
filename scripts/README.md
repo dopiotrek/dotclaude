@@ -61,4 +61,4 @@ too. Run it after you change a shared rule or hook, then commit in each repo.
 
 Lists open PRs in every repo under `~/repos/apps` with their CI state
 (green / running / red) and offers to merge the green ones (squash, delete
-branch; `d` shows the diff first). Agents never merge; this is how you do.
+branch; `d` shows the diff first). Use it for PRs an agent left open.
