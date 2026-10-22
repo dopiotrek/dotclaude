@@ -40,8 +40,8 @@ schema change on shared data, or a production action:
   PR (amend the branch with that one-line change).
 - `gh pr create --fill`; the body says: the item, what changed, how it was
   verified, what could not run.
-- Do not merge. Leave the PR open; Piotrek merges after CI is green. Never run
-  `gh pr merge`.
+- Merge your own PR once `pnpm verify` passed on its head and its checks are
+  green. Never push to `main`. If the repo has its own merge rules, follow them.
 
 ## Writing good [agent] items (for Piotrek)
 
