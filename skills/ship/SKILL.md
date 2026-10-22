@@ -13,7 +13,7 @@ description: Land the current work. In a factory repo (root `package.json` has a
 5. Run `pnpm verify`. Stop on failure and report the output. Fix the cause; never weaken, skip or delete a check.
 6. Commit, then `git push -u origin HEAD`.
 7. `gh pr create --fill`. The body says what changed, why, how it was verified, and lists any new migration or env variable.
-8. Do not merge. Leave the PR open; Piotrek merges after CI is green. Never run `gh pr merge` (without branch protection it merges at once, CI or not), never push to `main`.
+8. Merge your own PR once `pnpm verify` passed on its head and its checks are green. Never push to `main`. If the repo has its own merge rules, follow them.
 9. Do not deploy by hand. The deploy runs from `main` after the merge. If the PR is already merged and that deploy has finished, check the live site: key pages return 200 and the changed feature renders. Otherwise say the PR is open and stop.
 10. Report: commits, PR URL, CI state, checks passed or failed, anything not done, and how to roll back (revert the squash commit through a new PR).
 
