@@ -39,6 +39,10 @@ Text is allowed, but it must earn its place. Every string I add to a screen or a
 - Code comments: minimal by default. Explain a non-obvious _why_ — a constraint, a workaround, a decision that looks wrong until you know the reason — and nothing else. Never narrate what the next line does, never section-header a short function, never add JSDoc that only repeats the parameter names, never banner the top of a file. When editing, match the file's existing comment density instead of adding your own. (Full rule, path-scoped to code files: `rules/comments.md`.)
 - If I ask for more explanation on a specific screen or function, give it. This is about the default, not a ban
 
+## Writing Voice
+
+When you write or edit prose in my name (articles, posts, newsletters, launch copy) in any repo, read `~/repos/writing/VOICE.md` and `~/repos/writing/STYLE.md` first and follow them. They are my compound-writing home; new drafts go in `~/repos/writing/drafts/` unless the repo has its own place for them.
+
 ## Working Habits
 
 - Run the type checker before considering work complete. It's an external signal you can't get by re-reading the diff — run it and report what it actually said
