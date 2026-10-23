@@ -60,6 +60,10 @@
           {
             "type": "command",
             "command": "$HOME/.claude/hooks/rtk-rewrite.sh"
+          },
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/merge-guard.sh"
           }
         ]
       },
