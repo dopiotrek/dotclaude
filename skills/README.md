@@ -63,7 +63,6 @@ Grouped for orientation; run `/` in Claude Code for the live list.
 **Writing & content**
 
 - `deep-dive-burst` — copilot for learning-in-public company deep dives.
-- `humanizer` — strip AI-writing tells from text.
 - `writing-linkedin-posts` — author engaging LinkedIn posts.
 - `twitter-algorithm-optimizer` — optimize tweets for reach.
 - `session-mining` — mine session history into content ideas.
