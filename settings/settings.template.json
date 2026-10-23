@@ -4,7 +4,8 @@
       "Bash(curl https://workbench.md/*)",
       "Bash(curl -s https://workbench.md/*)",
       "Bash(curl -sL https://workbench.md/*)",
-      "Bash(vercel deploy *)"
+      "Bash(vercel deploy *)",
+      "Bash(safe-merge *)"
     ],
     "deny": [
       "Read(~/**/.env)",
@@ -199,7 +200,7 @@
       "**CI/CD deploy targets**: frontq and swissCRM \u2014 Docker image on a Hetzner box via Coolify; compass \u2014 Vercel; piotrek-cc \u2014 Cloudflare (wrangler); dronelist \u2014 see its `.github/workflows/deploy.yml`. Every production deploy needs my approval",
       "**Network posture**: None configured",
       "**Host containment**: None configured \u2014 assume Claude Code runs on an ordinary developer machine with open internet",
-      "**Source control**: `github.com/dopiotrek` and every repo under it \u2014 mine, private, free plan (no branch protection). Agent work goes to a branch and lands through a PR; the agent merges its own PR once `pnpm verify` passed and checks are green, unless the repo's own rules say otherwise",
+      "**Source control**: `github.com/dopiotrek` and every repo under it \u2014 mine, private, free plan (no branch protection). Agent work goes to a branch and lands through a PR; the agent merges its own PR through `safe-merge` once `pnpm verify` passed and checks are green, unless the repo's own rules say otherwise. Agents never call `gh pr merge` directly",
       "**Trusted internal domains**: None configured",
       "**Trusted cloud buckets**: None configured",
       "**Key internal services**: local dev servers on `*.localhost` (portless) for every repo in `~/repos/apps`, e.g. `frontq-admin.localhost`, `dronelist.localhost`",

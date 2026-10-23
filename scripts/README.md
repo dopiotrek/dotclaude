@@ -62,3 +62,10 @@ too. Run it after you change a shared rule or hook, then commit in each repo.
 Lists open PRs in every repo under `~/repos/apps` with their CI state
 (green / running / red) and offers to merge the green ones (squash, delete
 branch; `d` shows the diff first). Use it for PRs an agent left open.
+
+## safe-merge
+
+`safe-merge <pr> <head-sha> [owner/repo]` is the only way an agent merges its
+own PR. Settings allow it and keep `gh pr merge` behind a prompt. It refuses
+unless the PR is open, its head is that SHA, it already contains the base
+branch, and every check is green (no checks also refuses).
