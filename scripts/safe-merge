@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Merge a PR only when it is safe for an agent to do it alone. Settings allow
+# this script and keep `gh pr merge` behind a prompt, so this is the gate.
+#   safe-merge <pr> <head-sha> [owner/repo]
+# Refuses unless: the PR is open and not a draft, its head is <head-sha>, its
+# branch already contains the base branch (main has not moved), and every
+# check is green. No checks at all also refuses; merge those yourself.
+set -euo pipefail
+die() { echo "safe-merge: $*" >&2; exit 1; }
+
+[ $# -ge 2 ] && [ $# -le 3 ] || die "usage: safe-merge <pr> <head-sha> [owner/repo]"
+pr=$1 sha=$2
+[[ $pr =~ ^[0-9]+$ ]] || die "PR must be a number, got '$pr'"
+[[ $sha =~ ^[0-9a-f]{40}$ ]] || die "head-sha must be a full 40-char SHA"
+repo=${3:-$(gh repo view --json nameWithOwner -q .nameWithOwner)} || die "cannot tell the repo; pass owner/repo"
+
+info=$(gh pr view "$pr" -R "$repo" --json state,isDraft,headRefOid,baseRefName,statusCheckRollup)
+[ "$(jq -r .state <<<"$info")" = OPEN ] || die "#$pr is not open"
+[ "$(jq -r .isDraft <<<"$info")" = false ] || die "#$pr is a draft"
+[ "$(jq -r .headRefOid <<<"$info")" = "$sha" ] || die "#$pr head is $(jq -r .headRefOid <<<"$info"), not $sha"
+
+base=$(jq -r .baseRefName <<<"$info")
+behind=$(gh api "repos/$repo/compare/$base...$sha" --jq .behind_by)
+[ "$behind" = 0 ] || die "$base moved: #$pr is $behind commit(s) behind; rebase and re-run verify"
+
+checks=$(jq -r '[.statusCheckRollup[]? | (.conclusion // .state // "PENDING")]
+  | if length == 0 then "none"
+    elif all(.[]; . == "SUCCESS" or . == "NEUTRAL" or . == "SKIPPED") then "green"
+    else "not-green: " + (map(select(. != "SUCCESS" and . != "NEUTRAL" and . != "SKIPPED")) | unique | join(",")) end' <<<"$info")
+[ "$checks" = green ] || die "#$pr checks are $checks"
+
+gh pr merge "$pr" -R "$repo" --merge --match-head-commit "$sha"
+gh pr view "$pr" -R "$repo" --json state,mergeCommit --jq '.state + " " + .mergeCommit.oid'

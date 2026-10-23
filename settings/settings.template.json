@@ -4,7 +4,8 @@
       "Bash(curl https://workbench.md/*)",
       "Bash(curl -s https://workbench.md/*)",
       "Bash(curl -sL https://workbench.md/*)",
-      "Bash(vercel deploy *)"
+      "Bash(vercel deploy *)",
+      "Bash(safe-merge *)"
     ],
     "deny": [
       "Read(~/**/.env)",
