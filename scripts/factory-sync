@@ -134,9 +134,20 @@ def sync(repo: Path, check: bool):
 
 if __name__ == "__main__":
     args = sys.argv[1:]
+    if "-h" in args or "--help" in args:
+        print(__doc__.strip())
+        sys.exit(0)
+    flags = [a for a in args if a.startswith("-")]
+    unknown = [a for a in flags if a not in ("--check", "--quiet")]
+    if unknown:
+        sys.exit(f"factory-sync: unknown option {unknown[0]}\n\n{__doc__.strip()}")
     check = "--check" in args
     quiet = "--quiet" in args
-    targets = [Path(a).resolve() for a in args if a not in ("--check", "--quiet")] or sorted(p for p in APPS.iterdir() if (p / ".git").exists() and not (p / ".claude" / "factory-sync-skip").exists())
+    # A typo'd path would otherwise be created and filled with the shared files.
+    missing = [a for a in args if a not in flags and not Path(a).is_dir()]
+    if missing:
+        sys.exit(f"factory-sync: not a directory: {missing[0]}")
+    targets = [Path(a).resolve() for a in args if a not in flags] or sorted(p for p in APPS.iterdir() if (p / ".git").exists() and not (p / ".claude" / "factory-sync-skip").exists())
     bad = 0
     for repo in targets:
         ch = sync(repo, check)
