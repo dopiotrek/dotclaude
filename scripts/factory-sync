@@ -29,7 +29,6 @@ HOOKS = {  # file -> (event, matcher, runner, extra)
     "no-secrets.py": ("PreToolUse", "Write|Edit|MultiEdit", "python3", {}),
     "protect-files.sh": ("PreToolUse", "Write|Edit|MultiEdit", "bash", {}),
     "drizzle-migration-guard.py": ("PreToolUse", "Write|Edit|MultiEdit", "python3", {}),
-    "stop-verify-and-log.py": ("Stop", None, "python3", {"asyncRewake": True}),
 }
 FACTORY_HOOKS = {"remote-setup.sh": ("SessionStart", None, "bash", {"timeout": 600})}
 MARK = ".claude/hooks/shared/"

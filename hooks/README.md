@@ -66,9 +66,8 @@ Skips: node_modules, .svelte-kit, build, dist, lock files
 
 Type-checks the **single package** the edited file belongs to, right after the
 edit, and feeds any errors back to Claude (exit 2) so it self-corrects in the
-same turn instead of declaring "done" with broken types. This complements
-`stop-verify-and-log.py`, which runs the full repo check at the _end_ of the turn
-into a log file Claude never reads.
+same turn instead of declaring "done" with broken types. `pnpm verify` stays the
+full check.
 
 - Walks up to the nearest `package.json` and runs that package's own `check`
   script (so `svelte-kit sync`, tsconfig, and thresholds are respected),
@@ -78,48 +77,13 @@ into a log file Claude never reads.
   an app package takes ~24s, so edits do not wait. Exit 2 wakes Claude with the
   errors.
 - **One check per package at a time**: an edit that lands mid-check marks the
-  package dirty and the running hook re-checks when it finishes. The Stop hook
-  is the final backstop.
+  package dirty and the running hook re-checks when it finishes.
 - Silent on success; never crashes the turn (any error → exit 0).
 
 Tuning via env vars:
 
 - `CLAUDE_SKIP_TYPECHECK=1` — disable entirely
 - `CLAUDE_TYPECHECK_TIMEOUT` — max seconds per check run (default 60)
-
-#### `import-path-validator.py`
-
-**Event:** PreToolUse (Write|Edit|MultiEdit)
-**Conditional:** Only runs on `.ts`, `.js`, `.svelte` files
-
-Enforces import conventions for monorepo projects:
-
-- Blocks cross-package relative imports (use `@package/*` instead)
-- Warns about deep relative imports (use `$lib/` in SvelteKit)
-- Warns about wildcard imports (tree-shaking issues)
-- Warns about deprecated `$app/stores` (use `$app/state` in Svelte 5)
-
-#### `sveltekit-route-validator.py`
-
-**Event:** PreToolUse (Write|Edit|MultiEdit)
-**Conditional:** Only runs on files in `routes/` directories
-
-Validates SvelteKit routing conventions:
-
-- Ensures `+` prefix on route files (+page.svelte, +server.ts)
-- Detects Svelte 3 syntax (\_\_layout.svelte, index.svelte)
-- Catches common typos (+pages.svelte, +layouts.svelte)
-
-#### `sveltekit-perf-guard.py`
-
-**Event:** PostToolUse (Bash)
-**Conditional:** Only runs on build commands (pnpm build, vite build)
-
-Monitors bundle size and performance:
-
-- Checks total JS bundle size against budget (default 1000KB)
-- Warns about individual chunks exceeding 100KB
-- Detects anti-patterns: wildcard imports, full lodash, moment.js
 
 ### Database & Migrations
 
@@ -130,19 +94,8 @@ Monitors bundle size and performance:
 
 Prevents dangerous schema changes:
 
-- **Blocks:** DROP TABLE, DROP SCHEMA, TRUNCATE, DELETE without WHERE
-- **Warns:** DROP COLUMN, ALTER COLUMN TYPE, SET NOT NULL without DEFAULT
-
-#### `supabase-rls-reminder.py`
-
-**Event:** PreToolUse (Write|Edit|MultiEdit)
-**Conditional:** Only runs on `.sql` files, `migrations/`, and `schema*` files
-
-Reminds to add Row Level Security when creating tables:
-
-- Detects new table definitions in Drizzle schema files
-- Checks for tables with tenant columns (organizationId, userId)
-- Suggests RLS policy patterns
+- **Blocks:** DROP TABLE, DROP SCHEMA, TRUNCATE, DELETE without WHERE in migrations; `dropTable()` in schema files
+- Block only: warn-only checks were removed because Claude never sees them
 
 ### Token Optimization
 
@@ -156,36 +109,6 @@ Transparently rewrites CLI commands to RTK equivalents for 60-90% token savings:
 
 Skips silently if `rtk` or `jq` are not installed.
 
-### Verification
-
-#### `stop-verify-and-log.py`
-
-**Event:** Stop
-
-Runs verification checks after Claude stops. Registered with `asyncRewake`, so
-the Stop event returns at once and a failed check wakes Claude (exit 2) with the
-errors.
-
-- pnpm workspace: one check per package with a changed JS/TS/Svelte file, using
-  the package's `check:light` or `check` script (max 5 packages)
-- Single package: `pnpm tsc --noEmit`, `pnpm svelte-check --threshold error`
-- Python: `mypy .`
-- Rust: `cargo check`
-
-Errors only in files the turn did not touch are ignored. The same failure wakes
-Claude once, not on every stop. A check that could not run (missing tool,
-timeout) never wakes it. Full output goes to `.claude/logs/last-verify.txt`.
-
-### Dependencies
-
-#### `dependency-audit.py`
-
-**Event:** PostToolUse (Write|Edit|MultiEdit)
-**Conditional:** Only runs when package.json, requirements.txt, Cargo.toml, or Gemfile are modified
-
-Runs security audits on dependency file changes. Registered with `async`; prints
-one line with the counts per severity.
-
 ## Removed Hooks (April 2026 cleanup)
 
 The following hooks were removed as they're now handled by native Claude Code features:
@@ -193,6 +116,14 @@ The following hooks were removed as they're now handled by native Claude Code fe
 - **`permission-auto-approve.py`** — Replaced by `permissions.allow` and `permissions.deny` rules in settings.json (native, zero overhead)
 - **`bash-command-validator.py`** — Triple coverage with CLAUDE.md instructions + RTK rewrite hook
 - **`web-search-enhancer.py`** — Low value, search engines already bias toward recent results
+
+October 2026:
+
+- **`import-path-validator.py`**, **`sveltekit-route-validator.py`** — Hardcoded dronelist paths; a wrong route name fails the build anyway
+- **`supabase-rls-reminder.py`** — Never blocked, and PreToolUse stderr on exit 0 never reaches Claude, so it had no effect. The RLS rule lives in `rules/drizzle-supabase.md`
+- **`sveltekit-perf-guard.py`** — Fixed bundle budgets that fit no single project
+- **`stop-verify-and-log.py`** — Third copy of the same check, next to `typecheck-after-edit.py` and `pnpm verify`
+- **`dependency-audit.py`** — GitHub already reports vulnerable dependencies
 
 ## Creating Your Own Hooks
 

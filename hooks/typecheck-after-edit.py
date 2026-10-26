@@ -4,13 +4,10 @@ PostToolUse hook: package-scoped type-check after edits.
 
 Why this exists
 ---------------
-The Stop hook (stop-verify-and-log.py) already type-checks, but it runs at the
-*repo root* (the whole Turbo graph) AFTER Claude has stopped, and writes the
-result to a log file + macOS notification. The errors never re-enter Claude's
-context, so Claude can't self-correct from them during the turn — it declares
-"done" and the breakage is found later.
+`pnpm verify` is the full check, but it only runs when Claude remembers to run
+it. Without this hook, Claude declares "done" and the breakage is found later.
 
-This hook closes that gap. After each edit to a type-relevant file it:
+After each edit to a type-relevant file it:
   1. finds the *single nearest package* the file belongs to (not the whole repo),
   2. runs that package's own type-check (its `check` script, or `tsc --noEmit`),
   3. if it fails, prints the errors to stderr and exits 2 — which feeds the
@@ -111,8 +108,8 @@ def choose_command(pkg_dir: Path) -> tuple[list[str], str] | None:
     scripts = pkg.get("scripts", {})
     if isinstance(scripts, dict):
         # Prefer an error-only variant when the package defines one. A per-edit
-        # hook only cares about things that break the build; warnings are the
-        # Stop hook's business. `check:light` in this repo is
+        # hook only cares about things that break the build; warnings are
+        # `pnpm verify`'s business. `check:light` in this repo is
         # `svelte-check --threshold error`, which drops warnings at the source.
         for name in ("check:light", "check"):
             if name in scripts:
@@ -244,7 +241,7 @@ def main() -> None:
             if not (dirty.exists() and dirty.stat().st_mtime >= started):
                 break
     except subprocess.TimeoutExpired:
-        # Don't punish Claude for a slow check — the Stop hook will still run.
+        # Don't punish Claude for a slow check — `pnpm verify` still covers it.
         sys.exit(0)
     except OSError:
         sys.exit(0)
@@ -265,7 +262,7 @@ def main() -> None:
             continue
         saw_machine_format = True
         if match.group(1) != "ERROR":
-            continue  # warnings are the Stop hook's business, not this one's
+            continue  # warnings are `pnpm verify`'s business, not this one's
         # Messages embed literal "\n" escapes; keep only the first sentence.
         msg = match.group("msg").replace("\\n", " ").split("  ")[0].strip()
         errors.append(

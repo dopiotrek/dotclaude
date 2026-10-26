@@ -46,20 +46,14 @@ Python (and one shell) scripts that run around tool calls. Each path-sensitive h
 **Code quality**
 
 - `auto-format.py` — formats after edits (Prettier, Black, gofmt, rustfmt, php-cs-fixer).
-- `import-path-validator.py` — enforces monorepo import conventions (`@pkg/*`, `$lib/`, `$app/state` over `$app/stores`).
-- `sveltekit-route-validator.py` — checks SvelteKit route file naming (`+page.svelte`, `+server.ts`, …).
-- `sveltekit-perf-guard.py` — after a build command, checks bundle/chunk budgets and import anti-patterns.
 
 **Database & migrations**
 
-- `drizzle-migration-guard.py` — blocks destructive schema changes (DROP/TRUNCATE/DELETE-without-WHERE), warns on risky ones.
-- `supabase-rls-reminder.py` — reminds you to add Row Level Security on new tables.
+- `drizzle-migration-guard.py` — blocks destructive schema changes (DROP/TRUNCATE/DELETE-without-WHERE, `dropTable()`).
 
 **Tooling**
 
 - `rtk-rewrite.sh` — transparently rewrites Bash commands to `rtk` equivalents for token savings (no-op if `rtk`/`jq` absent).
-- `dependency-audit.py` — runs a security audit when a manifest (`package.json`, `requirements.txt`, `Cargo.toml`, …) changes.
-- `stop-verify-and-log.py` — on Stop, runs type checks in the background (`tsc`, `svelte-check`, `mypy`, `cargo check`).
 
 See [hooks/README.md](hooks/README.md) for the full reference and how to write your own.
 

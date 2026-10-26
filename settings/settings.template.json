@@ -38,19 +38,7 @@
           },
           {
             "type": "command",
-            "command": "python3 $HOME/.claude/hooks/import-path-validator.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/sveltekit-route-validator.py"
-          },
-          {
-            "type": "command",
             "command": "python3 $HOME/.claude/hooks/drizzle-migration-guard.py"
-          },
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/supabase-rls-reminder.py"
           }
         ]
       },
@@ -88,31 +76,6 @@
           {
             "type": "command",
             "command": "python3 $HOME/.claude/hooks/typecheck-after-edit.py",
-            "asyncRewake": true
-          },
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/dependency-audit.py",
-            "async": true
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/sveltekit-perf-guard.py"
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 $HOME/.claude/hooks/stop-verify-and-log.py",
             "asyncRewake": true
           }
         ]
