@@ -139,6 +139,9 @@ def main():
 
     tool_input = input_data.get("tool_input", {})
     tool_response = input_data.get("tool_response", {})
+    # Codex sends the tool result as plain text, Claude Code as an object.
+    if not isinstance(tool_response, dict):
+        tool_response = {}
 
     # Check if operation was successful
     success = tool_response.get("success", True)
