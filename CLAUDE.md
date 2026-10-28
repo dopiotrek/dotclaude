@@ -41,7 +41,7 @@ Text is allowed, but it must earn its place. Every string I add to a screen or a
 
 ## Writing Voice
 
-When you write or edit prose in my name (articles, posts, newsletters, launch copy) in any repo, read `~/repos/writing/VOICE.md` and `~/repos/writing/STYLE.md` first and follow them. They are my compound-writing home; new drafts go in `~/repos/writing/drafts/` unless the repo has its own place for them.
+When you write or edit prose in my name (articles, posts, newsletters, launch copy) in any repo, read `~/repos/cortex/VOICE.md` and `~/repos/cortex/STYLE.md` first and follow them. They are my compound-writing home; new drafts go in `~/repos/cortex/drafts/` unless the repo has its own place for them.
 
 ## Working Habits
 
