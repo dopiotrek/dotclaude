@@ -7,6 +7,11 @@ set -euo pipefail
 
 TS_VERSION=1.104.2
 
+if ! command -v ssh >/dev/null; then
+  apt-get update -qq
+  DEBIAN_FRONTEND=noninteractive apt-get install -y -qq openssh-client
+fi
+
 curl -fsSL "https://pkgs.tailscale.com/stable/tailscale_${TS_VERSION}_amd64.tgz" \
   | tar -xz -C /tmp
 install -m 0755 "/tmp/tailscale_${TS_VERSION}_amd64/tailscale" /usr/local/bin/tailscale
