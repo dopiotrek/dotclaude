@@ -1,0 +1,36 @@
+// Tailnet policy: your devices reach everything; cloud sessions (tag:agent)
+// reach only the hetzner server (tag:server), and only over SSH.
+{
+	"tagOwners": {
+		"tag:server": ["autogroup:admin"],
+		"tag:agent":  ["autogroup:admin"],
+	},
+
+	"acls": [
+		{"action": "accept", "src": ["autogroup:member"], "dst": ["*:*"]},
+		{"action": "accept", "src": ["tag:agent"], "dst": ["tag:server:22"]},
+	],
+
+	"ssh": [
+		{
+			"action": "accept",
+			"src":    ["autogroup:member"],
+			"dst":    ["autogroup:self"],
+			"users":  ["autogroup:nonroot", "root"],
+		},
+		// A tagged server is not covered by autogroup:self, so your own
+		// devices need their own rule to keep access after it is tagged.
+		{
+			"action": "accept",
+			"src":    ["autogroup:member"],
+			"dst":    ["tag:server"],
+			"users":  ["root"],
+		},
+		{
+			"action": "accept",
+			"src":    ["tag:agent"],
+			"dst":    ["tag:server"],
+			"users":  ["root"],
+		},
+	],
+}
