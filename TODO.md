@@ -238,3 +238,11 @@ Deferred:
 - [x] **[SKILLS]** (2026-10-03: it did say `gh pr merge --auto --squash`; changed to
       "leave the PR open".) Check `skills/ship` (changed 2026-10-03 in fa9e7da): it
       must not run `gh pr merge`. The Cowork bridge cannot read it.
+- [ ] **[INFRA]** Renew the cloud `TS_AUTHKEY` before ~2027-01-28 (90-day key made
+      2026-10-30). Tailscale → Keys: reusable, ephemeral, pre-approved, `tag:agent`.
+      Tailnet Lock is on, so sign it on the Mac first:
+      `tailscale lock sign "$(pbpaste)" | pbcopy`, then replace the value in the
+      cloud environment. An unsigned key makes cloud `ssh hetzner` hang silently.
+- [ ] **[INFRA]** Remove the old Bitwarden SSH public key from hetzner's
+      `/root/.ssh/authorized_keys`. Unused since the switch to Tailscale SSH
+      (2026-10-30); left in place as a fallback until that setup has proven itself.
