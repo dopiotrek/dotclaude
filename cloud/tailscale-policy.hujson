@@ -1,14 +1,18 @@
 // Tailnet policy: your devices reach everything; cloud sessions (tag:agent)
-// reach only the hetzner server (tag:server), and only over SSH.
+// reach only the hetzner server (tag:server), and only over SSH. GitHub Actions
+// (tag:ci) reach only OpenSSH on port 2222: Tailscale SSH owns port 22 and would
+// ignore the CI keys and the deploy key's forced command.
 {
 	"tagOwners": {
 		"tag:server": ["autogroup:admin"],
 		"tag:agent":  ["autogroup:admin"],
+		"tag:ci":     ["autogroup:admin"],
 	},
 
 	"acls": [
 		{"action": "accept", "src": ["autogroup:member"], "dst": ["*:*"]},
 		{"action": "accept", "src": ["tag:agent"], "dst": ["tag:server:22"]},
+		{"action": "accept", "src": ["tag:ci"],    "dst": ["tag:server:2222"]},
 	],
 
 	"ssh": [
