@@ -243,6 +243,7 @@ Deferred:
       Tailnet Lock is on, so sign it on the Mac first:
       `tailscale lock sign "$(pbpaste)" | pbcopy`, then replace the value in the
       cloud environment. An unsigned key makes cloud `ssh hetzner` hang silently.
-- [ ] **[INFRA]** Remove the old Bitwarden SSH public key from hetzner's
-      `/root/.ssh/authorized_keys`. Unused since the switch to Tailscale SSH
-      (2026-10-30); left in place as a fallback until that setup has proven itself.
+- [x] **[INFRA]** Remove the old Bitwarden SSH public key from hetzner's
+      `/root/.ssh/authorized_keys`. Done 2026-10-31: `hetzner-cx-23` removed,
+      backup in `authorized_keys.bak-2026-10-31`. Verified Mac `ssh hetzner` and
+      Coolify's own SSH login to the host both still work.
