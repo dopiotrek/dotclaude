@@ -100,8 +100,12 @@ def format_file(file_path: str) -> None:
 
     # Prefer the locally installed binary over npx (saves ~300ms per file)
     if cmd_parts[:2] == ["npx", "prettier"]:
-        local_bin = resolve_local_bin(path, "prettier")
-        if local_bin:
+        # A repo on oxfmt has no Prettier, and npx would format with Prettier's defaults (turnfleet, frontq, robomap).
+        oxfmt = resolve_local_bin(path, "oxfmt")
+        local_bin = None if oxfmt else resolve_local_bin(path, "prettier")
+        if oxfmt:
+            cmd_parts = [str(oxfmt)]
+        elif local_bin:
             # The project's own Prettier config loads its plugins. An explicit
             # --plugin is resolved from the file's folder, which fails under
             # pnpm when the plugin is not hoisted there (frontq) — and the

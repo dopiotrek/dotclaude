@@ -1,0 +1,6 @@
+#!/bin/sh
+# Git pre-push hook, copied into each repo by dotclaude/scripts/factory-sync. Runs the repo's fast checks (format,
+# lint, types) so an agent sees the error in seconds instead of in CI. A hook, not a rule, because agents skip rules.
+# A repo opts in with a "check:fast" script in package.json. Skip once with: git push --no-verify
+grep -q '"check:fast"' package.json 2>/dev/null || exit 0
+exec pnpm -s check:fast
