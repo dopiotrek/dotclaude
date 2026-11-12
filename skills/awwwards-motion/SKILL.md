@@ -1,11 +1,11 @@
 ---
 name: awwwards-motion
-description: Motion design pipeline for building Awwwards/Apple-tier animations, micro-interactions, scroll sequences, page transitions, and kinetic typography. Enforces the principles that separate award-winning motion from generic CSS transitions - intentional easing, scroll-linked choreography, staggered reveals, magnetic interactions, text splitting, parallax depth, morphing state transitions, and the invisible micro-animations that make interfaces feel alive. Every animation must justify its existence, respect reduced-motion, and run at 60fps. Motion is choreography, not decoration.
+description: Motion design for landing pages and marketing sites only - Awwwards-tier scroll sequences, scroll-linked reveals, parallax, kinetic typography, page transitions and hero entrances (GSAP ScrollTrigger, CSS linear() springs). Pairs with awwwards-hero and awwwards-sections. Do NOT use for app UI, dashboards, forms, or component micro-interactions - use animate, choreograph and review-animations there.
 ---
 
 # Awwwards-Tier Motion Design
 
-> This skill fires when the user asks for animations, transitions, micro-interactions, scroll effects, page transitions, kinetic typography, parallax, hover physics, loading sequences, or anything that involves making a web interface feel alive and premium. Motion is the language of quality - the difference between a static page and an experience that feels like it was hand-crafted by a studio charging $200k per project.
+> This skill is for landing pages and marketing sites: scroll effects, page transitions, kinetic typography, parallax, hero entrances and hover physics. For motion in app UI (dashboards, forms, components), use animate, choreograph and review-animations instead. Motion is the language of quality - the difference between a static page and an experience that feels like it was hand-crafted by a studio charging $200k per project.
 
 ---
 
