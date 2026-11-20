@@ -49,6 +49,7 @@ Grouped for orientation; run `/` in Claude Code for the live list.
 - `awwwards-motion` — award-tier animation: easing, scroll choreography, micro-interactions, reduced-motion.
 - `uiverify` — verify pixel-level UI changes with computed-style measurements instead of screenshot judgment.
 - `clean-comments` — remove redundant/obvious code comments.
+- `security-audit` — security guidance by default; full multi-agent codebase audit with verified findings only when asked. Reports go to `~/security-audit-skill/<repo>/`. (official, from cloudflare/security-audit-skill)
 
 **SEO & growth**
 
