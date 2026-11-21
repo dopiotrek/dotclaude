@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
-# Merge a PR only when it is safe for an agent to do it alone. Settings allow
-# this script and keep `gh pr merge` behind a prompt, so this is the gate.
-#   safe-merge <pr> <head-sha> [owner/repo]
+# Merge a PR whose base branch has no required checks, so GitHub auto-merge
+# (`gh pr merge --auto`) would merge it at once. Repos with required checks
+# land with auto-merge instead. Settings allow this script, so this is the gate.
+#   safe-merge [--verified] <pr> <head-sha> [owner/repo]
 # Refuses unless: the PR is open and not a draft, its head is <head-sha>, its
 # branch already contains the base branch (main has not moved), and every
-# check is green. No checks at all also refuses; merge those yourself.
+# check that ran is green. A PR with no checks merges only with --verified
+# (pass it only after `pnpm verify` passed on that head) and only when the base
+# has no required checks.
 set -euo pipefail
 die() { echo "safe-merge: $*" >&2; exit 1; }
 
-[ $# -ge 2 ] && [ $# -le 3 ] || die "usage: safe-merge <pr> <head-sha> [owner/repo]"
+verified=
+[ "${1:-}" = --verified ] && { verified=1; shift; }
+[ $# -ge 2 ] && [ $# -le 3 ] || die "usage: safe-merge [--verified] <pr> <head-sha> [owner/repo]"
 pr=$1 sha=$2
 [[ $pr =~ ^[0-9]+$ ]] || die "PR must be a number, got '$pr'"
 [[ $sha =~ ^[0-9a-f]{40}$ ]] || die "head-sha must be a full 40-char SHA"
@@ -27,7 +32,13 @@ checks=$(jq -r '[.statusCheckRollup[]? | (.conclusion // .state // "PENDING")]
   | if length == 0 then "none"
     elif all(.[]; . == "SUCCESS" or . == "NEUTRAL" or . == "SKIPPED") then "green"
     else "not-green: " + (map(select(. != "SUCCESS" and . != "NEUTRAL" and . != "SKIPPED")) | unique | join(",")) end' <<<"$info")
-[ "$checks" = green ] || die "#$pr checks are $checks"
+if [ "$checks" = none ]; then
+  required=$(gh api "repos/$repo/branches/$base" --jq '.protection.required_status_checks.contexts // [] | length')
+  [ "$required" = 0 ] || die "#$pr has no checks yet but $base requires $required; use gh pr merge $pr --auto --squash"
+  [ -n "$verified" ] || die "#$pr has no checks; run pnpm verify on $sha, then pass --verified"
+else
+  [ "$checks" = green ] || die "#$pr checks are $checks"
+fi
 
 gh pr merge "$pr" -R "$repo" --merge --match-head-commit "$sha"
 gh pr view "$pr" -R "$repo" --json state,mergeCommit --jq '.state + " " + .mergeCommit.oid'

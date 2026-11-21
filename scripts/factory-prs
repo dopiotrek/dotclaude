@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # List open PRs in every repo under ~/repos/apps with their CI state, and offer
-# to merge the green ones (squash, delete branch). You merge; agents never do.
+# to merge the green ones (squash, delete branch). Agents land PRs with
+# auto-merge; this is for the ones that got stuck.
 #   factory-prs          all repos
 #   factory-prs frontq   one repo
 set -uo pipefail

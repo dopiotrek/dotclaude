@@ -61,11 +61,18 @@ too. Run it after you change a shared rule or hook, then commit in each repo.
 
 Lists open PRs in every repo under `~/repos/apps` with their CI state
 (green / running / red) and offers to merge the green ones (squash, delete
-branch; `d` shows the diff first). Use it for PRs an agent left open.
+branch; `d` shows the diff first). Agents land their own PRs with auto-merge,
+so use it for PRs that are stuck: red checks, or no auto-merge on.
 
 ## safe-merge
 
-`safe-merge <pr> <head-sha> [owner/repo]` is the only way an agent merges its
-own PR. Settings allow it and keep `gh pr merge` behind a prompt. It refuses
+Agents land a PR with `gh pr merge <pr> --auto --squash`: GitHub merges it
+when the base branch's required checks pass. `hooks/merge-guard.sh` blocks an
+immediate `gh pr merge` and `--admin`.
+
+`safe-merge [--verified] <pr> <head-sha> [owner/repo]` is for a repo whose base
+branch has no required checks, where auto-merge would merge at once. It refuses
 unless the PR is open, its head is that SHA, it already contains the base
-branch, and every check is green (no checks also refuses).
+branch, and every check that ran is green. A PR with no checks merges only with
+`--verified` (the agent ran `pnpm verify` on that head) and only when the base
+has no required checks.

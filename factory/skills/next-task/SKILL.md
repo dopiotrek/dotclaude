@@ -19,6 +19,7 @@ One item per run. The output is a PR, or a clear note on why there is none.
 An item is ready when it says what to change and how to tell it is done.
 If it is not ready, or it needs a product decision, a new dependency, a
 schema change on shared data, or a production action:
+
 - add ` (blocked: <one line why>)` to the item, commit that on a branch, open
   a PR for it, and stop.
 
@@ -40,8 +41,11 @@ schema change on shared data, or a production action:
   PR (amend the branch with that one-line change).
 - `gh pr create --fill`; the body says: the item, what changed, how it was
   verified, what could not run.
-- Merge your own PR once `pnpm verify` passed on its head and its checks are
-  green. Never push to `main`. If the repo has its own merge rules, follow them.
+- Once that change is pushed, `gh pr merge <pr> --auto --squash`, with no
+  question to Piotrek; GitHub merges when the
+  required checks pass. If the base branch has no required checks, use
+  `safe-merge --verified` (see the factory-workflow rule). Never push to
+  `main`. If the repo has its own merge rules, follow them.
 
 ## Writing good [agent] items (for Piotrek)
 

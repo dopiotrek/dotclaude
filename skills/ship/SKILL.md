@@ -1,6 +1,6 @@
 ---
 name: ship
-description: Land the current work. In a factory repo (root `package.json` has a `verify` script) that means branch and PR, left open for Piotrek to merge, never a push to main. Elsewhere, commit, push and deploy to production. Then verify it is live. Use when the user says ship, deploy, release, push to prod, or commit and deploy.
+description: Land the current work. In a factory repo (root `package.json` has a `verify` script) that means branch, PR and GitHub auto-merge, never a push to main. Elsewhere, commit, push and deploy to production. Then verify it is live. Use when the user says ship, deploy, release, push to prod, or commit and deploy.
 ---
 
 1. Check the root `package.json` for a `verify` script. If it has one, this is a factory repo: follow `rules/factory-workflow.md` and the factory steps below. If not, use the direct steps.
@@ -13,8 +13,8 @@ description: Land the current work. In a factory repo (root `package.json` has a
 5. Run `pnpm verify`. Stop on failure and report the output. Fix the cause; never weaken, skip or delete a check.
 6. Commit, then `git push -u origin HEAD`.
 7. `gh pr create --fill`. The body says what changed, why, how it was verified, and lists any new migration or env variable.
-8. Merge your own PR once `pnpm verify` passed on its head and its checks are green. Never push to `main`. If the repo has its own merge rules, follow them.
-9. Do not deploy by hand. The deploy runs from `main` after the merge. If the PR is already merged and that deploy has finished, check the live site: key pages return 200 and the changed feature renders. Otherwise say the PR is open and stop.
+8. Right away, `gh pr merge <pr> --auto --squash`, with no question to Piotrek. GitHub merges when the required checks pass. If a check fails, fix it and push. If the base branch has no required checks, use `safe-merge --verified <pr> <head-sha>` instead (see `rules/factory-workflow.md`). Never push to `main`. If the repo has its own merge rules, follow them.
+9. Do not deploy by hand. The deploy runs from `main` after the merge. If the PR is already merged and that deploy has finished, check the live site: key pages return 200 and the changed feature renders. Otherwise say auto-merge is on and which checks are still running, and stop.
 10. Report: commits, PR URL, CI state, checks passed or failed, anything not done, and how to roll back (revert the squash commit through a new PR).
 
 ## Other repos

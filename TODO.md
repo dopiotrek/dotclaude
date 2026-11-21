@@ -232,7 +232,10 @@ Deferred:
       schedule it (`/schedule` in Claude Code, a cloud routine, e.g. weekdays
       03:00, prompt `/next-task`). Merge its PRs with `factory-prs`. Add the repo's env vars to the cloud
       environment first.
-- [ ] **[GIT]** Free GitHub plan (decided 2026-10-03): no branch protection, no
+- [x] **[GIT]** (2026-11-21: superseded. `main` now has required checks and
+      auto-merge in frontq, machineroom, robomap, turnfleet, piotrek-cc and
+      2warden; agents land with `gh pr merge --auto --squash`, see
+      `rules/factory-workflow.md`.) Free GitHub plan (decided 2026-10-03): no branch protection, no
       auto-merge on private repos. Agents open PRs; Piotrek merges green ones with
       `factory-prs`. piotrek-cc#3 was merged before CI by `gh pr merge --auto`.
 - [x] **[SKILLS]** (2026-10-03: it did say `gh pr merge --auto --squash`; changed to

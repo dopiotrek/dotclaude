@@ -1,14 +1,22 @@
 #!/usr/bin/env bash
-# PreToolUse(Bash): agents merge only through safe-merge. A raw `gh pr merge`
-# would hit the ask rule and prompt; a deny makes the agent switch instead.
+# PreToolUse(Bash): agents land PRs with GitHub auto-merge (`gh pr merge --auto`),
+# which waits for the base branch's required checks. An immediate merge or
+# `--admin` would skip them, so those are denied; a deny makes the agent switch.
 # safe-merge calls gh itself, outside Claude, so it is not affected.
 command -v jq &>/dev/null || exit 0
 CMD=$(jq -r '.tool_input.command // empty')
-[[ "$CMD" =~ (^|[\;\&\|\(]|\$\(|[[:space:]](then|do)[[:space:]])[[:space:]]*(rtk[[:space:]]+)?gh[[:space:]]+pr[[:space:]]+merge([[:space:]]|$) ]] || exit 0
-jq -n '{
-  hookSpecificOutput: {
-    hookEventName: "PreToolUse",
-    permissionDecision: "deny",
-    permissionDecisionReason: "Blocked: agents do not run `gh pr merge`. Use `safe-merge <pr> <head-sha> [owner/repo]`: it checks the head SHA, that main has not moved and that checks are green, then merges with no prompt. If it refuses, fix what it names (rebase, re-run verify, wait for checks); if the PR has no checks, leave it open for Piotrek. Do not cd first."
-  }
-}'
+MERGE='(^|[\;\&\|\(]|\$\(|[[:space:]](then|do)[[:space:]])[[:space:]]*(rtk[[:space:]]+)?gh[[:space:]]+pr[[:space:]]+merge([[:space:]]|$)'
+[[ "$CMD" =~ $MERGE ]] || exit 0
+
+deny() {
+  jq -n --arg r "$1" '{hookSpecificOutput: {hookEventName: "PreToolUse", permissionDecision: "deny", permissionDecisionReason: $r}}'
+  exit 0
+}
+# Every merge in a compound command must be an auto-merge, not just the first.
+while IFS= read -r seg; do
+  [[ "$seg" =~ (^|[[:space:]])gh[[:space:]]+pr[[:space:]]+merge([[:space:]]|$) ]] || continue
+  [[ "$seg" =~ (^|[[:space:]])--admin([[:space:]=]|$) ]] && deny "Blocked: never use \`gh pr merge --admin\`. It skips the required checks."
+  [[ "$seg" =~ (^|[[:space:]])--(auto|disable-auto)([[:space:]]|$) ]] && continue
+  deny "Blocked: agents do not merge a PR right away. Run \`gh pr merge <pr> --auto --squash [-R owner/repo]\`: GitHub merges it when the required checks pass. If the base branch has no required checks, use \`safe-merge --verified <pr> <head-sha>\` after \`pnpm verify\` passed on that head. Do not cd first."
+done < <(sed -E 's/(&&|\|\||[;&|]|\$\(|\))/\n/g' <<<"$CMD")
+exit 0
