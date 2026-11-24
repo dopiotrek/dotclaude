@@ -1,6 +1,7 @@
 ---
 paths:
   - "**/*.svelte"
+  - "**/*.tsx"
 ---
 
 # UX content (in-app copy)
