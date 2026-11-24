@@ -2,7 +2,7 @@
 """Copy the shared agent setup from dotclaude into a repo, so cloud and
 dispatched agents get the same rules and guards as local sessions.
 
-    factory-sync [--check] [repo ...]     default: every git repo in ~/repos/apps
+    factory-sync [--check] [repo ...]     default: every git repo in ~/repos/{products,tools,lab}
                                           (skip one with a .claude/factory-sync-skip file)
 
 Writes, inside each repo:
@@ -22,7 +22,7 @@ import json, os, shutil, subprocess, sys
 from pathlib import Path
 
 DOT = Path(__file__).resolve().parent.parent
-APPS = Path.home() / "repos" / "apps"
+APP_DIRS = [Path.home() / "repos" / d for d in ("products", "tools", "lab")]
 RULES = ["svelte5", "forms", "tailwind", "motion", "ux-accessibility", "ux-content",
          "drizzle-supabase", "comments", "docs-conventions", "factory-workflow",
          "ambition"]
@@ -157,7 +157,7 @@ if __name__ == "__main__":
     missing = [a for a in args if a not in flags and not Path(a).is_dir()]
     if missing:
         sys.exit(f"factory-sync: not a directory: {missing[0]}")
-    targets = [Path(a).resolve() for a in args if a not in flags] or sorted(p for p in APPS.iterdir() if (p / ".git").exists() and not (p / ".claude" / "factory-sync-skip").exists())
+    targets = [Path(a).resolve() for a in args if a not in flags] or sorted(p for a in APP_DIRS if a.is_dir() for p in a.iterdir() if (p / ".git").exists() and not (p / ".claude" / "factory-sync-skip").exists())
     bad = 0
     for repo in targets:
         ch = sync(repo, check)

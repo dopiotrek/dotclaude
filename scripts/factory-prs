@@ -1,14 +1,20 @@
 #!/usr/bin/env bash
-# List open PRs in every repo under ~/repos/apps with their CI state, and offer
+# List open PRs in every repo under ~/repos/{products,tools,lab} with their CI state, and offer
 # to merge the green ones (squash, delete branch). Agents land PRs with
 # auto-merge; this is for the ones that got stuck.
 #   factory-prs          all repos
 #   factory-prs frontq   one repo
 set -uo pipefail
-APPS=~/repos/apps
-dirs=("$@"); [ ${#dirs[@]} -eq 0 ] && dirs=($(cd "$APPS" && for d in */; do [ -d "$d/.git" ] && echo "${d%/}"; done))
-for dir in "${dirs[@]}"; do
-  cd "$APPS/$dir" 2>/dev/null || continue
+ROOT=~/repos
+paths=()
+if [ $# -eq 0 ]; then
+  for d in "$ROOT"/{products,tools,lab}/*/; do [ -d "$d/.git" ] && paths+=("${d%/}"); done
+else
+  for n in "$@"; do for g in products tools lab; do [ -d "$ROOT/$g/$n" ] && paths+=("$ROOT/$g/$n"); done; done
+fi
+for path in "${paths[@]}"; do
+  dir=$(basename "$path")
+  cd "$path" 2>/dev/null || continue
   git remote get-url origin >/dev/null 2>&1 || continue
   prs=$(gh pr list --state open --json number,title,headRefName,statusCheckRollup,isDraft 2>/dev/null) || continue
   [ "$(jq length <<<"$prs")" = 0 ] && continue
