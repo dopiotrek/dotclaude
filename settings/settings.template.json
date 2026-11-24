@@ -28,6 +28,7 @@
     ]
   },
   "model": "opus",
+  "effortLevel": "medium",
   "hooks": {
     "PreToolUse": [
       {
