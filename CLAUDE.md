@@ -2,7 +2,7 @@
 
 ## About Me
 
-- Who I am, what I work on and how I write live in my context repo: read `~/repos/cortex/README.md` when a task needs that context (writing, picking topics, anything about me)
+- Who I am, what I work on and how I write live in my context repo: read `~/repos/system/cortex/README.md` when a task needs that context (writing, picking topics, anything about me)
 - Primary stack: SvelteKit, Svelte 5 (runes only), TypeScript, Supabase, Drizzle ORM, Turborepo
 - All projects use pnpm (never npm or yarn). Exception: HyperFrames video projects, whose generated scripts are pinned `npx hyperframes` calls — run them as their own `CLAUDE.md` says
 - Svelte 5 runes only — never Svelte 4 stores or `$:`. (Always-on guard for new files; full Svelte and Drizzle/Supabase rules are path-scoped in `rules/`.)
@@ -42,7 +42,7 @@ Text is allowed, but it must earn its place. Every string I add to a screen or a
 
 ## Writing Voice
 
-When you write or edit prose in my name (articles, posts, newsletters, launch copy) in any repo, read `~/repos/cortex/VOICE.md` and `~/repos/cortex/STYLE.md` first and follow them. They are my compound-writing home; new drafts go in `~/repos/cortex/drafts/` unless the repo has its own place for them.
+When you write or edit prose in my name (articles, posts, newsletters, launch copy) in any repo, read `~/repos/system/cortex/VOICE.md` and `~/repos/system/cortex/STYLE.md` first and follow them. They are my compound-writing home; new drafts go in `~/repos/system/cortex/drafts/` unless the repo has its own place for them.
 
 ## Working Habits
 

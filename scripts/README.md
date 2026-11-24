@@ -59,7 +59,7 @@ too. Run it after you change a shared rule or hook, then commit in each repo.
 
 ## factory-prs
 
-Lists open PRs in every repo under `~/repos/apps` with their CI state
+Lists open PRs in every repo under `~/repos/{products,tools,lab}` with their CI state
 (green / running / red) and offers to merge the green ones (squash, delete
 branch; `d` shows the diff first). Agents land their own PRs with auto-merge,
 so use it for PRs that are stuck: red checks, or no auto-merge on.

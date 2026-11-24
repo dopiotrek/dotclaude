@@ -19,8 +19,8 @@ My personal, shareable [Claude Code](https://claude.ai/download) setup: automate
 ## Quick start
 
 ```bash
-git clone https://github.com/dopiotrek/dotclaude.git ~/repos/dotclaude
-cd ~/repos/dotclaude
+git clone https://github.com/dopiotrek/dotclaude.git ~/repos/system/dotclaude
+cd ~/repos/system/dotclaude
 ./install.sh        # symlinks ~/.claude → this repo, generates settings.json
 claude              # start a new session
 ```

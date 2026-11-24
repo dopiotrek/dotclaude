@@ -8,7 +8,7 @@ Only rules that agents get wrong without being told are repeated here.
 
 ## About me
 
-Who I am, what I work on and how I write live in my context repo: read `~/repos/cortex/README.md` when a task needs that context (writing, picking topics, anything about me).
+Who I am, what I work on and how I write live in my context repo: read `~/repos/system/cortex/README.md` when a task needs that context (writing, picking topics, anything about me).
 
 ## How to aim
 
