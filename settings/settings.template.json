@@ -1,4 +1,5 @@
 {
+  "cleanupPeriodDays": 90,
   "permissions": {
     "allow": [
       "Bash(curl https://workbench.md/*)",
@@ -149,14 +150,14 @@
   "autoMode": {
     "allow": [
       "$defaults",
-      "Bash(rtk:*) in $HOME/repos/apps/frontq",
-      "Bash(pnpm check:classes) in $HOME/repos/apps/frontq",
-      "Bash(pnpm dev:status) in $HOME/repos/apps/frontq"
+      "Bash(rtk:*) in $HOME/repos/products/frontq",
+      "Bash(pnpm check:classes) in $HOME/repos/products/frontq",
+      "Bash(pnpm dev:status) in $HOME/repos/products/frontq"
     ],
     "soft_deny": [
       "$defaults",
-      "Bash(pnpm db:dev:destroy) in $HOME/repos/apps/frontq",
-      "Bash(pnpm db:push) against non-local DATABASE_URL in $HOME/repos/apps/frontq"
+      "Bash(pnpm db:dev:destroy) in $HOME/repos/products/frontq",
+      "Bash(pnpm db:push) against non-local DATABASE_URL in $HOME/repos/products/frontq"
     ],
     "environment": [
       "### Org-wide",
@@ -172,7 +173,7 @@
       "**Source control**: `github.com/dopiotrek` and every repo under it \u2014 mine, private. Most factory repos protect `main` with required status checks and allow auto-merge. Agent work goes to a branch and lands through a PR; right after `gh pr create` the agent runs `gh pr merge --auto --squash`, and GitHub merges when the required checks pass. In a repo with no required checks the agent merges through `safe-merge --verified` after `pnpm verify` passed. Agents never merge a PR right away and never use `--admin`",
       "**Trusted internal domains**: None configured",
       "**Trusted cloud buckets**: None configured",
-      "**Key internal services**: local dev servers on `*.localhost` (portless) for every repo in `~/repos/apps`, e.g. `frontq-admin.localhost`, `dronelist.localhost`",
+      "**Key internal services**: local dev servers on `*.localhost` (portless) for every repo in `~/repos/products`, `~/repos/tools` and `~/repos/lab`, e.g. `frontq-admin.localhost`, `dronelist.localhost`",
       "**Internal package registry**: None configured",
       "**Sensitive data locations & audiences**: `.env*` and `*.key` in every repo; `.private/` folders (client files, never committed). In frontq: `packages/connector/src/secrets.ts`, `packages/crypto/src/secret.ts`, `.docs/decisions/classification.md`, tenant `sensitive_answer` rows (bank/tax fields, envelope-encrypted), EU-only object storage",
       "**Data retention / declassification**: None configured",
@@ -180,10 +181,10 @@
       "**Protected deployment namespaces / environments**: None configured \u2014 fall back to the Sensitive remote targets heuristic",
       "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries `prod` or `production` as a whole word or name segment",
       "### User-specific",
-      "**Primary use of Claude Code**: software development \u2014 I am a solo builder of several SvelteKit/Svelte 5/TypeScript/Postgres/Drizzle multi-tenant SaaS products in `~/repos/apps` (frontq, dronelist, swissCRM, compass, tma, piotrek-cc)",
+      "**Primary use of Claude Code**: software development \u2014 I am a solo builder of several SvelteKit/Svelte 5/TypeScript/Postgres/Drizzle multi-tenant SaaS products in `~/repos/products`, `~/repos/tools` and `~/repos/lab` (frontq, dronelist, swissCRM, compass, tma, piotrek-cc)",
       "**Trusted repo**: the repo the session started in and its `origin` remote. All my repos live under `github.com/dopiotrek`",
       "**Org-specific CLIs**: `rtk` (personal token-saving CLI wrapper), `agent-browser`/`ab` (browser automation, headless, profile `~/.agent-browser/profiles/main`), `portless` (local HTTPS dev proxy), `gh`, `turbo`, `drizzle-kit`",
-      "**Routine in every repo under `~/repos/apps`**: pnpm/turbo scripts, Drizzle migrations against local Postgres, local dev servers on `*.localhost`, git worktrees under `.claude/worktrees/`, pushing `worktree-*`/feature branches and opening PRs"
+      "**Routine in every repo under `~/repos/products`, `~/repos/tools` and `~/repos/lab`**: pnpm/turbo scripts, Drizzle migrations against local Postgres, local dev servers on `*.localhost`, git worktrees under `.claude/worktrees/`, pushing `worktree-*`/feature branches and opening PRs"
     ]
   },
   "skillOverrides": {
