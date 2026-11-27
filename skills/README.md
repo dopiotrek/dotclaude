@@ -39,7 +39,8 @@ Grouped for orientation; run `/` in Claude Code for the live list.
 - `ai-sdk` — Vercel AI SDK questions and building AI features (generateText, streamText, tools, useChat).
 - `superforms-reference` — sveltekit-superforms + Zod patterns (scoped to Svelte/TS files).
 - `svelte-component-architecture` — component decomposition for SvelteKit / Svelte 5.
-- `tapforce-shadcn-svelte` — shadcn-svelte setup and usage.
+- `shadcn` — React shadcn/ui: CLI, components, registries, presets. Not for Svelte repos. (official, from shadcn/ui)
+- `migrate-radix-to-base` — move a React shadcn project from Radix UI to Base UI. (official, ships with `shadcn`)
 - `tdd-workflow` — enforces test-driven development on test files.
 - `test-audit` — value gate for new tests; audit and prune low-value, duplicate, or implementation-coupled tests. (adapted from openclaw)
 - `turborepo` — Turborepo monorepo build/pipeline/caching guidance.
